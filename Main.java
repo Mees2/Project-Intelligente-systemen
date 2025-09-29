@@ -10,14 +10,14 @@ import java.awt.event.ActionListener;
 public class Main {
 
     // true = beurt X, false = beurt O
-    private static boolean beurtX = true;
-    private static JLabel statusLabel;
+    private static boolean turnX = true;
+    private static JLabel statusLabel; // hier staat de info over wiens beurt het is of wie gewonnen heeft.
     private static JButton[] buttons = new JButton[9];
-    private static boolean spelKlaar = false;
+    private static boolean gameDone = false; //wanneer true eindigt het spel
 
     public static void main(String[] args) {
 
-        JFrame frame = new JFrame("Tic Tac Toe");
+        JFrame frame = new JFrame("Tic Tac Toe"); //hier wordt de frame/window gemaakt waarin wordt gespeeld
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 450);
         frame.setLayout(new BorderLayout());
@@ -39,27 +39,27 @@ public class Main {
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (spelKlaar) return;
+                    if (gameDone) return;
                     if (!button.getText().equals("")) return; // knop is al gezet
 
-                    if (beurtX) {
+                    if (turnX) {
                         button.setText("X");
                     } else {
                         button.setText("O");
                     }
 
-                    if (checkWin()) {
-                        statusLabel.setText("Speler " + (beurtX ? "X" : "O") + " wint!");
-                        spelKlaar = true;
+                    if (checkWin()) { //checkWin staat op line 74 in Main.java het checkt of een speler een winnende positie heeft.
+                        statusLabel.setText("Speler " + (turnX ? "X" : "O") + " wint!");
+                        gameDone = true;
                         return;
-                    } else if (checkDraw()) {
+                    } else if (checkDraw()) { //checkDraw staat op line 92 in Main.java het checkt of er gelijkspel is
                         statusLabel.setText("Gelijkspel!");
-                        spelKlaar = true;
+                        gameDone = true;
                         return;
                     }
 
-                    beurtX = !beurtX; // beurt wisselen
-                    statusLabel.setText("Beurt: " + (beurtX ? "X" : "O"));
+                    turnX = !turnX; // beurt wisselen: true wordt false, false wordt true
+                    statusLabel.setText("Beurt: " + (turnX ? "X" : "O"));
                 }
             });
 
@@ -71,7 +71,7 @@ public class Main {
         frame.setVisible(true);
     }
 
-    private static boolean checkWin() {
+    private static boolean checkWin() { // er worden winposities geinitialiceerd en dan wordt er gecheckt of er een geldig is en zo ja voor wie
         int[][] winPosities = {
             {0,1,2}, {3,4,5}, {6,7,8}, // rijen
             {0,3,6}, {1,4,7}, {2,5,8}, // kolommen
@@ -89,8 +89,8 @@ public class Main {
         return false;
     }
 
-    private static boolean checkDraw() {
-        for (JButton b : buttons) {
+    private static boolean checkDraw() { //door te kijken of er lege vakjes op het bord zijn, 
+        for (JButton b : buttons) { // checkt deze functie of er gelijkspel is.
             if (b.getText().equals("")) return false;
         }
         return true;
