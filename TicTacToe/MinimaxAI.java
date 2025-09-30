@@ -2,14 +2,14 @@ package TicTacToe;
 
 /**
  * MinimaxAI klasse die de Minimax algoritme implementeert
- * Gebruikt voor een onverslaanbare TicTacToe AI tegenstander
+ * Gebruikt voor een onverslaanbare TicTacToe AI-tegenstander
  */
 public class MinimaxAI {
 
     /**
      * Bepaalt de beste zet voor de AI op basis van de huidige toestand van het spelbord
      * @param game Het huidige TicTacToe spel
-     * @param aiPlayer Het symbool van de AI speler
+     * @param aiPlayer Het symbool van de AI-speler
      * @param humanPlayer Het symbool van de menselijke speler
      * @return De index van de beste zet (0-8), of -1 als geen zet mogelijk is
      */
@@ -17,7 +17,7 @@ public class MinimaxAI {
         int bestScore = Integer.MIN_VALUE; // Start zo laag mogelijk om straks te verbeteren
         int move = -1; // Houdt de index van de beste zet bij
 
-        // Doorloop alle mogelijke zetten (0 t/m 8)
+        // Doorloop alle mogelijke zetten (0 tot en met 8)
         for (int i = 0; i < 9; i++) {
             if (game.isFree(i)) { // Alleen lege vakjes zijn geldig
                 game.doMove(i, aiPlayer); // Simuleer zet voor de AI
@@ -38,7 +38,7 @@ public class MinimaxAI {
      * Het recursieve minimax-algoritme dat de score van een bordpositie berekent
      * @param game Het huidige TicTacToe spel
      * @param isMax true als de AI aan de beurt is (maximizer), false als de mens aan de beurt is (minimizer)
-     * @param aiPlayer Het symbool van de AI speler
+     * @param aiPlayer Het symbool van de AI-speler
      * @param humanPlayer Het symbool van de menselijke speler
      * @return De score van de huidige positie
      */
@@ -49,8 +49,10 @@ public class MinimaxAI {
         if (game.isDraw()) return 0; // Geen zetten meer → gelijkspel
 
         // Als de AI aan de beurt is (maximizer)
+        int best;// Start hoog om straks minimum te nemen
+        // Geeft de laagst gevonden score terug
         if (isMax) {
-            int best = Integer.MIN_VALUE; // Start laag om straks maximum te nemen
+            best = Integer.MIN_VALUE;
             for (int i = 0; i < 9; i++) {
                 if (game.isFree(i)) {
                     game.doMove(i, aiPlayer); // Simuleer AI-zet
@@ -58,11 +60,10 @@ public class MinimaxAI {
                     game.undoMove(i); // Zet ongedaan maken
                 }
             }
-            return best; // Geeft de hoogst gevonden score terug
-        } 
+        }
         // Als de mens aan de beurt is (minimizer)
         else {
-            int best = Integer.MAX_VALUE; // Start hoog om straks minimum te nemen
+            best = Integer.MAX_VALUE;
             for (int i = 0; i < 9; i++) {
                 if (game.isFree(i)) {
                     game.doMove(i, humanPlayer); // Simuleer zet van de mens
@@ -70,7 +71,7 @@ public class MinimaxAI {
                     game.undoMove(i); // Zet ongedaan maken
                 }
             }
-            return best; // Geeft de laagst gevonden score terug
         }
+        return best; // Geeft de hoogst gevonden score terug
     }
 }

@@ -12,7 +12,7 @@ public class TicTacToeMenu extends JFrame {
 
     /**
      * Constructor voor het TicTacToe menu
-     * @param menuManager De menu manager die de navigatie beheert
+     * @param menuManager De menumanager die de navigatie beheert
      */
     public TicTacToeMenu(MenuManager menuManager) {
         this.menuManager = menuManager;

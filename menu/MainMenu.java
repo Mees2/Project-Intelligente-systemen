@@ -2,19 +2,17 @@ package menu;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Het hoofdmenu van de spelcollectie
  * Hier kan de gebruiker kiezen welk spel te spelen of het programma afsluiten
  */
 public class MainMenu extends JFrame {
-    private MenuManager menuManager;
+    private final MenuManager menuManager;
 
     /**
      * Constructor voor het hoofdmenu
-     * @param menuManager De menu manager die de navigatie beheert
+     * @param menuManager De menumanager die de navigatie beheert
      */
     public MainMenu(MenuManager menuManager) {
         this.menuManager = menuManager;
@@ -44,12 +42,7 @@ public class MainMenu extends JFrame {
         // TicTacToe knop
         JButton ticTacToeButton = new JButton("TicTacToe");
         ticTacToeButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        ticTacToeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                menuManager.openTicTacToeMenu();
-            }
-        });
+        ticTacToeButton.addActionListener(_ -> menuManager.openTicTacToeMenu());
         buttonPanel.add(ticTacToeButton);
 
         // Reversi knop (voor toekomstige implementatie)
@@ -62,25 +55,27 @@ public class MainMenu extends JFrame {
         buttonPanel.add(new JLabel(""));
 
         // Afsluiten knop
-        JButton exitButton = new JButton("Afsluiten");
-        exitButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        exitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int option = JOptionPane.showConfirmDialog(
-                    MainMenu.this,
-                    "Weet je zeker dat je het programma wilt afsluiten?",
-                    "Bevestig afsluiten",
-                    JOptionPane.YES_NO_OPTION
-                );
-                if (option == JOptionPane.YES_OPTION) {
-                    System.exit(0);
-                }
-            }
-        });
+        JButton exitButton = getJButton();
         buttonPanel.add(exitButton);
 
         add(buttonPanel, BorderLayout.CENTER);
+    }
+
+    private JButton getJButton() {
+        JButton exitButton = new JButton("Afsluiten");
+        exitButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        exitButton.addActionListener(_ -> {
+            int option = JOptionPane.showConfirmDialog(
+                MainMenu.this,
+                "Weet je zeker dat je het programma wilt afsluiten?",
+                "Bevestig afsluiten",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (option == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
+        });
+        return exitButton;
     }
 
     /**

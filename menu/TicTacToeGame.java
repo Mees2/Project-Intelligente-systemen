@@ -12,7 +12,7 @@ import TicTacToe.MinimaxAI;
 
 /**
  * TicTacToeGame klasse die het TicTacToe spel beheert
- * Ondersteunt zowel Speler vs Speler als Speler vs AI modes
+ * Ondersteunt zowel Speler vs Speler als Speler vs AI-modes
  */
 public class TicTacToeGame {
     private final MenuManager menuManager;
@@ -26,7 +26,7 @@ public class TicTacToeGame {
 
     /**
      * Constructor voor TicTacToeGame
-     * @param menuManager De menu manager voor navigatie
+     * @param menuManager De menumanager voor navigatie
      * @param gameMode De spelmode: "PVP" voor Player vs Player, "PVA" voor Player vs AI
      */
     public TicTacToeGame(MenuManager menuManager, String gameMode) {
@@ -88,7 +88,7 @@ public class TicTacToeGame {
     }
 
     /**
-     * Behandelt een klik op een spelknop
+     * Behandelt een klik op een speelknop
      * @param pos De positie van de geklikte knop (0-8)
      */
     private void handleButtonClick(int pos) {
@@ -119,7 +119,7 @@ public class TicTacToeGame {
     }
 
     /**
-     * Laat de AI een zet doen (alleen in PVA mode)
+     * Laat de AI een zet doen (alleen in PVA-mode)
      */
     private void doAiMove() {
         SwingUtilities.invokeLater(() -> {
