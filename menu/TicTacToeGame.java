@@ -3,8 +3,6 @@ package menu;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -74,7 +72,7 @@ public class TicTacToeGame {
             button.setFont(button.getFont().deriveFont(40f));
 
             final int pos = i;
-            button.addActionListener(e -> handleButtonClick(pos));
+            button.addActionListener(_ -> handleButtonClick(pos));
 
             panel.add(button);
         }
@@ -83,7 +81,7 @@ public class TicTacToeGame {
 
         // Menu knop toevoegen
         JButton menuButton = new JButton("Terug naar Menu");
-        menuButton.addActionListener(e -> returnToMenu());
+        menuButton.addActionListener(_ -> returnToMenu());
         gameFrame.add(menuButton, BorderLayout.SOUTH);
 
         gameFrame.setVisible(true);
