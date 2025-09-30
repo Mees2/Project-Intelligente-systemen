@@ -1,4 +1,4 @@
-package game;
+package TicTacToe;
 
 /**
  * TicTacToe spellogica klasse

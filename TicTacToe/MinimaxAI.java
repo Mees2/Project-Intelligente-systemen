@@ -1,4 +1,4 @@
-package game;
+package TicTacToe;
 
 /**
  * MinimaxAI klasse die de Minimax algoritme implementeert

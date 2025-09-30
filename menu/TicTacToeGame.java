@@ -9,8 +9,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 // Import de bestaande game classes
-import game.TicTacToe;
-import game.MinimaxAI;
+import TicTacToe.TicTacToe;
+import TicTacToe.MinimaxAI;
 
 /**
  * TicTacToeGame klasse die het TicTacToe spel beheert
