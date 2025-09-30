@@ -57,16 +57,14 @@ public class TicTacToe {
 
     /**
      * Voert een zet uit op het bord
-     * @param pos De positie (0-8)
+     *
+     * @param pos    De positie (0-8)
      * @param speler De speler ('X' of 'O')
-     * @return true als de zet succesvol was
      */
-    public boolean doMove(int pos, char speler) {
+    public void doMove(int pos, char speler) {
         if (board[pos] == ' ') {
             board[pos] = speler;
-            return true;
         }
-        return false;
     }
 
     /**
