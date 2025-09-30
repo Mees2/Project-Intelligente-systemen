@@ -5,7 +5,7 @@ package TicTacToe;
  * Beheert het spelbord en de spelregels voor TicTacToe
  */
 public class TicTacToe {
-    private char[] board; // 'X', 'O', of ' '
+    private final char[] board; // 'X', 'O', of ' '
 
     /**
      * Constructor - initialiseert een nieuw leeg spelbord
@@ -13,14 +13,6 @@ public class TicTacToe {
     public TicTacToe() {
         board = new char[9];
         for (int i = 0; i < 9; i++) board[i] = ' '; // Hier wordt een virtueel bord gemaakt voor de spellogica
-    }
-
-    /**
-     * Geeft het huidige spelbord terug
-     * @return Het spelbord als char array
-     */
-    public char[] getBoard() {
-        return board;
     }
 
     /**

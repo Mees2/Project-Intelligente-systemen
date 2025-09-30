@@ -17,12 +17,12 @@ import TicTacToe.MinimaxAI;
  * Ondersteunt zowel Speler vs Speler als Speler vs AI modes
  */
 public class TicTacToeGame {
-    private MenuManager menuManager;
-    private String gameMode; // "PVP" of "PVA"
+    private final MenuManager menuManager;
+    private final String gameMode; // "PVP" of "PVA"
     private boolean turnX = true; // Speler X (menselijke speler) begint altijd
     private JLabel statusLabel;
-    private JButton[] buttons = new JButton[9];
-    private TicTacToe game = new TicTacToe();
+    private final JButton[] buttons = new JButton[9];
+    private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
     private JFrame gameFrame;
 
@@ -74,12 +74,7 @@ public class TicTacToeGame {
             button.setFont(button.getFont().deriveFont(40f));
 
             final int pos = i;
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    handleButtonClick(pos);
-                }
-            });
+            button.addActionListener(e -> handleButtonClick(pos));
 
             panel.add(button);
         }
@@ -88,12 +83,7 @@ public class TicTacToeGame {
 
         // Menu knop toevoegen
         JButton menuButton = new JButton("Terug naar Menu");
-        menuButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                returnToMenu();
-            }
-        });
+        menuButton.addActionListener(e -> returnToMenu());
         gameFrame.add(menuButton, BorderLayout.SOUTH);
 
         gameFrame.setVisible(true);
@@ -134,26 +124,23 @@ public class TicTacToeGame {
      * Laat de AI een zet doen (alleen in PVA mode)
      */
     private void doAiMove() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(500); // Korte vertraging voor betere gebruikerservaring
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-
-                int move = MinimaxAI.bestMove(game, 'O', 'X');
-                if (move != -1) {
-                    game.doMove(move, 'O');
-                    buttons[move].setText("O");
-                }
-
-                if (checkEnd('O')) return;
-
-                turnX = true;
-                statusLabel.setText("Beurt: X (jij)");
+        SwingUtilities.invokeLater(() -> {
+            try {
+                Thread.sleep(500); // Korte vertraging voor betere gebruikerservaring
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
+
+            int move = MinimaxAI.bestMove(game, 'O', 'X');
+            if (move != -1) {
+                game.doMove(move, 'O');
+                buttons[move].setText("O");
+            }
+
+            if (checkEnd('O')) return;
+
+            turnX = true;
+            statusLabel.setText("Beurt: X (jij)");
         });
     }
 
