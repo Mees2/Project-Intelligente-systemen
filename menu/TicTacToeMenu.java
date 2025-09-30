@@ -44,23 +44,13 @@ public class TicTacToeMenu extends JFrame {
         // Speler vs Speler knop
         JButton pvpButton = new JButton("Speler vs Speler");
         pvpButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        pvpButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                menuManager.startTicTacToeGame("PVP");
-            }
-        });
+        pvpButton.addActionListener(_ -> menuManager.startTicTacToeGame("PVP"));
         buttonPanel.add(pvpButton);
 
         // Speler vs AI knop
         JButton pvaButton = new JButton("Speler vs AI");
         pvaButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        pvaButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                menuManager.startTicTacToeGame("PVA");
-            }
-        });
+        pvaButton.addActionListener(_ -> menuManager.startTicTacToeGame("PVA"));
         buttonPanel.add(pvaButton);
 
         // Server knop (voor toekomstige implementatie)
@@ -75,12 +65,7 @@ public class TicTacToeMenu extends JFrame {
         // Terug naar hoofdmenu knop
         JButton backButton = new JButton("Terug naar Hoofdmenu");
         backButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                menuManager.returnToMainMenu();
-            }
-        });
+        backButton.addActionListener(_ -> menuManager.returnToMainMenu());
         buttonPanel.add(backButton);
 
         add(buttonPanel, BorderLayout.CENTER);
