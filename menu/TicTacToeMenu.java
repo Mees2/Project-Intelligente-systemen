@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
  * Opties: Speler vs Speler, Speler vs AI, Server, Terug naar hoofdmenu
  */
 public class TicTacToeMenu extends JFrame {
-    private MenuManager menuManager;
+    private final MenuManager menuManager;
 
     /**
      * Constructor voor het TicTacToe menu
