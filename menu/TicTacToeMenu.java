@@ -2,8 +2,6 @@ package menu;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Het TicTacToe submenu waar de gebruiker de spelmode kan kiezen
