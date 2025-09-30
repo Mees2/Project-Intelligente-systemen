@@ -18,7 +18,7 @@ public class Main {
         frame.setSize(400, 450);
         frame.setLayout(new BorderLayout()); //hier wordt de window gemaakt
 
-        statusLabel = new JLabel("Beurt: X (jij)", JLabel.CENTER); //dit laat zien wie aan de beurt is en wie wint
+        statusLabel = new JLabel("Beurt: X (jij)", JLabel.CENTER); //dit laat zien wie aan de beurt is en wie wint!
         frame.add(statusLabel, BorderLayout.NORTH);
 
         JPanel panel = new JPanel();
