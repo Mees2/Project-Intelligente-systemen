@@ -84,3 +84,5 @@ public final class MainMenu extends JFrame {
         setVisible(false);
     }
 }
+
+//nieuwe 
