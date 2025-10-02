@@ -48,7 +48,7 @@ public final class MainMenu extends JFrame {
     private JButton createNavButton(String text, Runnable action) {
         var btn = new JButton(text);
         btn.setFont(new Font("Arial", Font.PLAIN, 14));
-        btn.addActionListener(_ -> action.run());
+        btn.addActionListener(e -> action.run());
         return btn;
     }
 
@@ -62,7 +62,7 @@ public final class MainMenu extends JFrame {
     private JButton createExitButton() {
         var exitButton = new JButton("Afsluiten");
         exitButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        exitButton.addActionListener(_ -> {
+        exitButton.addActionListener(e -> {
             var option = JOptionPane.showConfirmDialog(
                 this,
                 "Weet je zeker dat je het programma wilt afsluiten?",

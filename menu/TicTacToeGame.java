@@ -72,7 +72,7 @@ public class TicTacToeGame {
             button.setFont(button.getFont().deriveFont(40f));
 
             final int pos = i;
-            button.addActionListener(_ -> handleButtonClick(pos));
+            button.addActionListener(e -> handleButtonClick(pos));
 
             panel.add(button);
         }
@@ -81,7 +81,7 @@ public class TicTacToeGame {
 
         // Menu knop toevoegen
         JButton menuButton = new JButton("Terug naar Menu");
-        menuButton.addActionListener(_ -> returnToMenu());
+        menuButton.addActionListener(e -> returnToMenu());
         gameFrame.add(menuButton, BorderLayout.SOUTH);
 
         gameFrame.setVisible(true);
