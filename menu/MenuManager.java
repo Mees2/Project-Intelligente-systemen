@@ -1,25 +1,20 @@
 package menu;
 
 /**
- * MenuManager beheert de navigatie tussen verschillende menu's en spellen
- * Deze klasse coordineert het openen en sluiten van menu's en het starten van spellen
+ * MenuManager beheert de navigatie tussen verschillende menu's en spellen.
  */
-public class MenuManager {
-    private MainMenu mainMenu;
-    private TicTacToeMenu ticTacToeMenu;
+public final class MenuManager {
+    private static final String MODE_PVP = "PVP";
+    private static final String MODE_PVA = "PVA";
+
+    private final MainMenu mainMenu;
+    private final TicTacToeMenu ticTacToeMenu;
 
     /**
      * Constructor voor de MenuManager
      * Initialiseert alle menu's
      */
     public MenuManager() {
-        initializeMenus();
-    }
-
-    /**
-     * Initialiseert alle menu objecten
-     */
-    private void initializeMenus() {
         mainMenu = new MainMenu(this);
         ticTacToeMenu = new TicTacToeMenu(this);
     }
@@ -54,12 +49,11 @@ public class MenuManager {
      */
     public void startTicTacToeGame(String gameMode) {
         ticTacToeMenu.hideMenu();
-        
-        // Start het TicTacToe spel in de juiste mode
-        if (gameMode.equals("PVP")) {
-            startTicTacToePlayerVsPlayer();
-        } else if (gameMode.equals("PVA")) {
-            startTicTacToePlayerVsAI();
+
+        switch (gameMode) {
+            case MODE_PVP -> startTicTacToePlayerVsPlayer();
+            case MODE_PVA -> startTicTacToePlayerVsAI();
+            default -> throw new IllegalArgumentException("Onbekende gameMode: " + gameMode);
         }
     }
 
@@ -67,7 +61,7 @@ public class MenuManager {
      * Start TicTacToe in Speler vs Speler mode
      */
     private void startTicTacToePlayerVsPlayer() {
-        TicTacToeGame game = new TicTacToeGame(this, "PVP");
+        var game = new TicTacToeGame(this, MODE_PVP);
         game.start();
     }
 
@@ -75,7 +69,7 @@ public class MenuManager {
      * Start TicTacToe in Speler vs AI mode
      */
     private void startTicTacToePlayerVsAI() {
-        TicTacToeGame game = new TicTacToeGame(this, "PVA");
+        var game = new TicTacToeGame(this, MODE_PVA);
         game.start();
     }
 
