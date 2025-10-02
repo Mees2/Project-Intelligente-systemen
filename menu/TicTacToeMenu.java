@@ -20,7 +20,7 @@ public class TicTacToeMenu extends JFrame {
     }
 
     /**
-     * Initialiseert de TicTacToe menu interface
+     * Initialiseert de TicTacToe menu interface test***
      */
     private void initializeMenu() {
         setTitle("TicTacToe - Spelmode Selectie");
