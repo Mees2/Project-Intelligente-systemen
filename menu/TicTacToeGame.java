@@ -17,6 +17,8 @@ import TicTacToe.MinimaxAI;
 public class TicTacToeGame {
     private final MenuManager menuManager;
     private final String gameMode; // "PVP" of "PVA"
+    private final String speler1; // spelernaam
+    private final String speler2; // spelernaam
     private boolean turnX = true; // Speler X (menselijke speler) begint altijd
     private JLabel statusLabel;
     private final JButton[] buttons = new JButton[9];
@@ -29,9 +31,11 @@ public class TicTacToeGame {
      * @param menuManager De menumanager voor navigatie
      * @param gameMode De spelmode: "PVP" voor Player vs Player, "PVA" voor Player vs AI
      */
-    public TicTacToeGame(MenuManager menuManager, String gameMode) {
+    public TicTacToeGame(MenuManager menuManager, String gameMode, String speler1, String speler2) {
         this.menuManager = menuManager;
         this.gameMode = gameMode;
+        this.speler1 = speler1;
+        this.speler2 = speler2;
     }
 
     /**
@@ -106,14 +110,14 @@ public class TicTacToeGame {
 
         if (gameMode.equals("PVP")) {
             // Player vs Player: beide spelers zijn menselijk
-            statusLabel.setText(turnX ? "Beurt: X" : "Beurt: O");
+            statusLabel.setText("Beurt: " + playerName(turnX ? 'X' : 'O'));
         } else if (gameMode.equals("PVA")) {
             // Player vs AI: alleen als het nu de AI's beurt is
             if (!turnX) { // O is de AI
-                statusLabel.setText("Beurt: O (AI)");
+                statusLabel.setText("Beurt: AI");
                 doAiMove();
             } else {
-                statusLabel.setText("Beurt: X (jij)");
+                statusLabel.setText("Beurt: " + speler1);
             }
         }
     }
@@ -138,7 +142,7 @@ public class TicTacToeGame {
             if (checkEnd('O')) return;
 
             turnX = true;
-            statusLabel.setText("Beurt: X (jij)");
+            statusLabel.setText("Beurt: " + speler1);
         });
     }
 
@@ -149,15 +153,8 @@ public class TicTacToeGame {
      */
     private boolean checkEnd(char player) {
         if (game.isWin(player)) {
-            if (gameMode.equals("PVA")) {
-                if (player == 'X') {
-                    statusLabel.setText("Gefeliciteerd! Jij wint!");
-                } else {
-                    statusLabel.setText("AI wint! Probeer het opnieuw.");
-                }
-            } else {
-                statusLabel.setText("Speler " + player + " wint!");
-            }
+            String winnaar = playerName(player);
+            statusLabel.setText("Gefeliciteerd! " + winnaar + " wint!");
             gameDone = true;
             return true;
         } else if (game.isDraw()) {
@@ -186,12 +183,20 @@ public class TicTacToeGame {
      */
     private String getInitialStatusText() {
         if (gameMode.equals("PVP")) {
-            return "Beurt: X";
+            return "Beurt: " + speler1;
         } else {
-            return "Beurt: X (jij)";
+            return "Beurt: " + speler1;
         }
     }
 
+    private String playerName(char symbol) {
+        if (gameMode.equals("PVP")) {
+            return (symbol == 'X') ? speler1 : speler2;
+        } else if (gameMode.equals("PVA")) {
+            return (symbol == 'X') ? speler1 : "AI";
+        }
+        return "";
+    }    
     /**
      * Keert terug naar het menu
      */
