@@ -193,7 +193,7 @@ public class TicTacToeGame {
         if (gameMode.equals("PVP")) {
             return (symbol == 'X') ? speler1 : speler2;
         } else if (gameMode.equals("PVA")) {
-            return (symbol == 'X') ? speler1 : "AI";
+            return (symbol == 'X') ? speler1 : speler2;
         }
         return "";
     }    
