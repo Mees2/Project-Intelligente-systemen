@@ -75,4 +75,41 @@ public class TicTacToe {
     public boolean isFree(int pos) {
         return board[pos] == ' ';
     }
+    /**
+ * Controleert of het nog mogelijk is dat iemand wint
+ * (oftewel: of er een reeks zetten bestaat die niet in remise eindigt)
+ * @return true als iemand nog kan winnen, false als alleen een gelijkspel mogelijk is
+ */
+public boolean isWinPossible() {
+    return isWinPossibleRecursive(true); // true = X begint in deze beurt (standaard)
+}
+
+private boolean isWinPossibleRecursive(boolean xTurn) {
+    // Als er al iemand heeft gewonnen -> er was dus een pad naar winst
+    if (isWin('X') || isWin('O')) return true;
+
+    // Als het bord vol is en niemand heeft gewonnen -> dit pad leidt tot remise
+    if (isDraw()) return false;
+
+    char speler = xTurn ? 'X' : 'O'; // als xTurn True is dan is speler X, anders O
+    boolean anyWinPossible = false;
+
+    // Probeer alle vrije posities
+    for (int i = 0; i < 9; i++) {
+        if (isFree(i)) {
+            doMove(i, speler);
+
+            // Recursief kijken naar de volgende beurt
+            if (isWinPossibleRecursive(!xTurn)) { // !xTurn zorgt voor beurt wisseling
+                anyWinPossible = true;
+                undoMove(i);
+                break; // We hebben een pad naar winst gevonden, verder zoeken hoeft niet
+            }
+
+            undoMove(i);
+        }
+    }
+
+    return anyWinPossible;
+}
 }
