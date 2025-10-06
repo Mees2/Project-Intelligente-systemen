@@ -25,17 +25,31 @@ public class TicTacToeGame {
     private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
     private JFrame gameFrame;
+    private char spelerRol; // Rol van de speler
+    private char aiRol; // Rol van de AI
 
     /**
      * Constructor voor TicTacToeGame
      * @param menuManager De menumanager voor navigatie
      * @param gameMode De spelmode: "PVP" voor Player vs Player, "PVA" voor Player vs AI
      */
+
     public TicTacToeGame(MenuManager menuManager, String gameMode, String speler1, String speler2) {
         this.menuManager = menuManager;
         this.gameMode = gameMode;
         this.speler1 = speler1;
         this.speler2 = speler2;
+
+        if (gameMode.equals("PVA")) {
+            // Selecteert rol door lezen input naamselection
+            if (speler1.equals("AI")) {
+                aiRol = 'X';
+                spelerRol = 'O';
+            } else {
+                aiRol = 'O';
+                spelerRol = 'X';
+        }
+    }
     }
 
     /**
@@ -49,6 +63,8 @@ public class TicTacToeGame {
      * Initialiseert de spelinterface
      */
     private void initializeGame() {
+        turnX = true;
+
         gameFrame = new JFrame(getTitleForMode());
         gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         gameFrame.addWindowListener(new WindowAdapter() {
@@ -62,7 +78,8 @@ public class TicTacToeGame {
         gameFrame.setLayout(new BorderLayout());
 
         // Status label met informatie over huidige beurt
-        statusLabel = new JLabel(getInitialStatusText(), JLabel.CENTER);
+        statusLabel = new JLabel("", JLabel.CENTER);
+        statusLabel.setFont(statusLabel.getFont().deriveFont(18f));
         gameFrame.add(statusLabel, BorderLayout.NORTH);
 
         // Spelbord panel
@@ -77,7 +94,6 @@ public class TicTacToeGame {
 
             final int pos = i;
             button.addActionListener(e -> handleButtonClick(pos));
-
             panel.add(button);
         }
 
@@ -89,6 +105,13 @@ public class TicTacToeGame {
         gameFrame.add(menuButton, BorderLayout.SOUTH);
 
         gameFrame.setVisible(true);
+
+        updateStatus();
+
+        if (gameMode.equals("PVA") && !isPlayersTurn()) {
+            doAiMove();
+        }
+
     }
 
     /**
@@ -97,6 +120,9 @@ public class TicTacToeGame {
      */
     private void handleButtonClick(int pos) {
         if (gameDone || !game.isFree(pos)) return;
+
+        // Alleen reageren als de speler aan de beurt is
+        if (gameMode.equals("PVA") && !isPlayersTurn()) return;
 
         // Zet van de huidige speler
         char currentPlayer = turnX ? 'X' : 'O';
@@ -107,20 +133,13 @@ public class TicTacToeGame {
 
         // Wissel van beurt
         turnX = !turnX;
+        updateStatus();
 
-        if (gameMode.equals("PVP")) {
-            // Player vs Player: beide spelers zijn menselijk
-            statusLabel.setText("Beurt: " + playerName(turnX ? 'X' : 'O'));
-        } else if (gameMode.equals("PVA")) {
-            // Player vs AI: alleen als het nu de AI's beurt is
-            if (!turnX) { // O is de AI
-                statusLabel.setText("Beurt: AI");
-                doAiMove();
-            } else {
-                statusLabel.setText("Beurt: " + speler1);
-            }
+        if (gameMode.equals("PVA") && !isPlayersTurn() && !gameDone) {
+            doAiMove();
         }
-    }
+
+        }
 
     /**
      * Laat de AI een zet doen (alleen in PVA-mode)
@@ -133,16 +152,17 @@ public class TicTacToeGame {
                 Thread.currentThread().interrupt();
             }
 
-            int move = MinimaxAI.bestMove(game, 'O', 'X');
+            int move = MinimaxAI.bestMove(game, aiRol, spelerRol);
             if (move != -1) {
-                game.doMove(move, 'O');
-                buttons[move].setText("O");
+                game.doMove(move, aiRol);
+                buttons[move].setText(String.valueOf(aiRol));
             }
 
-            if (checkEnd('O')) return;
+            if (checkEnd(aiRol)) return;
 
-            turnX = true;
-            statusLabel.setText("Beurt: " + speler1);
+            turnX = (spelerRol == 'X');
+
+            updateStatus();
         });
     }
 
@@ -151,10 +171,10 @@ public class TicTacToeGame {
      * @param player De speler die zojuist een zet heeft gedaan
      * @return true als het spel beëindigd is
      */
-    private boolean checkEnd(char player) {
+     private boolean checkEnd(char player) {
         if (game.isWin(player)) {
-            String winnaar = playerName(player);
-            statusLabel.setText("Gefeliciteerd! " + winnaar + " wint!");
+            String winnaar = getNameBySymbol(player);
+            statusLabel.setText("Gefeliciteerd! " + winnaar + " (" + player + ") wint!");
             gameDone = true;
             return true;
         } else if (game.isDraw()) {
@@ -164,7 +184,6 @@ public class TicTacToeGame {
         }
         return false;
     }
-
     /**
      * Krijgt de titel voor het spelvenster gebaseerd op de mode
      * @return De titel string
@@ -181,22 +200,27 @@ public class TicTacToeGame {
      * Krijgt de initiële status tekst gebaseerd op de mode
      * @return De status tekst
      */
-    private String getInitialStatusText() {
-        if (gameMode.equals("PVP")) {
-            return "Beurt: " + speler1;
-        } else {
-            return "Beurt: " + speler1;
-        }
+    private boolean isPlayersTurn() {
+        return (turnX ? 'X' : 'O') == spelerRol;
     }
 
-    private String playerName(char symbol) {
+    private String getNameBySymbol(char symbol) {
         if (gameMode.equals("PVP")) {
             return (symbol == 'X') ? speler1 : speler2;
         } else if (gameMode.equals("PVA")) {
-            return (symbol == 'X') ? speler1 : "AI";
+            if (symbol == spelerRol) return (spelerRol == 'X') ? speler1 : speler2;
+            else return "AI";
         }
         return "";
     }    
+
+    private void updateStatus() {
+        if (gameDone) return;
+
+        char currentSymbol = turnX ? 'X' : 'O';
+        String currentName = getNameBySymbol(currentSymbol);
+        statusLabel.setText("Beurt: " + currentName + " (" + currentSymbol + ")");   
+    }
     /**
      * Keert terug naar het menu
      */
@@ -215,3 +239,4 @@ public class TicTacToeGame {
 }
 
 //nieuwe 
+
