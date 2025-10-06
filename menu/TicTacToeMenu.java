@@ -9,6 +9,12 @@ import java.awt.*;
  */
 public class TicTacToeMenu extends JFrame {
     private final MenuManager menuManager;
+    private final LanguageManager lang = LanguageManager.getInstance();
+    
+    private JLabel titleLabel;
+    private JButton pvpButton;
+    private JButton pvaButton;
+    private JButton backButton;
 
     /**
      * Constructor voor het TicTacToe menu
@@ -23,14 +29,14 @@ public class TicTacToeMenu extends JFrame {
      * Initialiseert de TicTacToe menu interface test***
      */
     private void initializeMenu() {
-        setTitle("TicTacToe - Spelmode Selectie");
+        setTitle(lang.get("tictactoe.menu.title"));
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(400, 350);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // Titel label
-        JLabel titleLabel = new JLabel("TicTacToe - Kies je spelmode", JLabel.CENTER);
+        titleLabel = new JLabel(lang.get("tictactoe.menu.header"), JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         add(titleLabel, BorderLayout.NORTH);
 
@@ -40,13 +46,13 @@ public class TicTacToeMenu extends JFrame {
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
         // Speler vs Speler knop
-        JButton pvpButton = new JButton("Speler vs Speler");
+        pvpButton = new JButton(lang.get("tictactoe.menu.pvp"));
         pvpButton.setFont(new Font("Arial", Font.PLAIN, 14));
         pvpButton.addActionListener(e -> menuManager.startTicTacToeGame("PVP"));
         buttonPanel.add(pvpButton);
 
         // Speler vs AI knop
-        JButton pvaButton = new JButton("Speler vs AI");
+        pvaButton = new JButton(lang.get("tictactoe.menu.pva"));
         pvaButton.setFont(new Font("Arial", Font.PLAIN, 14));
         pvaButton.addActionListener(e -> menuManager.startTicTacToeGame("PVA"));
         buttonPanel.add(pvaButton);
@@ -61,12 +67,23 @@ public class TicTacToeMenu extends JFrame {
         buttonPanel.add(new JLabel(""));
 
         // Terug naar hoofdmenu knop
-        JButton backButton = new JButton("Terug naar Hoofdmenu");
+        backButton = new JButton(lang.get("tictactoe.menu.back"));
         backButton.setFont(new Font("Arial", Font.PLAIN, 14));
         backButton.addActionListener(e -> menuManager.returnToMainMenu());
         buttonPanel.add(backButton);
 
         add(buttonPanel, BorderLayout.CENTER);
+    }
+    
+    /**
+     * Update alle UI teksten naar de huidige taal
+     */
+    public void updateLanguage() {
+        setTitle(lang.get("tictactoe.menu.title"));
+        titleLabel.setText(lang.get("tictactoe.menu.header"));
+        pvpButton.setText(lang.get("tictactoe.menu.pvp"));
+        pvaButton.setText(lang.get("tictactoe.menu.pva"));
+        backButton.setText(lang.get("tictactoe.menu.back"));
     }
 
     /**

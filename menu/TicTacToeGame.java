@@ -17,12 +17,14 @@ import TicTacToe.MinimaxAI;
 public class TicTacToeGame {
     private final MenuManager menuManager;
     private final String gameMode; // "PVP" of "PVA"
+    private final LanguageManager lang = LanguageManager.getInstance();
     private boolean turnX = true; // Speler X (menselijke speler) begint altijd
     private JLabel statusLabel;
     private final JButton[] buttons = new JButton[9];
     private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
     private JFrame gameFrame;
+    private JButton menuButton;
 
     /**
      * Constructor voor TicTacToeGame
@@ -80,7 +82,7 @@ public class TicTacToeGame {
         gameFrame.add(panel, BorderLayout.CENTER);
 
         // Menu knop toevoegen
-        JButton menuButton = new JButton("Terug naar Menu");
+        menuButton = new JButton(lang.get("tictactoe.game.menu"));
         menuButton.addActionListener(e -> returnToMenu());
         gameFrame.add(menuButton, BorderLayout.SOUTH);
 
@@ -106,14 +108,14 @@ public class TicTacToeGame {
 
         if (gameMode.equals("PVP")) {
             // Player vs Player: beide spelers zijn menselijk
-            statusLabel.setText(turnX ? "Beurt: X" : "Beurt: O");
+            statusLabel.setText(lang.get("tictactoe.game.turn", turnX ? "X" : "O"));
         } else if (gameMode.equals("PVA")) {
             // Player vs AI: alleen als het nu de AI's beurt is
             if (!turnX) { // O is de AI
-                statusLabel.setText("Beurt: O (AI)");
+                statusLabel.setText(lang.get("tictactoe.game.turn", "O (" + lang.get("tictactoe.game.ai") + ")"));
                 doAiMove();
             } else {
-                statusLabel.setText("Beurt: X (jij)");
+                statusLabel.setText(lang.get("tictactoe.game.turn", "X"));
             }
         }
     }
@@ -138,7 +140,7 @@ public class TicTacToeGame {
             if (checkEnd('O')) return;
 
             turnX = true;
-            statusLabel.setText("Beurt: X (jij)");
+            statusLabel.setText(lang.get("tictactoe.game.turn", "X"));
         });
     }
 
@@ -151,17 +153,17 @@ public class TicTacToeGame {
         if (game.isWin(player)) {
             if (gameMode.equals("PVA")) {
                 if (player == 'X') {
-                    statusLabel.setText("Gefeliciteerd! Jij wint!");
+                    statusLabel.setText(lang.get("tictactoe.game.win", lang.get("tictactoe.game.player")));
                 } else {
-                    statusLabel.setText("AI wint! Probeer het opnieuw.");
+                    statusLabel.setText(lang.get("tictactoe.game.win", lang.get("tictactoe.game.ai")));
                 }
             } else {
-                statusLabel.setText("Speler " + player + " wint!");
+                statusLabel.setText(lang.get("tictactoe.game.win", String.valueOf(player)));
             }
             gameDone = true;
             return true;
         } else if (game.isDraw()) {
-            statusLabel.setText("Gelijkspel!");
+            statusLabel.setText(lang.get("tictactoe.game.draw"));
             gameDone = true;
             return true;
         }
@@ -174,9 +176,9 @@ public class TicTacToeGame {
      */
     private String getTitleForMode() {
         if (gameMode.equals("PVP")) {
-            return "TicTacToe - Speler vs Speler";
+            return lang.get("tictactoe.game.title.pvp");
         } else {
-            return "TicTacToe - Speler vs AI";
+            return lang.get("tictactoe.game.title.pva");
         }
     }
 
@@ -186,9 +188,9 @@ public class TicTacToeGame {
      */
     private String getInitialStatusText() {
         if (gameMode.equals("PVP")) {
-            return "Beurt: X";
+            return lang.get("tictactoe.game.turn", "X");
         } else {
-            return "Beurt: X (jij)";
+            return lang.get("tictactoe.game.turn", "X");
         }
     }
 
@@ -198,8 +200,8 @@ public class TicTacToeGame {
     private void returnToMenu() {
         int option = JOptionPane.showConfirmDialog(
             gameFrame,
-            "Weet je zeker dat je terug wilt naar het menu?",
-            "Bevestig",
+            lang.get("main.exit.confirm"),
+            lang.get("main.exit.title"),
             JOptionPane.YES_NO_OPTION
         );
         if (option == JOptionPane.YES_OPTION) {
