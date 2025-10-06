@@ -17,7 +17,6 @@ public final class SettingsMenu extends JFrame {
     private JLabel languageLabel;
     private JRadioButton dutchRadio;
     private JRadioButton englishRadio;
-    private JRadioButton vietnameseRadio;
     private JButton backButton;
 
     public SettingsMenu(MenuManager menuManager) {
@@ -61,22 +60,18 @@ public final class SettingsMenu extends JFrame {
         String currentLang = lang.getCurrentLanguage();
         dutchRadio = new JRadioButton(lang.get("settings.language.dutch"), currentLang.equals("nl"));
         englishRadio = new JRadioButton(lang.get("settings.language.english"), currentLang.equals("en"));
-        vietnameseRadio = new JRadioButton(lang.get("settings.language.vietnamese"), currentLang.equals("vi"));
         
         // Button group om slechts één selectie toe te staan
         var languageGroup = new ButtonGroup();
         languageGroup.add(dutchRadio);
         languageGroup.add(englishRadio);
-        languageGroup.add(vietnameseRadio);
         
         // Action listeners voor taalwijziging
         dutchRadio.addActionListener(e -> changeLanguage("nl"));
         englishRadio.addActionListener(e -> changeLanguage("en"));
-        vietnameseRadio.addActionListener(e -> changeLanguage("vi"));
         
         languagePanel.add(dutchRadio);
         languagePanel.add(englishRadio);
-        languagePanel.add(vietnameseRadio);
         
         settingsPanel.add(languageLabel);
         settingsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -126,7 +121,6 @@ public final class SettingsMenu extends JFrame {
         languageLabel.setText(lang.get("settings.language"));
         dutchRadio.setText(lang.get("settings.language.dutch"));
         englishRadio.setText(lang.get("settings.language.english"));
-        vietnameseRadio.setText(lang.get("settings.language.vietnamese"));
         backButton.setText(lang.get("settings.back"));
     }
     

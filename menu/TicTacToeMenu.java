@@ -14,6 +14,7 @@ public class TicTacToeMenu extends JFrame {
     private JLabel titleLabel;
     private JButton pvpButton;
     private JButton pvaButton;
+    private JButton serverButton;
     private JButton backButton;
 
     /**
@@ -58,7 +59,7 @@ public class TicTacToeMenu extends JFrame {
         buttonPanel.add(pvaButton);
 
         // Server knop (voor toekomstige implementatie)
-        JButton serverButton = new JButton("Server (Binnenkort beschikbaar)");
+        serverButton = new JButton(lang.get("tictactoe.menu.server.soon"));
         serverButton.setFont(new Font("Arial", Font.PLAIN, 14));
         serverButton.setEnabled(false); // Uitgeschakeld tot implementatie
         buttonPanel.add(serverButton);
@@ -83,6 +84,7 @@ public class TicTacToeMenu extends JFrame {
         titleLabel.setText(lang.get("tictactoe.menu.header"));
         pvpButton.setText(lang.get("tictactoe.menu.pvp"));
         pvaButton.setText(lang.get("tictactoe.menu.pva"));
+        serverButton.setText(lang.get("tictactoe.menu.server.soon"));
         backButton.setText(lang.get("tictactoe.menu.back"));
     }
 
