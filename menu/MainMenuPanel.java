@@ -43,7 +43,7 @@ public final class MainMenuPanel extends JPanel {
         setBackground(new Color(247, 247, 255)); 
 
         add(createTitlePanel(), BorderLayout.NORTH);   
-        add(createButtonPanel(), BorderLayout.CENTER); 
+        add(createButtonPanel(), BorderLayout.EAST); 
         add(createLeftPanel(), BorderLayout.WEST);     
     }
 

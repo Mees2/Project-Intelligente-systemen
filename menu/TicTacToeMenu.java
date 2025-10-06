@@ -2,6 +2,11 @@ package menu;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+
 
 /**
  * Het TicTacToe submenu waar de gebruiker de spelmode kan kiezen
@@ -18,60 +23,156 @@ public class TicTacToeMenu extends JFrame {
         this.menuManager = menuManager;
         initializeMenu();
     }
-
+    
     /**
      * Initialiseert de TicTacToe menu interface test***
      */
     private void initializeMenu() {
         setTitle("TicTacToe - Spelmode Selectie");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setSize(400, 350);
+        setSize(500, 350);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(new Color(247,247,255));
 
         // Titel label
         JLabel titleLabel = new JLabel("TicTacToe - Kies je spelmode", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 25));
+        titleLabel.setForeground(new Color(5,5,169));
         add(titleLabel, BorderLayout.NORTH);
 
         // Menu knoppen panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(5, 1, 10, 10));
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        buttonPanel.setOpaque(false);
 
         // Speler vs Speler knop
-        JButton pvpButton = new JButton("Speler vs Speler");
-        pvpButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        JButton pvpButton = createRoundedButton("Speler vs Speler",
+        new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         pvpButton.addActionListener(e -> menuManager.startTicTacToeGame("PVP"));
         buttonPanel.add(pvpButton);
+        buttonPanel.add(Box.createVerticalStrut(20));
 
         // Speler vs AI knop
-        JButton pvaButton = new JButton("Speler vs AI");
-        pvaButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        JButton pvaButton = createRoundedButton("Speler vs AI",
+        new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         pvaButton.addActionListener(e -> menuManager.startTicTacToeGame("PVA"));
         buttonPanel.add(pvaButton);
+        buttonPanel.add(Box.createVerticalStrut(20));
 
         // Server knop (voor toekomstige implementatie)
-        JButton serverButton = new JButton("Server (Binnenkort beschikbaar)");
-        serverButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        JButton serverButton = createRoundedButton("Server (Binnenkort beschikbaar)",
+        new Color(200,200,200), new Color(200,200,200), new Color(150,150,150), true);
         serverButton.setEnabled(false); // Uitgeschakeld tot implementatie
         buttonPanel.add(serverButton);
-
-        // Lege ruimte
-        buttonPanel.add(new JLabel(""));
+        buttonPanel.add(Box.createVerticalStrut(40));
 
         // Terug naar hoofdmenu knop
-        JButton backButton = new JButton("Terug naar Hoofdmenu");
-        backButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        JButton backButton = createRoundedButton("Terug naar Hoofdmenu", 
+        new Color(184,107,214),new Color(204,127,234), new Color(120,60,150), true);
         backButton.addActionListener(e -> menuManager.returnToMainMenu());
         buttonPanel.add(backButton);
-
         add(buttonPanel, BorderLayout.CENTER);
+        
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeComponents();
+            }
+        });
     }
+
+private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled){
+    var btn = new JButton(text){
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getModel().isRollover() && isEnabled() ? hoverColor : baseColor);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+            g2.setColor(borderColor);
+            g2.setStroke(new BasicStroke(2));
+            g2.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 30, 30);
+            g2.dispose();
+            super.paintComponent(g);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            double scale = 1.0;
+            if (getParent() != null) {
+                Window window = SwingUtilities.getWindowAncestor(this);
+                if (window != null) {
+                    scale = Math.min(window.getWidth() / 500.0, window.getHeight() / 350.0);
+                    scale = Math.max(0.7, Math.min(scale, 2.0));
+                }
+            }
+            int scaledWidth = (int)(200 * scale);
+            int scaledHeight = (int)(35 * scale);
+            return new Dimension(scaledWidth, scaledHeight);
+        }
+
+        @Override
+        public Dimension getMinimumSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public Dimension getMaximumSize() {
+            return getPreferredSize();
+        }
+
+    };
+    
+    btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
+    btn.setForeground(enabled ? Color.WHITE : new Color(100,100,100));
+    btn.setContentAreaFilled(false);
+    btn.setOpaque(false);
+    btn.setFocusPainted(false);
+    btn.setBorderPainted(false);
+    btn.setRolloverEnabled(true);
+    btn.setEnabled(enabled);
+    btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+    
+    return btn;
+}
+
+private void resizeComponents() {
+    double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
+    scale = Math.max(0.7, Math.min(scale, 2.0));
+    resizeAllButtons(this, scale);
+    revalidate();
+    repaint();
+}
+
+private void resizeAllButtons(Container container, double scale) {
+    for (Component comp : container.getComponents()) {
+        if (comp instanceof JButton) {
+            JButton btn = (JButton) comp;
+            int newFontSize = (int)(12 * scale);
+            btn.setFont(btn.getFont().deriveFont(Font.PLAIN, newFontSize));
+            
+            int newWidth = (int)(200 * scale);
+            int newHeight = (int)(35 * scale);
+            Dimension newSize = new Dimension(newWidth, newHeight);
+            btn.setPreferredSize(newSize);
+            btn.setMinimumSize(newSize);
+            btn.setMaximumSize(newSize);
+        } else if (comp instanceof JLabel) {
+            JLabel label = (JLabel) comp;
+            int newTitleSize = (int)(25 * scale);
+            newTitleSize = Math.max(18, Math.min(newTitleSize, 40));
+            label.setFont(label.getFont().deriveFont(Font.BOLD, newTitleSize));
+        } else if (comp instanceof Container) {
+            resizeAllButtons((Container) comp, scale);
+        }
+    }
+}
 
     /**
      * Toont het TicTacToe menu
-     */
+     */ 
     public void showMenu() {
         setVisible(true);
     }
@@ -83,4 +184,3 @@ public class TicTacToeMenu extends JFrame {
         setVisible(false);
     }
 }
-
