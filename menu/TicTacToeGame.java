@@ -174,7 +174,7 @@ public class TicTacToeGame {
      private boolean checkEnd(char player) {
         if (game.isWin(player)) {
             String winnaar = getNameBySymbol(player);
-            statusLabel.setText("Gefeliciteerd! " + winnaar + " (" + player + ") wint!");
+            statusLabel.setText(winnaar + " (" + player + ") wint!");
             gameDone = true;
             return true;
         } else if (game.isDraw()) {
