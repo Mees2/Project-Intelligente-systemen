@@ -47,7 +47,7 @@ public final class MenuManager {
 
     /**
      * Opent het instellingen menu
-     * Verbergt het hoofdmenu en toont het instellingen menu
+     * Verbergt het hoofdmenu en toont het instellingen-menu
      */
     public void openSettingsMenu() {
         mainMenu.hideMenu();
@@ -55,7 +55,7 @@ public final class MenuManager {
     }
 
     /**
-     * Keert terug naar het hoofdmenu vanaf het instellingen menu
+     * Keert terug naar het hoofdmenu vanaf het instellingen-menu
      */
     public void returnToMainMenuFromSettings() {
         settingsMenu.hideMenu();

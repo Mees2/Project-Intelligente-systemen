@@ -2,12 +2,12 @@ package menu;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 
-/**
- * Het instellingen menu van de spelcollectie.
- * Hier kunnen gebruikers instellingen aanpassen zoals de taal.
- */
+//Het instellingen-menu van de spelcollectie.
+
 public final class SettingsMenu extends JFrame {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final MenuManager menuManager;
@@ -105,7 +105,7 @@ public final class SettingsMenu extends JFrame {
             lang.get("settings.language.changed.title"),
             JOptionPane.INFORMATION_MESSAGE);
         
-        // Update UI elementen
+        // Update UI-elementen
         updateUITexts();
         
         // Update het hoofdmenu
@@ -113,7 +113,7 @@ public final class SettingsMenu extends JFrame {
     }
     
     /**
-     * Update alle UI teksten naar de huidige taal
+     * Update alle UI-teksten naar de huidige taal
      */
     private void updateUITexts() {
         setTitle(lang.get("settings.title"));
