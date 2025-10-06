@@ -67,8 +67,8 @@ public final class SettingsMenu extends JFrame {
         languageGroup.add(englishRadio);
         
         // Action listeners voor taalwijziging
-        dutchRadio.addActionListener(e -> changeLanguage("nl"));
-        englishRadio.addActionListener(e -> changeLanguage("en"));
+        dutchRadio.addActionListener(_ -> changeLanguage("nl"));
+        englishRadio.addActionListener(_ -> changeLanguage("en"));
         
         languagePanel.add(dutchRadio);
         languagePanel.add(englishRadio);
@@ -87,7 +87,7 @@ public final class SettingsMenu extends JFrame {
         
         backButton = new JButton(lang.get("settings.back"));
         backButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        backButton.addActionListener(e -> menuManager.returnToMainMenuFromSettings());
+        backButton.addActionListener(_ -> menuManager.returnToMainMenuFromSettings());
         
         buttonPanel.add(backButton);
         return buttonPanel;
