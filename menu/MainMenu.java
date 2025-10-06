@@ -10,6 +10,13 @@ public final class MainMenu extends JFrame {
     private static final long serialVersionUID = 1L;
 
     private final MenuManager menuManager;
+    private final LanguageManager lang = LanguageManager.getInstance();
+    
+    private JLabel titleLabel;
+    private JButton ticTacToeButton;
+    private JButton reversiButton;
+    private JButton settingsButton;
+    private JButton exitButton;
 
     public MainMenu(MenuManager menuManager) {
         this.menuManager = menuManager;
@@ -17,7 +24,7 @@ public final class MainMenu extends JFrame {
     }
 
     private void initializeMenu() {
-        setTitle("Spelcollectie - Hoofdmenu");
+        setTitle(lang.get("main.title"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
         setLocationRelativeTo(null);
@@ -28,17 +35,22 @@ public final class MainMenu extends JFrame {
     }
 
     private JLabel createTitleLabel() {
-        var titleLabel = new JLabel("Welkom bij de Spelcollectie", JLabel.CENTER);
+        titleLabel = new JLabel(lang.get("main.welcome"), JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         return titleLabel;
     }
 
     private JPanel createButtonPanel() {
-        var buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
+        var buttonPanel = new JPanel(new GridLayout(5, 1, 10, 10));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
-        buttonPanel.add(createNavButton("TicTacToe", menuManager::openTicTacToeMenu));
-        buttonPanel.add(createDisabledButton("Reversi (Binnenkort beschikbaar)"));
+        ticTacToeButton = createNavButton(lang.get("main.tictactoe"), menuManager::openTicTacToeMenu);
+        reversiButton = createDisabledButton(lang.get("main.reversi.soon"));
+        settingsButton = createNavButton(lang.get("main.settings"), menuManager::openSettingsMenu);
+        
+        buttonPanel.add(ticTacToeButton);
+        buttonPanel.add(reversiButton);
+        buttonPanel.add(settingsButton);
         buttonPanel.add(new JLabel());
         buttonPanel.add(createExitButton());
 
@@ -60,13 +72,13 @@ public final class MainMenu extends JFrame {
     }
 
     private JButton createExitButton() {
-        var exitButton = new JButton("Afsluiten");
+        exitButton = new JButton(lang.get("main.exit"));
         exitButton.setFont(new Font("Arial", Font.PLAIN, 14));
         exitButton.addActionListener(e -> {
             var option = JOptionPane.showConfirmDialog(
                 this,
-                "Weet je zeker dat je het programma wilt afsluiten?",
-                "Bevestig afsluiten",
+                lang.get("main.exit.confirm"),
+                lang.get("main.exit.title"),
                 JOptionPane.YES_NO_OPTION
             );
             if (option == JOptionPane.YES_OPTION) {
@@ -74,6 +86,18 @@ public final class MainMenu extends JFrame {
             }
         });
         return exitButton;
+    }
+    
+    /**
+     * Update alle UI teksten naar de huidige taal
+     */
+    public void updateLanguage() {
+        setTitle(lang.get("main.title"));
+        titleLabel.setText(lang.get("main.welcome"));
+        ticTacToeButton.setText(lang.get("main.tictactoe"));
+        reversiButton.setText(lang.get("main.reversi.soon"));
+        settingsButton.setText(lang.get("main.settings"));
+        exitButton.setText(lang.get("main.exit"));
     }
 
     public void showMenu() {
@@ -84,5 +108,3 @@ public final class MainMenu extends JFrame {
         setVisible(false);
     }
 }
-
-//nieuwe 

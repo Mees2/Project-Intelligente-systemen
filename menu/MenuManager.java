@@ -9,6 +9,7 @@ public final class MenuManager {
 
     private final MainMenu mainMenu;
     private final TicTacToeMenu ticTacToeMenu;
+    private final SettingsMenu settingsMenu;
 
     /**
      * Constructor voor de MenuManager
@@ -17,6 +18,7 @@ public final class MenuManager {
     public MenuManager() {
         mainMenu = new MainMenu(this);
         ticTacToeMenu = new TicTacToeMenu(this);
+        settingsMenu = new SettingsMenu(this);
     }
 
     /**
@@ -40,6 +42,23 @@ public final class MenuManager {
      */
     public void returnToMainMenu() {
         ticTacToeMenu.hideMenu();
+        mainMenu.showMenu();
+    }
+
+    /**
+     * Opent het instellingen menu
+     * Verbergt het hoofdmenu en toont het instellingen-menu
+     */
+    public void openSettingsMenu() {
+        mainMenu.hideMenu();
+        settingsMenu.showMenu();
+    }
+
+    /**
+     * Keert terug naar het hoofdmenu vanaf het instellingen-menu
+     */
+    public void returnToMainMenuFromSettings() {
+        settingsMenu.hideMenu();
         mainMenu.showMenu();
     }
 
@@ -79,6 +98,14 @@ public final class MenuManager {
      */
     public void onGameFinished() {
         ticTacToeMenu.showMenu();
+    }
+    
+    /**
+     * Update de taal in alle menu's
+     */
+    public void updateLanguage() {
+        mainMenu.updateLanguage();
+        ticTacToeMenu.updateLanguage();
     }
 }
 
