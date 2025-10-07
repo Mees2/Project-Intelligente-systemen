@@ -156,18 +156,11 @@ public class TicTacToeGame {
             statusLabel.setText(lang.get("tictactoe.game.draw"));
             gameDone = true;
             return true;
-        } else if (!game.isWinPossible()) {
-            statusLabel.setText("Gelijkspel!");
-            gameDone = true;
-            return true;
         }
         return false;
     }
-        
-    /**
-     * Krijgt de titel voor het spelvenster gebaseerd op de mode
-     * @return De titel string
-     */
+
+
     private String getTitleForMode() {
         if (gameMode.equals("PVP")) {
             return lang.get("tictactoe.game.title.pvp");
