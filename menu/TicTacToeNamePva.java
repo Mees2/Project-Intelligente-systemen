@@ -72,9 +72,13 @@ public class TicTacToeNamePva extends JFrame {
             this.hideMenu();
 
             if (xbutton.isSelected()) {
-                menuManager.startTicTacToeGame("PVA", spelerNaam, "AI");
-            } else {
-                menuManager.startTicTacToeGame("PVA", "AI", spelerNaam);
+                String spelerMetSymbol = spelerNaam + " (X)";
+                String aiMetSymbol = "AI (O)";
+                menuManager.startTicTacToeGame("PVA", spelerMetSymbol, aiMetSymbol);
+            } else { 
+                String aiMetSymbol = "AI (X)";
+                String spelerMetSymbol = spelerNaam + " (O)";
+                menuManager.startTicTacToeGame("PVA", aiMetSymbol, spelerMetSymbol);
             }
         });
 
