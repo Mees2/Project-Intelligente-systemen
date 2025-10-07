@@ -156,7 +156,12 @@ public class TicTacToeGame {
             statusLabel.setText(lang.get("tictactoe.game.draw"));
             gameDone = true;
             return true;
+        } else if (!isWinPossible()) {
+        statusLabel.setText("Gelijkspel!");
+        gameDone = true;
+        return true;
         }
+        
         return false;
     }
 
@@ -214,6 +219,39 @@ public class TicTacToeGame {
             gameFrame.dispose();
             menuManager.onGameFinished();
         }
+    }
+    /**
+     * Controleert vanaf de huidige spelstaat (na de laatst gespeelde zet)
+     * of er nog een pad bestaat dat eindigt in winst voor iemand.
+     * Let op: checkEnd wordt aangeroepen direct na een zet, dus de volgende
+     * speler is !turnX — we moeten de zoekboom vanaf die speler beginnen.
+     */
+    private boolean isWinPossible() {
+        // start vanaf de speler die nu aan de beurt is (na de laatst uitgevoerde zet)
+        return isWinPossibleRecursive(!turnX);
+    }
+
+    private boolean isWinPossibleRecursive(boolean xTurn) {
+        // Als er al een winnaar is -> er was dus een pad naar winst
+        if (game.isWin('X') || game.isWin('O')) return true;
+
+        // Als bord vol en geen winnaar -> dit pad leidt tot remise
+        if (game.isDraw()) return false;
+
+        char speler = xTurn ? 'X' : 'O';
+
+        // Probeer alle vrije posities
+        for (int i = 0; i < 9; i++) {
+            if (game.isFree(i)) {
+                game.doMove(i, speler);
+                boolean possible = isWinPossibleRecursive(!xTurn);
+                game.undoMove(i);
+
+                if (possible) return true; // vond een pad naar winst
+            }
+        }
+
+        return false; // geen pad naar winst gevonden in deze tak
     }
 }
 
