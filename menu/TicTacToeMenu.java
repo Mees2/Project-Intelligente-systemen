@@ -49,13 +49,13 @@ public class TicTacToeMenu extends JFrame {
         // Speler vs Speler knop
         pvpButton = new JButton(lang.get("tictactoe.menu.pvp"));
         pvpButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        pvpButton.addActionListener(e -> menuManager.startTicTacToeGame("PVP"));
+        pvpButton.addActionListener(e -> menuManager.openNameSelection("PVP"));
         buttonPanel.add(pvpButton);
 
         // Speler vs AI knop
         pvaButton = new JButton(lang.get("tictactoe.menu.pva"));
         pvaButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        pvaButton.addActionListener(e -> menuManager.startTicTacToeGame("PVA"));
+        pvaButton.addActionListener(e -> menuManager.openNameSelection("PVA"));
         buttonPanel.add(pvaButton);
 
         // Server knop (voor toekomstige implementatie)
