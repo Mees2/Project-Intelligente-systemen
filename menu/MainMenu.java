@@ -11,12 +11,8 @@ public final class MainMenu extends JFrame {
 
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
+    private MainMenuPanel mainMenuPanel; // Add reference to the panel
 
-    private JLabel titleLabel;
-    private JButton ticTacToeButton;
-    private JButton reversiButton;
-    private JButton settingsButton;
-    private JButton exitButton;
 
     public MainMenu(MenuManager menuManager) {
         this.menuManager = menuManager;
@@ -30,7 +26,8 @@ public final class MainMenu extends JFrame {
         setResizable(true);
         setLocationRelativeTo(null);
 
-        setContentPane(new MainMenuPanel(menuManager));
+        mainMenuPanel = new MainMenuPanel(menuManager);
+        setContentPane(mainMenuPanel);
     }
 
     /**
@@ -38,11 +35,9 @@ public final class MainMenu extends JFrame {
      */
     public void updateLanguage() {
         setTitle(lang.get("main.title"));
-        titleLabel.setText(lang.get("main.welcome"));
-        ticTacToeButton.setText(lang.get("main.tictactoe"));
-        reversiButton.setText(lang.get("main.reversi.soon"));
-        settingsButton.setText(lang.get("main.settings"));
-        exitButton.setText(lang.get("main.exit"));
+        if (mainMenuPanel != null) {
+            mainMenuPanel.updateLanguage(); // Update the panel content
+        }
     }
 
     public void showMenu() {
@@ -53,4 +48,3 @@ public final class MainMenu extends JFrame {
         setVisible(false);
     }
 }
-

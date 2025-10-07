@@ -11,6 +11,7 @@ import java.awt.event.ComponentEvent;
 public final class MainMenuPanel extends JPanel {
     
     private final MenuManager menuManager;
+    private final LanguageManager lang = LanguageManager.getInstance();
     
 
     private static final int BASE_WIDTH = 700;
@@ -25,6 +26,7 @@ public final class MainMenuPanel extends JPanel {
     private JButton tttButton;
     private JButton reversiButton;
     private JButton exitButton;
+    private JButton settingsButton;
 
     public MainMenuPanel(MenuManager menuManager) {
         this.menuManager = menuManager;
@@ -67,12 +69,12 @@ public final class MainMenuPanel extends JPanel {
         buttonContainer.setBorder(BorderFactory.createEmptyBorder(0, 0, 100, 50));
         buttonContainer.add(Box.createVerticalStrut(50)); 
         
-        tttButton = createRoundedButton("TicTacToe", menuManager::openTicTacToeMenu, 
+        tttButton = createRoundedButton(lang.get("main.tictactoe"), menuManager::openTicTacToeMenu,
             new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true, BASE_BUTTON_W_LARGE);
         buttonContainer.add(tttButton);
         buttonContainer.add(Box.createVerticalStrut(10)); 
         
-        reversiButton = createRoundedButton("Reversi (Binnenkort beschikbaar)", () -> {}, 
+        reversiButton = createRoundedButton(lang.get("main.reversi.soon"), () -> {},
             new Color(200,200,200), new Color(200,200,200), new Color(150,150,150), false, BASE_BUTTON_W_LARGE);
         buttonContainer.add(reversiButton);
         buttonContainer.add(Box.createVerticalGlue());
@@ -85,15 +87,26 @@ public final class MainMenuPanel extends JPanel {
         leftPanel.setOpaque(false);
         leftPanel.setBorder(BorderFactory.createEmptyBorder(0, 50, 50, 0)); 
         
-        exitButton = createRoundedButton("Afsluiten", this::confirmExit,
+        // Create a container for both buttons
+        var buttonContainer = new JPanel();
+        buttonContainer.setLayout(new BoxLayout(buttonContainer, BoxLayout.Y_AXIS));
+        buttonContainer.setOpaque(false);
+
+        settingsButton = createRoundedButton(lang.get("main.settings"), menuManager::openSettingsMenu,
+                new Color(184,107,214), new Color(204,127,234), new Color(120,60,150), true, BASE_BUTTON_W_SMALL);
+        buttonContainer.add(settingsButton);
+        buttonContainer.add(Box.createVerticalStrut(10));
+
+        exitButton = createRoundedButton(lang.get("main.exit"), menuManager::confirmExit,
             new Color(184,107,214), new Color(204,127,234), new Color(120,60,150), true, BASE_BUTTON_W_SMALL);
-        leftPanel.add(exitButton, BorderLayout.SOUTH);
-        
+        buttonContainer.add(exitButton);
+
+        leftPanel.add(buttonContainer, BorderLayout.SOUTH);
         return leftPanel;
     }
 
     private JLabel createTitleLabel() {
-        var titleLabel = new JLabel("<html>Welkom<br>bij de<br>Spelcollectie</html>", JLabel.LEFT); 
+        var titleLabel = new JLabel(lang.get("main.welcome"), JLabel.LEFT);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, BASE_TITLE_FONT));
         titleLabel.setForeground(new Color(5,5,169));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 50, 25, 10)); 
@@ -171,6 +184,7 @@ public final class MainMenuPanel extends JPanel {
         
         resizeButton(tttButton, scale);
         resizeButton(reversiButton, scale);
+        resizeButton(settingsButton, scale);
         resizeButton(exitButton, scale);
         
         revalidate();
@@ -197,5 +211,14 @@ public final class MainMenuPanel extends JPanel {
         btn.setPreferredSize(newSize);
         btn.setMinimumSize(newSize);
         btn.setMaximumSize(newSize);
+    }
+
+    public void updateLanguage() {
+        if (titleLabel == null) return;
+        titleLabel.setText(lang.get("main.welcome"));
+        tttButton.setText(lang.get("main.tictactoe"));
+        reversiButton.setText(lang.get("main.reversi.soon"));
+        settingsButton.setText(lang.get("main.settings"));
+        exitButton.setText(lang.get("main.exit"));
     }
 }

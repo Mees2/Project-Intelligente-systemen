@@ -124,6 +124,11 @@ public final class SettingsMenu extends JFrame {
         backButton.setText(lang.get("settings.back"));
     }
     
+
+    public void updateLanguage() {
+        updateUITexts();
+    }
+
     public void showMenu() {
         updateUITexts(); // Update teksten wanneer menu wordt getoond
         setVisible(true);

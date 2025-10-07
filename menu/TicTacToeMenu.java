@@ -43,7 +43,7 @@ public class TicTacToeMenu extends JFrame {
         getContentPane().setBackground(new Color(247,247,255));
 
         // Titel label
-        JLabel titleLabel = new JLabel(lang.get("tictactoe.menu.header"), JLabel.CENTER);
+        titleLabel = new JLabel(lang.get("tictactoe.menu.header"), JLabel.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 25));
         titleLabel.setForeground(new Color(5,5,169));
         add(titleLabel, BorderLayout.NORTH);
@@ -55,28 +55,28 @@ public class TicTacToeMenu extends JFrame {
         buttonPanel.setOpaque(false);
 
         // Speler vs Speler knop
-        JButton pvpButton = createRoundedButton(lang.get("tictactoe.menu.pvp"),
+        pvpButton = createRoundedButton(lang.get("tictactoe.menu.pvp"),
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         pvpButton.addActionListener(e -> menuManager.openNameSelection("PVP"));
         buttonPanel.add(pvpButton);
         buttonPanel.add(Box.createVerticalStrut(20));
 
         // Speler vs AI knop
-        JButton pvaButton = createRoundedButton(lang.get("tictactoe.menu.pva"),
+        pvaButton = createRoundedButton(lang.get("tictactoe.menu.pva"),
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         pvaButton.addActionListener(e -> menuManager.openNameSelection("PVA"));
         buttonPanel.add(pvaButton);
         buttonPanel.add(Box.createVerticalStrut(20));
 
         // Server knop (voor toekomstige implementatie)
-        JButton serverButton = createRoundedButton(lang.get("tictactoe.menu.server.soon"),
+        serverButton = createRoundedButton(lang.get("tictactoe.menu.server.soon"),
         new Color(200,200,200), new Color(200,200,200), new Color(150,150,150), true);
         serverButton.setEnabled(false); // Uitgeschakeld tot implementatie
         buttonPanel.add(serverButton);
         buttonPanel.add(Box.createVerticalStrut(40));
 
         // Terug naar hoofdmenu knop
-        JButton backButton = createRoundedButton(lang.get("tictactoe.menu.back"),
+        backButton = createRoundedButton(lang.get("tictactoe.menu.back"),
         new Color(184,107,214),new Color(204,127,234), new Color(120,60,150), true);
         backButton.addActionListener(e -> menuManager.returnToMainMenu());
         buttonPanel.add(backButton);
@@ -204,4 +204,4 @@ private void resizeAllButtons(Container container, double scale) {
     }
 }
 
-//nieuwe 
+//nieuwe

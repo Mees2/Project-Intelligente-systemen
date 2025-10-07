@@ -1,5 +1,7 @@
 package menu;
 
+import javax.swing.JOptionPane;
+
 /**
  * MenuManager beheert de navigatie tussen verschillende menu's en spellen.
  */
@@ -98,7 +100,7 @@ public final class MenuManager {
     }
     /**
      * Start TicTacToe in Speler vs Speler mode
-     
+
     private void startTicTacToePlayerVsPlayer() {
         var game = new TicTacToeGame(this, MODE_PVP);
         game.start();
@@ -106,7 +108,7 @@ public final class MenuManager {
 
     /**
      * Start TicTacToe in Speler vs AI mode
-     
+
     private void startTicTacToePlayerVsAI() {
         var game = new TicTacToeGame(this, MODE_PVA);
         game.start();
@@ -119,14 +121,27 @@ public final class MenuManager {
     public void onGameFinished() {
         ticTacToeMenu.showMenu();
     }
-    
+
     /**
      * Update de taal in alle menu's
      */
     public void updateLanguage() {
         mainMenu.updateLanguage();
         ticTacToeMenu.updateLanguage();
+        settingsMenu.updateLanguage();
+    }
+
+
+    public void confirmExit() {
+        LanguageManager lang = LanguageManager.getInstance();
+        var option = JOptionPane.showConfirmDialog(
+                null,
+                lang.get("main.exit.confirm"),
+                lang.get("main.exit.title"),
+                JOptionPane.YES_NO_OPTION
+        );
+        if (option == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
     }
 }
-
-//nieuwe 

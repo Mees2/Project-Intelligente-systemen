@@ -45,7 +45,7 @@ public final class LanguageManager {
         
         // Instellingen menu vertalingen
         addTranslation("settings.title", "Instellingen", "Settings");
-        addTranslation("settings.language", "Taal / Language:", "Language:");
+        addTranslation("settings.language", "Taal:", "Language:");
         addTranslation("settings.language.dutch", "Nederlands", "Dutch");
         addTranslation("settings.language.english", "English", "English");
         addTranslation("settings.language.changed", "Taal is gewijzigd naar {0}", 
