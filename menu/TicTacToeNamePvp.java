@@ -61,12 +61,8 @@ public class TicTacToeNamePvp extends JFrame {
                 return;
             }
 
-            // Add X and O to the names
-            String speler1MetSymbol = speler1naam + " (X)";
-            String speler2MetSymbol = speler2naam + " (O)";
-
             this.hideMenu();
-            menuManager.startTicTacToeGame("PVP", speler1MetSymbol, speler2MetSymbol);
+            menuManager.startTicTacToeGame("PVP", speler1naam, speler2naam);
         });
 
         JButton backButton = new JButton("Terug naar Spelmethode");
