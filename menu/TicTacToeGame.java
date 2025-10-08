@@ -149,15 +149,16 @@ public class TicTacToeGame {
                 statusLabel.setText(lang.get("tictactoe.game.win", String.valueOf(player)));
             }
             String winnaar = getNameBySymbol(player);
-            statusLabel.setText("Gefeliciteerd! " + winnaar + " (" + player + ") wint!");
-            gameDone = true;
+            statusLabel.setText(lang.get("tictactoe.game.win", winnaar + 
+            " (" + String.valueOf(player) + ")"));
+            gameDone = true; 
             return true;
         } else if (game.isDraw()) {
             statusLabel.setText(lang.get("tictactoe.game.draw"));
             gameDone = true;
             return true;
         } else if (!isWinPossible()) {
-        statusLabel.setText("Gelijkspel!");
+        statusLabel.setText(lang.get("tictactoe.game.draw"));
         gameDone = true;
         return true;
         }
@@ -178,13 +179,13 @@ public class TicTacToeGame {
      * Krijgt de initiële status tekst gebaseerd op de mode
      * @return De status tekst
      */
-    private String getInitialStatusText() {
-        if (gameMode.equals("PVP")) {
-            return lang.get("tictactoe.game.turn", "X");
-        } else {
-            return lang.get("tictactoe.game.turn", "X");
-        }
-    }
+    // private String getInitialStatusText() {
+    //     if (gameMode.equals("PVP")) {
+    //         return lang.get("tictactoe.game.turn", "X");
+    //     } else {
+    //         return lang.get("tictactoe.game.turn", "X");
+    //     }
+    // }
     private boolean isPlayersTurn() {
         return (turnX ? 'X' : 'O') == spelerRol;
     }
@@ -205,7 +206,7 @@ public class TicTacToeGame {
 
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
-        statusLabel.setText("Beurt: " + currentName + " (" + currentSymbol + ")");
+        statusLabel.setText(lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")"));
     }
 
     private void returnToMenu() {

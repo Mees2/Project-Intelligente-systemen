@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public final class LanguageManager {
     private static LanguageManager instance;
-    private String currentLanguage = "nl"; // Default: Nederlands
+    private String currentLanguage = "en"; // Default: engels
     
     // Map voor alle vertalingen: key -> (language -> translation)
     private final Map<String, Map<String, String>> translations = new HashMap<>();
@@ -47,7 +47,7 @@ public final class LanguageManager {
         addTranslation("settings.title", "Instellingen", "Settings");
         addTranslation("settings.language", "Taal:", "Language:");
         addTranslation("settings.language.dutch", "Nederlands", "Dutch");
-        addTranslation("settings.language.english", "English", "English");
+        addTranslation("settings.language.english", "Engels", "English");
         addTranslation("settings.language.changed", "Taal is gewijzigd naar {0}", 
                       "Language changed to {0}");
         addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed");
@@ -66,8 +66,8 @@ public final class LanguageManager {
         // TicTacToe spel vertalingen
         addTranslation("tictactoe.game.title.pvp", "TicTacToe - Speler vs Speler", "TicTacToe - Player vs Player");
         addTranslation("tictactoe.game.title.pva", "TicTacToe - Speler vs AI", "TicTacToe - Player vs AI");
-        addTranslation("tictactoe.game.turn", "Beurt van speler: {0}", "Player {0}'s turn");
-        addTranslation("tictactoe.game.win", "Speler {0} wint!", "Player {0} wins!");
+        addTranslation("tictactoe.game.turn", "Beurt van speler: {0}", "turn of player: {0}");
+        addTranslation("tictactoe.game.win", "Gefeliciteerd {0} jij hebt gewonnen!", "Congratulations {0} you won!");
         addTranslation("tictactoe.game.draw", "Gelijkspel!", "It's a draw!");
         addTranslation("tictactoe.game.newgame", "Nieuw Spel", "New Game");
         addTranslation("tictactoe.game.menu", "Terug naar Menu", "Back to Menu");
@@ -75,11 +75,23 @@ public final class LanguageManager {
         addTranslation("tictactoe.game.player", "Speler", "Player");
         addTranslation("tictactoe.game.ai", "AI", "AI");
         
+        // TicTacToe naam invoer vertalingen
+        addTranslation("tictactoe.name.title", "TicTacToe - Kies Naam en Rol", "TicTacToe - Choose Name and Role");
+        addTranslation("tictactoe.name.playername", "Naam Speler:", "Player Name:");
+        addTranslation("tictactoe.name.playername1", "Naam Speler 1 (X):", "Player Name 1 (X):");
+        addTranslation("tictactoe.name.playername2", "Naam Speler 2 (O):", "Player Name 2 (O):");
+        addTranslation("tictactoe.name.selectrole", "Selecteer Rol:", "Select Role:");
+        addTranslation("tictactoe.name.startgame", "Start Spel", "Start Game"); 
+        addTranslation("tictactoe.name.back", "Terug", "Back");
+        addTranslation("tictactoe.name.error.emptyname", "Naam mag niet leeg zijn.", "Name cannot be empty.");
+        addTranslation("tictactoe.name.error.emptyrole", "Rol mag niet leeg zijn.", "Role cannot be empty.");
+
         // Algemene vertalingen
         addTranslation("common.yes", "Ja", "Yes");
         addTranslation("common.no", "Nee", "No");
         addTranslation("common.ok", "OK", "OK");
         addTranslation("common.cancel", "Annuleren", "Cancel");
+        addTranslation("common.error", "Fout", "Error");
     }
     
     /**
@@ -146,7 +158,7 @@ public final class LanguageManager {
         switch (currentLanguage) {
             case "nl": return "Nederlands";
             case "en": return "English";
-            default: return "Nederlands";
+            default: return "English";
         }
     }
 }

@@ -5,6 +5,14 @@ import javax.swing.*;
 
 public class TicTacToeNamePvp extends JFrame {
     private final MenuManager menuManager;
+    private final LanguageManager lang = LanguageManager.getInstance();
+
+    // Store UI components as fields
+    private JLabel titleLabel;
+    private JLabel speler1Label;
+    private JLabel speler2Label;
+    private JButton startButton;
+    private JButton backButton;
 
     public TicTacToeNamePvp(MenuManager menuManager) {
         this.menuManager = menuManager;
@@ -12,7 +20,7 @@ public class TicTacToeNamePvp extends JFrame {
     }
 
     private void initializeMenu() {
-        setTitle("TikTakToe - Kies Naam Spelers");
+        setTitle(lang.get("tictactoe.name.title"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
         setLocationRelativeTo(null);
@@ -21,7 +29,7 @@ public class TicTacToeNamePvp extends JFrame {
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
-        JLabel titleLabel = new JLabel("TicTacToe - Kies Naam Spelers", JLabel.CENTER);
+        titleLabel = new JLabel(lang.get("tictactoe.name.title"), JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -31,12 +39,12 @@ public class TicTacToeNamePvp extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
-        JLabel speler1Label = new JLabel("Naam Speler 1 (X):");
+        speler1Label = new JLabel(lang.get("tictactoe.name.playername1"));
         JTextField textField1 = new JTextField();
         textField1.setPreferredSize(new Dimension(250,40));
         textField1.setFont(new Font("Arial", Font.PLAIN, 14));
         
-        JLabel speler2Label = new JLabel("Naam Speler 2 (O):");
+        speler2Label = new JLabel(lang.get("tictactoe.name.playername2"));
         JTextField textField2 = new JTextField();
         textField2.setPreferredSize(new Dimension(250,40));
         textField2.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -50,14 +58,14 @@ public class TicTacToeNamePvp extends JFrame {
         buttonPanel.add(speler2Label);
         buttonPanel.add(textField2);
 
-        JButton startButton = new JButton("Start het spel");
+        startButton = new JButton(lang.get("tictactoe.name.startgame"));
         startButton.setFont(new Font("Arial", Font.PLAIN, 14));
         startButton.addActionListener(e -> {
             String speler1naam = textField1.getText().trim();
             String speler2naam = textField2.getText().trim();
 
             if (speler1naam.isEmpty() || speler2naam.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vul alstublieft beide namen in.", "Fout", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyname"), lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -65,7 +73,7 @@ public class TicTacToeNamePvp extends JFrame {
             menuManager.startTicTacToeGame("PVP", speler1naam, speler2naam);
         });
 
-        JButton backButton = new JButton("Terug naar Spelmethode");
+        backButton = new JButton(lang.get("tictactoe.name.back"));
         backButton.setFont(new Font("Arial", Font.PLAIN, 14));
         backButton.addActionListener(e -> menuManager.closeNameSelectionPVP());
 
@@ -73,6 +81,15 @@ public class TicTacToeNamePvp extends JFrame {
         buttonPanel.add(backButton);
 
         add(buttonPanel, BorderLayout.CENTER);
+    }
+
+    public void updateLanguage() {
+        setTitle(lang.get("tictactoe.name.title"));
+        titleLabel.setText(lang.get("tictactoe.name.title"));
+        speler1Label.setText(lang.get("tictactoe.name.playername1"));
+        speler2Label.setText(lang.get("tictactoe.name.playername2"));
+        startButton.setText(lang.get("tictactoe.name.startgame"));
+        backButton.setText(lang.get("tictactoe.name.back"));
     }
 
     public void showMenu() {

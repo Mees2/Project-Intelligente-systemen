@@ -129,6 +129,9 @@ public final class MenuManager {
         mainMenu.updateLanguage();
         ticTacToeMenu.updateLanguage();
         settingsMenu.updateLanguage();
+        ticTacToeNamePvp.updateLanguage();
+        ticTacToeNamePva.updateLanguage();
+
     }
 
 
