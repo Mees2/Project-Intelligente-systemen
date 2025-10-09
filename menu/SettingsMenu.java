@@ -2,7 +2,6 @@ package menu;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.InputStream;
 import java.io.Serial;
 
 //Het instellingen-menu van de spelcollectie.
@@ -40,31 +39,22 @@ public final class SettingsMenu extends JFrame {
         add(createButtonPanel(), BorderLayout.SOUTH);
     }
 
-private JLabel createTitleLabel() {
-    titleLabel = new JLabel(lang.get("settings.title"), JLabel.CENTER);
+    private JLabel createTitleLabel() {
+        titleLabel = new JLabel(lang.get("settings.title"), JLabel.CENTER);
 
-    try {
-        InputStream is = getClass().getResourceAsStream("/fonts/berlinsansfb_reg.ttf");
-        if (is == null) {
-            System.err.println("Font resource not found!");
-        } else {
-            System.out.println("Font resource found!");
-            Font berlinFont = Font.createFont(Font.TRUETYPE_FONT, is);
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(berlinFont);
+        try {
+            Font berlinFont = Font.createFont(Font.TRUETYPE_FONT,
+                getClass().getResourceAsStream("/fonts/berlinsansfb_reg.ttf"));
             berlinFont = berlinFont.deriveFont(Font.BOLD, 18f);
             titleLabel.setFont(berlinFont);
-            is.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18)); // fallback
+
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        return titleLabel;
     }
-
-    titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-    return titleLabel;
-}
-
 
     private JPanel createSettingsPanel() {
         var settingsPanel = new JPanel();
