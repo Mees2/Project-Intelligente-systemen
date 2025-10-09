@@ -32,6 +32,7 @@ public final class SettingsMenu extends JFrame {
         setSize(400, 350);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(new Color(247,247,255));
 
         add(createTitleLabel(), BorderLayout.NORTH);
         add(createSettingsPanel(), BorderLayout.CENTER);
@@ -49,6 +50,7 @@ public final class SettingsMenu extends JFrame {
         var settingsPanel = new JPanel();
         settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
         settingsPanel.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
+        settingsPanel.setBackground(new Color(247, 247, 255));
 
         // Taal sectie
         languageLabel = new JLabel(lang.get("settings.language"));
@@ -57,14 +59,27 @@ public final class SettingsMenu extends JFrame {
         
         var languagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         languagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        languagePanel.setBackground(new Color(247, 247, 255));
+
         
-        // Radio buttons voor taal selectie
+        // Radio buttons voor taal selectie met achtergrondopmaak
         String currentLang = lang.getCurrentLanguage();
         dutchRadio = new JRadioButton(lang.get("settings.language.dutch"), currentLang.equals("nl"));
+        dutchRadio.setBackground(new Color(247, 247, 255));
+        dutchRadio.setOpaque(true);
+
         englishRadio = new JRadioButton(lang.get("settings.language.english"), currentLang.equals("en"));
+        englishRadio.setBackground(new Color(247, 247, 255));
+        englishRadio.setOpaque(true);
+
         vietnameseRadio = new JRadioButton(lang.get("settings.language.vietnamese"), currentLang.equals("vn"));
+        vietnameseRadio.setBackground(new Color(247, 247, 255));
+        vietnameseRadio.setOpaque(true);
+
         chineseRadio = new JRadioButton(lang.get("settings.language.chinese"), currentLang.equals("cn"));
-        
+        chineseRadio.setBackground(new Color(247, 247, 255));
+        chineseRadio.setOpaque(true);
+
         // Button group om slechts één selectie toe te staan
         var languageGroup = new ButtonGroup();
         languageGroup.add(dutchRadio);
@@ -94,6 +109,7 @@ public final class SettingsMenu extends JFrame {
 
     private JPanel createButtonPanel() {
         var buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.setBackground(new Color(247, 247, 255));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
         
         backButton = new JButton(lang.get("settings.back"));

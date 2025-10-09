@@ -28,11 +28,13 @@ public class TicTacToeNamePvp extends JFrame {
         setSize(400, 300);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(new Color(247,247,255));
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        // achtergrond
+        topPanel.setBackground(new Color(247,247,255));
 
+        // titel label
         titleLabel = new JLabel(lang.get("tictactoe.name.title"), JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -56,6 +58,7 @@ public class TicTacToeNamePvp extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(6, 1, 10, 10));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        buttonPanel.setBackground(new Color(247,247,255));
 
         buttonPanel.add(speler1Label);
         buttonPanel.add(textField1);

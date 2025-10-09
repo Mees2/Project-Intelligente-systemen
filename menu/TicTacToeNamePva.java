@@ -37,6 +37,7 @@ public class TicTacToeNamePva extends JFrame {
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(titleLabel);
         topPanel.add(Box.createVerticalStrut(10));
+        topPanel.setBackground(new Color(247,247,255));
 
         add(topPanel, BorderLayout.NORTH);
 
@@ -52,6 +53,15 @@ public class TicTacToeNamePva extends JFrame {
         rolLabel = new JLabel(lang.get("tictactoe.name.selectrole"));
         JRadioButton xbutton = new JRadioButton("X");
         JRadioButton obutton = new JRadioButton("O");
+        
+        // achtergrondkleur radio buttons
+        xbutton.setBackground(new Color(247, 247, 255));
+        obutton.setBackground(new Color(247, 247, 255));
+
+        // gebruikt achtergrondkleur van radiobuttons
+        xbutton.setOpaque(true);
+        obutton.setOpaque(true);
+
 
         ButtonGroup roleGroup = new ButtonGroup();
         roleGroup.add(xbutton);
@@ -93,6 +103,7 @@ public class TicTacToeNamePva extends JFrame {
 
         buttonPanel.add(startButton);
         buttonPanel.add(backButton);
+        buttonPanel.setBackground(new Color(247,247,255));
 
         add(buttonPanel, BorderLayout.CENTER);
     }
