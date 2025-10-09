@@ -3,6 +3,9 @@ package menu;
 import java.awt.*;
 import javax.swing.*;
 
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+
 public class TicTacToeNamePvp extends JFrame {
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
@@ -25,6 +28,7 @@ public class TicTacToeNamePvp extends JFrame {
         setSize(400, 300);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(new Color(247,247,255));
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
