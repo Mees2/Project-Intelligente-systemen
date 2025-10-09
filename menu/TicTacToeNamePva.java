@@ -2,6 +2,8 @@ package menu;
 
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class TicTacToeNamePva extends JFrame {
     private final MenuManager menuManager;
@@ -14,7 +16,6 @@ public class TicTacToeNamePva extends JFrame {
     private JButton startButton;
     private JButton backButton;
     
-
     public TicTacToeNamePva(MenuManager menuManager) {
         this.menuManager = menuManager;
         initializeMenu();
@@ -22,10 +23,11 @@ public class TicTacToeNamePva extends JFrame {
 
     private void initializeMenu() {
         setTitle(lang.get("tictactoe.name.title"));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(400, 300);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(new Color(247,247,255));
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
@@ -52,6 +54,8 @@ public class TicTacToeNamePva extends JFrame {
 
         JTextField textField1 = new JTextField();
         textField1.setPreferredSize(new Dimension(250, 40));
+        textField1.setMaximumSize(new Dimension(500, 40));
+        textField1.setAlignmentX(Component.CENTER_ALIGNMENT);
         textField1.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         JPanel buttonPanel = new JPanel();
@@ -123,6 +127,13 @@ public class TicTacToeNamePva extends JFrame {
         buttonPanel.setBackground(new Color(247,247,255));
 
         add(buttonPanel, BorderLayout.CENTER);
+
+            addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeComponents();
+            }
+        });
     }
 // Gekopieerd van tictactoemenu
 private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled){
@@ -194,7 +205,6 @@ private void resizeAllButtons(Container container, double scale) {
             JButton btn = (JButton) comp;
             int newFontSize = (int)(12 * scale);
             btn.setFont(btn.getFont().deriveFont(Font.PLAIN, newFontSize));
-
             int newWidth = (int)(200 * scale);
             int newHeight = (int)(35 * scale);
             Dimension newSize = new Dimension(newWidth, newHeight);
@@ -203,14 +213,27 @@ private void resizeAllButtons(Container container, double scale) {
             btn.setMaximumSize(newSize);
         } else if (comp instanceof JLabel) {
             JLabel label = (JLabel) comp;
-            int newTitleSize = (int)(25 * scale);
-            newTitleSize = Math.max(18, Math.min(newTitleSize, 40));
-            label.setFont(label.getFont().deriveFont(Font.BOLD, newTitleSize));
+
+            if (label == titleLabel) {
+                int newTitleSize = (int)(25 * scale);
+                newTitleSize = Math.max(18, Math.min(newTitleSize, 40));
+                label.setFont(label.getFont().deriveFont(Font.BOLD, newTitleSize));
+            } else if (label == speler1Label || label == rolLabel) {
+                int newLabelSize = (int)(18 * scale);
+                newLabelSize = Math.max(14, Math.min(newLabelSize, 30));
+                label.setFont(label.getFont().deriveFont(Font.PLAIN, newLabelSize));
+            }
+        } else if (comp instanceof JTextField) {
+            JTextField field = (JTextField) comp;
+            int newFontSize = (int)(14 * scale);
+            field.setFont(field.getFont().deriveFont(Font.PLAIN, newFontSize));
+            field.setMaximumSize(new Dimension(500, (int)(40 * scale)));
+
         } else if (comp instanceof Container) {
             resizeAllButtons((Container) comp, scale);
         }
     }
-}    
+}
     
     public void updateLanguage() {
         setTitle(lang.get("tictactoe.name.title"));

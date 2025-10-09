@@ -2,7 +2,6 @@ package menu;
 
 import java.awt.*;
 import javax.swing.*;
-
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
@@ -16,6 +15,8 @@ public class TicTacToeNamePvp extends JFrame {
     private JLabel speler2Label;
     private JButton startButton;
     private JButton backButton;
+    private JTextField textField1;
+    private JTextField textField2;
 
     public TicTacToeNamePvp(MenuManager menuManager) {
         this.menuManager = menuManager;
@@ -24,11 +25,12 @@ public class TicTacToeNamePvp extends JFrame {
 
     private void initializeMenu() {
         setTitle(lang.get("tictactoe.name.title"));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setSize(500, 350);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-
+        getContentPane().setBackground(new Color(247,247,255));
+        
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         // achtergrond
@@ -46,36 +48,34 @@ public class TicTacToeNamePvp extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        centerPanel.setBackground(new Color(247,247,255));
+
         // kleur body tekst
         Color bodyTextColor = new Color(0x2B6F6E);
 
         speler1Label = new JLabel(lang.get("tictactoe.name.playername1"));
         speler1Label.setForeground(bodyTextColor);
+        speler1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JTextField textField1 = new JTextField();
-        textField1.setPreferredSize(new Dimension(250,40));
+        textField1 = new JTextField();
         textField1.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        textField1.setMaximumSize(new Dimension(500, 40));
+        textField1.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         speler2Label = new JLabel(lang.get("tictactoe.name.playername2"));
         speler2Label.setForeground(bodyTextColor);
+        speler2Label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JTextField textField2 = new JTextField();
-        textField2.setPreferredSize(new Dimension(250,40));
+        textField2 = new JTextField();
         textField2.setFont(new Font("SansSerif", Font.PLAIN, 14));
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(6, 1, 10, 10));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-        buttonPanel.setBackground(new Color(247,247,255));
-
-        buttonPanel.add(speler1Label);
-        buttonPanel.add(textField1);
-        buttonPanel.add(speler2Label);
-        buttonPanel.add(textField2);
+        textField2.setMaximumSize(new Dimension(500, 40));
+        textField2.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         startButton = createRoundedButton(lang.get("tictactoe.name.startgame"),
         new Color(184,107,214),new Color(204,127,234), new Color(120,60,150), true);
-        startButton.setFont(new Font("Arial", Font.PLAIN, 14));
         startButton.addActionListener(e -> {
             String speler1naam = textField1.getText().trim();
             String speler2naam = textField2.getText().trim();
@@ -91,13 +91,30 @@ public class TicTacToeNamePvp extends JFrame {
 
         backButton = createRoundedButton(lang.get("tictactoe.name.back"),
         new Color(184,107,214),new Color(204,127,234), new Color(120,60,150), true);
-        backButton.setFont(new Font("Arial", Font.PLAIN, 14));
         backButton.addActionListener(e -> menuManager.closeNameSelectionPVP());
 
-        buttonPanel.add(startButton);
-        buttonPanel.add(backButton);
 
-        add(buttonPanel, BorderLayout.CENTER);
+        centerPanel.add(speler1Label);
+        centerPanel.add(Box.createVerticalStrut(5));
+        centerPanel.add(textField1);
+        centerPanel.add(Box.createVerticalStrut(10));
+        centerPanel.add(speler2Label);
+        centerPanel.add(Box.createVerticalStrut(5));
+        centerPanel.add(textField2);
+        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(startButton);
+        centerPanel.add(Box.createVerticalStrut(10));
+        centerPanel.add(backButton);
+
+        add(centerPanel, BorderLayout.CENTER);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeComponents();
+            }
+        });
+
     }
 
 // Gekopieerd van tictactoemenu
@@ -170,23 +187,33 @@ private void resizeAllButtons(Container container, double scale) {
             JButton btn = (JButton) comp;
             int newFontSize = (int)(12 * scale);
             btn.setFont(btn.getFont().deriveFont(Font.PLAIN, newFontSize));
-
-            int newWidth = (int)(200 * scale);
-            int newHeight = (int)(35 * scale);
-            Dimension newSize = new Dimension(newWidth, newHeight);
+            Dimension newSize = new Dimension((int)(200 * scale), (int)(35 * scale));
             btn.setPreferredSize(newSize);
             btn.setMinimumSize(newSize);
             btn.setMaximumSize(newSize);
         } else if (comp instanceof JLabel) {
             JLabel label = (JLabel) comp;
-            int newTitleSize = (int)(25 * scale);
-            newTitleSize = Math.max(18, Math.min(newTitleSize, 40));
-            label.setFont(label.getFont().deriveFont(Font.BOLD, newTitleSize));
-        } else if (comp instanceof Container) {
+                if (label == titleLabel) {
+                    int newTitleSize = (int)(25 * scale);
+                    newTitleSize = Math.max(18, Math.min(newTitleSize, 40));
+                    label.setFont(label.getFont().deriveFont(Font.BOLD, newTitleSize));
+                } else if (label == speler1Label || label == speler2Label) {
+                    int newLabelSize = (int)(18 * scale);
+                    newLabelSize = Math.max(14, Math.min(newLabelSize, 30));
+                    label.setFont(label.getFont().deriveFont(Font.PLAIN, newLabelSize));
+                }
+
+        } else if(comp instanceof JTextField) {
+            JTextField field = (JTextField) comp;
+            int newFontSize = (int)(14 * scale);
+            field.setFont(field.getFont().deriveFont(Font.PLAIN, newFontSize));
+            field.setMaximumSize(new Dimension(500, (int)(40 * scale)));
+        } else if(comp instanceof Container) {
             resizeAllButtons((Container) comp, scale);
         }
     }
-}    
+}
+   
 
     public void updateLanguage() {
         setTitle(lang.get("tictactoe.name.title"));
