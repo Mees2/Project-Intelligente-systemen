@@ -34,7 +34,7 @@ public final class LanguageManager {
     private void initializeTranslations() {
         // Hoofdmenu vertalingen
         addTranslation("main.title", "Spelcollectie - Hoofdmenu", "Game Collection - Main Menu","Bộ sưu tập trò Game - Menu chính","游戏合集 - 主菜单");
-        addTranslation("main.welcome", "Welkom bij de Spelcollectie", "Welcome to the Game Collection","Chào mừng đến với bộ sưu tập trò Game","欢迎来到游戏合集");
+        addTranslation("main.welcome", "<html>Welkom<br>bij de<br>Spelcollectie</html>", "Welcome to the Game Collection","Chào mừng đến với bộ sưu tập trò Game","欢迎来到游戏合集");
         addTranslation("main.tictactoe", "TicTacToe", "TicTacToe","Cờ ca-rô","井字棋");
         addTranslation("main.reversi.soon", "Reversi (Binnenkort beschikbaar)", "Reversi (Coming Soon)","Cờ Lật(Sắp ra)","黑白棋（即将推出）");
         addTranslation("main.settings", "Instellingen", "Settings","Cai đặt","设置");

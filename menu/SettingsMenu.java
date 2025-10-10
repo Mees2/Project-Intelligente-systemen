@@ -66,7 +66,7 @@ public class SettingsMenu extends JFrame {
             lang.get("settings.language.vietnamese"),
             lang.get("settings.language.chinese")
         };
-
+        // combox opmaak
         languageComboBox = new JComboBox<>(languageOptions);
         languageComboBox.setMaximumSize(new Dimension(200, 30));
         languageComboBox.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -90,7 +90,7 @@ public class SettingsMenu extends JFrame {
             }
         });
 
-
+        // terug knop
         backButton = createRoundedButton(lang.get("settings.back"),
                 new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
         backButton.addActionListener(e -> {
@@ -98,7 +98,7 @@ public class SettingsMenu extends JFrame {
             menuManager.returnToMainMenuFromSettings();
         });
         
-
+        // ruimte ertussen
         centerPanel.add(languageLabel);
         centerPanel.add(Box.createVerticalStrut(3));
         centerPanel.add(languageComboBox);
@@ -115,6 +115,7 @@ public class SettingsMenu extends JFrame {
             }
         });
     }
+    // het veranderen van de taal
     private void changeLanguage(String languageCode) {
             
         
@@ -130,7 +131,7 @@ public class SettingsMenu extends JFrame {
             menuManager.updateLanguage();
     }
 
-
+// opmaak die lijkt op tictactoemenu
     private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
         var btn = new JButton(text) {
             @Override
