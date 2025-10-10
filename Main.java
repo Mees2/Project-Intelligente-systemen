@@ -2,6 +2,8 @@
 import menu.MenuManager;
 import javax.swing.UIManager;
 
+import Server.ClientTicTacToe;
+
 /**
  * Hoofdklasse voor de Spelcollectie applicatie
  * Start het menu systeem waarmee gebruikers verschillende spellen kunnen selecteren
@@ -27,8 +29,14 @@ public class Main {
             System.out.println("Kon Windows look & feel niet instellen, gebruik default.");
         }
 
+        // Start server connection in background
+        ClientTicTacToe client = new ClientTicTacToe();
+        Thread clientThread = new Thread(client);
+        clientThread.start();
+
         // Start de applicatie via het menu systeem
         MenuManager menuManager = new MenuManager();
         menuManager.startApplication();
+        
     }
 }
