@@ -50,12 +50,12 @@ public final class LanguageManager {
         addTranslation("settings.title", "Instellingen", "Settings","Cai đặt","设置");
         addTranslation("settings.language", "Taal:", "Language:", "Ngôn ngữ","语d言");
         addTranslation("settings.language.dutch", "Nederlands", "Dutch", "Tiếng Hà Lan","荷兰语");
-        addTranslation("settings.language.english", "English", "English","Tiếng Anh","英文");
+        addTranslation("settings.language.english", "Engels", "English","Tiếng Anh","英文");
         addTranslation("settings.language.vietnamese", "Vietnamees", "Vietnamese","Tiếng Việt","越南语");
         addTranslation("settings.language.chinese", "Chinees", "Chinese","Tiếng Trung Quốc","中文");
-        addTranslation("settings.language.changed", "Taal is gewijzigd naar {0}", 
-                      "Language changed to {0}",
-                            "Ngôn ngữ đã thay đổi thành {0} " ,"语言已更改为{0}");
+        addTranslation("settings.language.changed", "Taal is gewijzigd naar Nederlands", 
+                      "Language changed to English",
+                            "Ngôn ngữ đã thay đổi thành Vietnamees in vietnamees" ,"语言已更改为 chinees in het chinees");
         addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","ngôn ngữ đã thay đổi ","语言已更改");
         addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","quay lại menu chính","返回主菜单");
         
