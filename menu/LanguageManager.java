@@ -49,10 +49,10 @@ public final class LanguageManager {
         // Instellingen menu vertalingen
         addTranslation("settings.title", "Instellingen", "Settings","Cai đặt","设置");
         addTranslation("settings.language", "Taal:", "Language:", "Ngôn ngữ","语d言");
-        addTranslation("settings.language.dutch", "Nederlands", "Dutch", "Tiếng Hà Lan","荷兰语");
+        addTranslation("settings.language.dutch", "Nederlands", "Nederlands", "Nederlands","Nederlands");
         addTranslation("settings.language.english", "Engels", "English","Tiếng Anh","英文");
-        addTranslation("settings.language.vietnamese", "Vietnamees", "Vietnamese","Tiếng Việt","越南语");
-        addTranslation("settings.language.chinese", "Chinees", "Chinese","Tiếng Trung Quốc","中文");
+        addTranslation("settings.language.vietnamese", "Tiếng Việt", "Tiếng Việt","Tiếng Việt","Tiếng Việt");
+        addTranslation("settings.language.chinese", "中文", "中文","中文","中文");
         addTranslation("settings.language.changed", "Taal is gewijzigd naar Nederlands", 
                       "Language changed to English",
                             "Ngôn ngữ đã thay đổi thành Tiếng Việt" ,"语言已更改为中文");
