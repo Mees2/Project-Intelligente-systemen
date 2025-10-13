@@ -21,7 +21,7 @@ public final class MainMenuPanel extends JPanel {
     private static final int BASE_BUTTON_W_LARGE = 250;
     private static final int BASE_BUTTON_W_SMALL = 150;
     private static final int BASE_BUTTON_H = 35;
-    
+
     private JLabel titleLabel;
     private JButton tttButton;
     private JButton reversiButton;
@@ -67,7 +67,7 @@ public final class MainMenuPanel extends JPanel {
         buttonContainer.setLayout(new BoxLayout(buttonContainer, BoxLayout.Y_AXIS));
         buttonContainer.setOpaque(false);
         buttonContainer.setBorder(BorderFactory.createEmptyBorder(0, 0, 100, 50));
-        buttonContainer.add(Box.createVerticalStrut(50)); 
+
         
         tttButton = createRoundedButton(lang.get("main.tictactoe"), menuManager::openTicTacToeMenu,
             new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true, BASE_BUTTON_W_LARGE);
