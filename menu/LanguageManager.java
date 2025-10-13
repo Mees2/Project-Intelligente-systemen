@@ -34,7 +34,7 @@ public final class LanguageManager {
     private void initializeTranslations() {
         // Hoofdmenu vertalingen
         addTranslation("main.title", "Spelcollectie - Hoofdmenu", "Game Collection - Main Menu","Bộ sưu tập trò Game - Menu chính","游戏合集 - 主菜单");
-        addTranslation("main.welcome", "<html>Welkom<br>bij de<br>Spelcollectie</html>", "Welcome to the Game Collection","Chào mừng đến với bộ sưu tập trò Game","欢迎来到游戏合集");
+        addTranslation("main.welcome", "<html>Welkom<br>bij de<br>Spelcollectie</html>", "<html>Welcome<br>to the<br>Game Collection","<html>Chào mừng<br>đến với bộ sưu<br>tập trò Game</html>","<html>欢迎<br>来到<br>游戏合集</html>");
         addTranslation("main.tictactoe", "TicTacToe", "TicTacToe","Cờ ca-rô","井字棋");
         addTranslation("main.reversi.soon", "Reversi (Binnenkort beschikbaar)", "Reversi (Coming Soon)","Cờ Lật(Sắp ra)","黑白棋（即将推出）");
         addTranslation("main.settings", "Instellingen", "Settings","Cai đặt","设置");
@@ -55,7 +55,7 @@ public final class LanguageManager {
         addTranslation("settings.language.chinese", "Chinees", "Chinese","Tiếng Trung Quốc","中文");
         addTranslation("settings.language.changed", "Taal is gewijzigd naar Nederlands", 
                       "Language changed to English",
-                            "Ngôn ngữ đã thay đổi thành Vietnamees in vietnamees" ,"语言已更改为 chinees in het chinees");
+                            "Ngôn ngữ đã thay đổi thành Tiếng Việt" ,"语言已更改为中文");
         addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","ngôn ngữ đã thay đổi ","语言已更改");
         addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","quay lại menu chính","返回主菜单");
         
