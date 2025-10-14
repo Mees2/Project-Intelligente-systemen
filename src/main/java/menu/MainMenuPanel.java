@@ -21,7 +21,7 @@ public final class MainMenuPanel extends JPanel {
     private static final int BASE_BUTTON_W_LARGE = 250;
     private static final int BASE_BUTTON_W_SMALL = 150;
     private static final int BASE_BUTTON_H = 35;
-    
+
     private JLabel titleLabel;
     private JButton tttButton;
     private JButton reversiButton;
