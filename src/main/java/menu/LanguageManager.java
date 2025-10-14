@@ -53,20 +53,20 @@ public final class LanguageManager {
         addTranslation("settings.language.english", "Engels", "English","Tiếng Anh","英文");
         addTranslation("settings.language.vietnamese", "Tiếng Việt", "Tiếng Việt","Tiếng Việt","Tiếng Việt");
         addTranslation("settings.language.chinese", "中文", "中文","中文","中文");
-        addTranslation("settings.language.changed", "Taal is gewijzigd naar Nederlands", 
+        addTranslation("settings.language.changed", "Taal is gewijzigd naar Nederlands",
                       "Language changed to English",
                             "Ngôn ngữ đã thay đổi thành Tiếng Việt" ,"语言已更改为中文");
         addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","ngôn ngữ đã thay đổi ","语言已更改");
         addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","quay lại menu chính","返回主菜单");
         
         // TicTacToe menu vertalingen
-        addTranslation("tictactoe.menu.title", "TicTacToe - Kies Spelmode", "TicTacToe - Choose Game Mode","Cờ ca-rô - chọn Game","");
+        addTranslation("tictactoe.menu.title", "TicTacToe - Kies Spelmode", "TicTacToe - Choose Game Mode","Cờ ca-rô chọn Game","");
         addTranslation("tictactoe.menu.header", "Kies je spelmode", "Choose your game mode","Chọn chế độ game","选择模式");
         addTranslation("tictactoe.menu.pvp", "Speler vs Speler", "Player vs Player","Người chơi đấu với người chơi","玩家对战");
         addTranslation("tictactoe.menu.pvp.desc", "Speel tegen een vriend", "Play against a friend","Chơi với bạn"," 好友对战");
         addTranslation("tictactoe.menu.pva", "Speler vs AI", "Player vs AI","Chơi với AI"," 玩家对战 AI");
         addTranslation("tictactoe.menu.pva.desc", "Speel tegen de computer", "Play against the computer","Chơi với máy tính","电脑对战");
-        addTranslation("tictactoe.menu.server.soon", "Server (Binnenkort beschikbaar)", "Server (Coming Soon)","Máy chủ(Sắp ra)","服务器（即将推出");
+        addTranslation("tictactoe.menu.server.soon", "Server (Binnenkort beschikbaar)", "Server (Coming Soon)","Máy chủ(Sắp ra)","服务器（即将推出");  
         addTranslation("tictactoe.menu.back", "Terug", "Back","Quay lại","返回");
         
         // TicTacToe spel vertalingen
@@ -81,14 +81,14 @@ public final class LanguageManager {
         addTranslation("tictactoe.game.player", "Speler", "Player","Người chơi","玩家");
         addTranslation("tictactoe.game.ai", "AI", "AI","Trí tuệ nhân tạo"
                 ,"人工智能");
-        
+
         // TicTacToe naam invoer vertalingen
         addTranslation("tictactoe.name.title", "TicTacToe - Kies Naam en Rol", "TicTacToe - Choose Name and Role", "Cờ ca-rô - Chọn tên và vai trò","选择名称和角色");
         addTranslation("tictactoe.name.playername", "Naam Speler:", "Player Name:", "Tên người chơi:","玩家名称:");
         addTranslation("tictactoe.name.playername1", "Naam Speler 1 (X):", "Player Name 1 (X):", "Tên người chơi 1 (X):","玩家名称 1 (X):");
         addTranslation("tictactoe.name.playername2", "Naam Speler 2 (O):", "Player Name 2 (O):",  "Tên người chơi 2 (O):","玩家名称 2 (O):");
         addTranslation("tictactoe.name.selectrole", "Selecteer Rol:", "Select Role:", "Chọn vai trò:","选择角色:");
-        addTranslation("tictactoe.name.startgame", "Start Spel", "Start Game", "Bắt đầu chơi Game","开始游戏");
+        addTranslation("tictactoe.name.startgame", "Start Spel", "Start Game", "Bắt đầu chơi Game","开始游戏"); 
         addTranslation("tictactoe.name.back", "Terug", "Back", "Quay lại","返回");
         addTranslation("tictactoe.name.error.emptyname", "Naam mag niet leeg zijn.", "Name cannot be empty.", "Tên không được để trống","名称不能为空");
         addTranslation("tictactoe.name.error.emptyrole", "Rol mag niet leeg zijn.", "Role cannot be empty.", "Vai trò không được để trống","角色不能为空");

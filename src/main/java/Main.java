@@ -2,7 +2,7 @@
 import menu.MenuManager;
 import javax.swing.UIManager;
 
-import Server.ClientTicTacToe;
+import server.ClientTicTacToe;
 
 /**
  * Hoofdklasse voor de Spelcollectie applicatie

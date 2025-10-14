@@ -68,10 +68,10 @@ public class TicTacToeMenu extends JFrame {
         buttonPanel.add(pvaButton);
         buttonPanel.add(Box.createVerticalStrut(20));
 
-        // Server knop (voor toekomstige implementatie)
-        serverButton = createRoundedButton(lang.get("tictactoe.menu.server.soon"),
-        new Color(200,200,200), new Color(200,200,200), new Color(150,150,150), true);
-        serverButton.setEnabled(false); // Uitgeschakeld tot implementatie
+        // Server knop
+        serverButton = createRoundedButton(lang.get("tictactoe.menu.server"),
+        new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
+        serverButton.addActionListener(e -> menuManager.connectToServer());
         buttonPanel.add(serverButton);
         buttonPanel.add(Box.createVerticalStrut(40));
 
@@ -185,7 +185,7 @@ private void resizeAllButtons(Container container, double scale) {
         titleLabel.setText(lang.get("tictactoe.menu.header"));
         pvpButton.setText(lang.get("tictactoe.menu.pvp"));
         pvaButton.setText(lang.get("tictactoe.menu.pva"));
-        serverButton.setText(lang.get("tictactoe.menu.server.soon"));
+        serverButton.setText(lang.get("tictactoe.menu.server"));
         backButton.setText(lang.get("tictactoe.menu.back"));
     }
 
