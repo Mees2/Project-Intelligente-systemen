@@ -66,7 +66,7 @@ public final class LanguageManager {
         addTranslation("tictactoe.menu.pvp.desc", "Speel tegen een vriend", "Play against a friend","Chơi với bạn"," 好友对战");
         addTranslation("tictactoe.menu.pva", "Speler vs AI", "Player vs AI","Chơi với AI"," 玩家对战 AI");
         addTranslation("tictactoe.menu.pva.desc", "Speel tegen de computer", "Play against the computer","Chơi với máy tính","电脑对战");
-        addTranslation("tictactoe.menu.server.soon", "Server (Binnenkort beschikbaar)", "Server (Coming Soon)","Máy chủ(Sắp ra)","服务器（即将推出");  
+        addTranslation("tictactoe.menu.server", "Server", "Server","Máy chủ","服务器");
         addTranslation("tictactoe.menu.back", "Terug", "Back","Quay lại","返回");
         
         // TicTacToe spel vertalingen
