@@ -77,11 +77,11 @@ public class ClientTicTacToe implements Runnable {
             Thread thread = new Thread(inputHandler); // we zetten de inputhandler op een apparte thread
             thread.start(); //we starten de thread, gebruik nooit run(); dat start geen apparte thread
 
-            out.println("login "+ "iemand"+ LocalDateTime.now().getSecond()+LocalDateTime.now().getNano());
+            //out.println("login "+ "temp"+ LocalDateTime.now().getNano());
 
-            out.println("get gamelist");
+            //out.println("get gamelist");
 
-            out.println("subscribe tic-tac-toe");
+            //out.println("subscribe tic-tac-toe");
 
             String inputMessage; // we maken een input message aan
 

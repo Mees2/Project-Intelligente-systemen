@@ -71,7 +71,7 @@ public class TicTacToeMenu extends JFrame {
         // Server knop
         serverButton = createRoundedButton(lang.get("tictactoe.menu.server"),
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
-        serverButton.addActionListener(e -> menuManager.connectToServer());
+        serverButton.addActionListener(e -> menuManager.openNameSelection("SERVER"));
         buttonPanel.add(serverButton);
         buttonPanel.add(Box.createVerticalStrut(40));
 
