@@ -24,7 +24,7 @@ public class ClientTicTacToe implements Runnable {
     private int portNumber = 7789; // port nummer van de server
 
     private Socket client; // aanmaken van de socket
-    private BufferedReader in; // aanmaken van input reader
+    BufferedReader in; // aanmaken van input reader
     private PrintWriter out; // aanmaken van output writer
     private boolean done; // boolean voor het bewaren of we klaar zijn (voor disconnect)
 
@@ -32,6 +32,10 @@ public class ClientTicTacToe implements Runnable {
     private boolean connected = false; // Voor het bijhouden van de verbindingsstatus
 
     private List<Integer> gohitthese;
+
+    public BufferedReader getReader() {
+        return in;
+    }
 
     /**
      * Connect to the server (gebruikt door GUI)
@@ -122,10 +126,14 @@ public class ClientTicTacToe implements Runnable {
 	 * Deze methode logt in met de opgegeven gebruikersnaam parameter
 	 * @param name
 	 */
+    private static int clientCounter = 0;
+
 	public void login(String name)
 	{
-		System.out.println("Logging in as " + name);
-		out.println("login " + name);
+        int suffix = (int)(Math.random() * 10000);
+        String uniqueName = name + suffix;
+		System.out.println("Logging in as " + uniqueName);
+		out.println("login " + uniqueName);
 	}
 	
 	/**
@@ -179,7 +187,8 @@ public class ClientTicTacToe implements Runnable {
 						String name = i[1];
 						login(name);
 						//out.println("login " + name);
-					} else { // anders printen we het message
+					}
+                    else { // anders printen we het message
 						out.println(message);
 					}
 

@@ -89,7 +89,8 @@ public class TicTacToeNameServer extends JFrame{
                     new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
             startButton.addActionListener(e -> {
                 String spelerNaam = textField1.getText().trim();
-                menuManager.startTicTacToeGame("SERVER", spelerNaam, "AI"); });
+                //menuManager.startTicTacToeGame("SERVER", spelerNaam, "AI"); });
+                menuManager.startTicTacToeGame("SERVER", "AI", spelerNaam); });
             // gaat terug
             backButton = createRoundedButton(lang.get("tictactoe.name.back"),
                     new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);

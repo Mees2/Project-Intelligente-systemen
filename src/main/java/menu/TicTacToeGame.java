@@ -3,8 +3,11 @@ package menu;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.IOException;
+
 import tictactoe.TicTacToe;
 import tictactoe.MinimaxAI;
+import server.ClientTicTacToe;
 
 public class TicTacToeGame {
     private final MenuManager menuManager;
@@ -22,6 +25,9 @@ public class TicTacToeGame {
     private JFrame gameFrame;
     private char spelerRol;
     private char aiRol;
+    private ClientTicTacToe client;
+    private volatile boolean loggedIn = false;
+    private volatile boolean inGame = false;
 
     public TicTacToeGame(MenuManager menuManager, String gameMode, String speler1, String speler2) {
         this.menuManager = menuManager;
@@ -41,6 +47,63 @@ public class TicTacToeGame {
     }
 
     public void start() {
+        client = new ClientTicTacToe();
+        if (!client.connectToServer()) {
+            JOptionPane.showMessageDialog(null,
+                    "Failed to connect to server",
+                    "Connection Error",
+                    JOptionPane.ERROR_MESSAGE);
+            menuManager.onGameFinished();
+            return;
+        }
+
+        // Start background thread to process server responses
+        new Thread(() -> {
+            try {
+                String serverMsg;
+                while (client.isConnected() && (serverMsg = client.getReader().readLine()) != null) {
+                    System.out.println("[Server] " + serverMsg);
+
+                    if (serverMsg.contains("OK")) {
+                        loggedIn = true;
+                    }
+                    if (serverMsg.contains("MATCH")) {
+                        inGame = true;
+                    }
+                    if (serverMsg.contains("YOURTURN")) {
+                        SwingUtilities.invokeLater(() -> updateStatusLabel());
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Connection lost: " + e.getMessage());
+            }
+        }, "server-listener").start();
+
+        // Wait a moment for connection to stabilize
+        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+
+        // Send login
+        String playerName = gameMode.equals("PVP") ? speler1 :
+                (spelerRol == 'X' ? speler1 : speler2);
+        client.login(playerName);
+
+        // Wait for login confirmation
+        int attempts = 0;
+        while (!loggedIn && attempts < 20) {
+            try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+            attempts++;
+        }
+
+        if (!loggedIn) {
+            JOptionPane.showMessageDialog(null, "Login failed", "Error", JOptionPane.ERROR_MESSAGE);
+            client.shutdown();
+            menuManager.onGameFinished();
+            return;
+        }
+
+        // Request match
+        client.requestMatch();
+
         initializeGame();
     }
 
@@ -193,6 +256,11 @@ public class TicTacToeGame {
     private void handleButtonClick(int pos) {
         if (gameDone || !game.isFree(pos)) return;
         if (gameMode.equals("PVA") && !isPlayersTurn()) return;
+
+        // Send move to server
+        if (client != null && client.isConnected()) {
+            client.sendMove(pos);
+        }
 
         char currentPlayer = turnX ? 'X' : 'O';
         game.doMove(pos, currentPlayer);
