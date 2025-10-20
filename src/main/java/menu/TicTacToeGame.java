@@ -29,6 +29,72 @@ public class TicTacToeGame {
     private volatile boolean loggedIn = false;
     private volatile boolean inGame = false;
 
+    private int extractMovePosition(String serverMsg) {
+        try {
+            // Find MOVE: "X" pattern
+            int moveIndex = serverMsg.indexOf("MOVE:");
+            if (moveIndex == -1) return -1;
+
+            String afterMove = serverMsg.substring(moveIndex + 5).trim();
+            int start = afterMove.indexOf('"') + 1;
+            int end = afterMove.indexOf('"', start);
+
+            if (start > 0 && end > start) {
+                String posStr = afterMove.substring(start, end);
+                return Integer.parseInt(posStr);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to parse move position: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    /**
+     * Extract player name from server message
+     * Example: "SVR GAME MOVE {PLAYER: "Piet5939", MOVE: "3", DETAILS: ""}" -> returns "Piet5939"
+     */
+    private String extractPlayerName(String serverMsg) {
+        try {
+            int playerIndex = serverMsg.indexOf("PLAYER:");
+            if (playerIndex == -1) return "";
+
+            String afterPlayer = serverMsg.substring(playerIndex + 7).trim();
+            int start = afterPlayer.indexOf('"') + 1;
+            int end = afterPlayer.indexOf('"', start);
+
+            if (start > 0 && end > start) {
+                return afterPlayer.substring(start, end);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to parse player name: " + e.getMessage());
+        }
+        return "";
+    }
+
+    /**
+     * Check if the move came from us (accounting for random suffix in login)
+     */
+    private boolean isOurMove(String movePlayerName, String ourBaseName) {
+        // Check if the move player name starts with our base name
+        return movePlayerName.startsWith(ourBaseName);
+    }
+
+    /**
+     * Apply opponent's move to the board
+     */
+    private void applyOpponentMove(int pos) {
+        if (gameDone || !game.isFree(pos)) return;
+
+        char currentPlayer = turnX ? 'X' : 'O';
+        game.doMove(pos, currentPlayer);
+        boardPanel.getButtons()[pos].setText(String.valueOf(currentPlayer));
+
+        if (checkEnd(currentPlayer)) return;
+
+        turnX = !turnX;
+        updateStatusLabel();
+    }
+
     public TicTacToeGame(MenuManager menuManager, String gameMode, String speler1, String speler2) {
         this.menuManager = menuManager;
         this.gameMode = gameMode;
@@ -72,6 +138,20 @@ public class TicTacToeGame {
                     }
                     if (serverMsg.contains("YOURTURN")) {
                         SwingUtilities.invokeLater(() -> updateStatusLabel());
+                    }
+                    // Inside the server listener thread in start() method, update the MOVE handler:
+                    if (serverMsg.contains("MOVE") && serverMsg.contains("PLAYER:")) {
+                        String playerName = extractPlayerName(serverMsg);
+                        int movePos = extractMovePosition(serverMsg);
+
+
+                        // Only apply move if it's from opponent (not from us)
+                        String ourName = gameMode.equals("PVP") ? speler1 :
+                                (spelerRol == 'X' ? speler1 : speler2);
+
+                        if (movePos != -1 && !isOurMove(playerName, ourName)) {
+                            SwingUtilities.invokeLater(() -> applyOpponentMove(movePos));
+                        }
                     }
                 }
             } catch (IOException e) {
