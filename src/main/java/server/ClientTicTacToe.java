@@ -130,10 +130,8 @@ public class ClientTicTacToe implements Runnable {
 
 	public void login(String name)
 	{
-        int suffix = (int)(Math.random() * 10000);
-        String uniqueName = name + suffix;
-		System.out.println("Logging in as " + uniqueName);
-		out.println("login " + uniqueName);
+		System.out.println("Logging in as " + name);
+		out.println("login " + name);
 	}
 	
 	/**
