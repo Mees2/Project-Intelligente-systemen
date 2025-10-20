@@ -20,6 +20,7 @@ import java.util.Scanner;
 
 public class ClientTicTacToe implements Runnable {
 
+
     private String hostName = "127.0.0.1"; // localhost address
     private int portNumber = 7789; // port nummer van de server
 
