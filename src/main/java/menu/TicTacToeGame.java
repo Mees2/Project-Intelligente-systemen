@@ -114,6 +114,12 @@ public class TicTacToeGame {
     }
 
     public void start() {
+        // Check om ervoor te zorgen dat offline play mogelijk is zonder server verbinding
+        if (!"SERVER".equals(gameMode)) {
+            initializeGame();
+            return;
+        }
+
         client = new ClientTicTacToe();
         if (!client.connectToServer()) {
             JOptionPane.showMessageDialog(null,
