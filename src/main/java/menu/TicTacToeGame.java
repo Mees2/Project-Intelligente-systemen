@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.security.spec.ECField;
 
 
 import tictactoe.TicTacToe;
@@ -398,9 +399,13 @@ public class TicTacToeGame {
     private String getTitleForMode() {
         if (gameMode.equals("PVP")) {
             return lang.get("tictactoe.game.title.pvp");
-        } else {
+        } else if (gameMode.equals("PVA")){
             return lang.get("tictactoe.game.title.pva");
         }
+        else if(gameMode.equals("SERVER")){
+            return lang.get("tictactoe.game.title.server");
+        }
+        return lang.get("tictactoe.game.title");
     }
 
     private boolean isPlayersTurn() {
@@ -427,6 +432,15 @@ public class TicTacToeGame {
     private void returnToMenu() {
         int option = JOptionPane.showConfirmDialog(gameFrame, lang.get("main.exit.confirm"), lang.get("main.exit.title"), JOptionPane.YES_NO_OPTION);
         if (option == JOptionPane.YES_OPTION) {
+
+            if ("SERVER".equals(gameMode) && client != null) {
+                try {
+                    client.quit();
+                } catch (Exception e) {
+                    System.err.println("Error while quitting the game: " + e.getMessage());
+                    try { client.shutdown(); } catch (Exception ignored) {}
+                }
+            }
             gameFrame.dispose();
             menuManager.onGameFinished();
         }

@@ -205,4 +205,17 @@ public class ClientTicTacToe implements Runnable {
 		client.run();
 	}
 
+    public void quit() {
+        try {
+            if (out != null) {
+                out.println("quit");
+                System.out.println("Sent quit to server");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send quit: " + e.getMessage());
+        } finally {
+            shutdown();
+        }
+    }
+
 }
