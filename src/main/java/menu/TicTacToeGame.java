@@ -206,9 +206,8 @@ public class TicTacToeGame {
                             }
                             // turnX should reflect who starts: X starts
                             turnX = true; // X always starts at beginning of game
-                            // but if starter is opponent and they are X, then it's not local player's turn:
-                            // handle clicks by isPlayersTurn()
 
+                            // Update the status label and board enabled state
                             updateStatusLabel();
                         });
                     }
@@ -425,7 +424,8 @@ public class TicTacToeGame {
 
     private void handleButtonClick(int pos) {
         if (gameDone || !game.isFree(pos)) return;
-        if (gameMode.equals("PVA") && !isPlayersTurn()) return;
+        // Prevent making a move when it's not your turn in online (SERVER) or PVA modes
+        if (("PVA".equals(gameMode) || "SERVER".equals(gameMode)) && !isPlayersTurn()) return;
 
         // Send move to server
         if (client != null && client.isConnected()) {
@@ -508,16 +508,47 @@ public class TicTacToeGame {
         return "";
     }
 
+    /**
+     * Enable or disable the board buttons based on whether the local player may act.
+     * Only affects buttons that are still free (empty).
+     */
+    private void setBoardEnabled(boolean enabled) {
+        if (boardPanel == null) return;
+        JButton[] buttons = boardPanel.getButtons();
+        for (int i = 0; i < buttons.length; i++) {
+            // only enable free cells
+            boolean shouldEnable = enabled && game.isFree(i) && !gameDone;
+            buttons[i].setEnabled(shouldEnable);
+        }
+    }
+
     private void updateStatusLabel() {
-        if (gameDone) return;
+        if (gameDone) {
+            // ensure board is disabled when the game is finished
+            setBoardEnabled(false);
+            return;
+        }
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
         if ("SERVER".equals(gameMode) && (opponentName == null || opponentName.isEmpty())) {
             // waiting for match details
             statusLabel.setText(lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails")));
+            // don't allow moves until match details arrive
+            setBoardEnabled(false);
             return;
         }
         statusLabel.setText(lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")"));
+
+        // If we are playing online (SERVER), only allow moves when it's our turn.
+        if ("SERVER".equals(gameMode)) {
+            setBoardEnabled(isPlayersTurn());
+        } else if ("PVA".equals(gameMode)) {
+            // In PVA mode the player may move only when it's their turn (kept for safety)
+            setBoardEnabled(isPlayersTurn());
+        } else {
+            // PVP local: enable all free buttons
+            setBoardEnabled(true);
+        }
     }
 
     private void returnToMenu() {
