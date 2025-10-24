@@ -4,8 +4,6 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.security.spec.ECField;
-
 
 import tictactoe.TicTacToe;
 import tictactoe.MinimaxAI;
@@ -30,6 +28,10 @@ public class TicTacToeGame {
     private ClientTicTacToe client;
     private volatile boolean loggedIn = false;
     private volatile boolean inGame = false;
+
+    // New: server mode local/opponent names (can be set after login / match)
+    private String localPlayerName = "";
+    private String opponentName = "";
 
     private int extractMovePosition(String serverMsg) {
         try {
@@ -74,6 +76,29 @@ public class TicTacToeGame {
     }
 
     /**
+     * Generic extractor for fields in server messages like MATCH {PLAYERTOMOVE: "spelerA", OPPONENT: "spelerB"}
+     */
+    private String extractFieldValue(String serverMsg, String fieldName) {
+        try {
+            int idx = serverMsg.indexOf(fieldName + ":");
+            if (idx == -1) {
+                // try uppercase keys with braces whitespace
+                idx = serverMsg.indexOf(fieldName.toUpperCase() + ":");
+                if (idx == -1) return "";
+            }
+            String after = serverMsg.substring(idx + fieldName.length() + 1).trim();
+            int start = after.indexOf('"') + 1;
+            int end = after.indexOf('"', start);
+            if (start > 0 && end > start) {
+                return after.substring(start, end);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to parse field " + fieldName + ": " + e.getMessage());
+        }
+        return "";
+    }
+
+    /**
      * Check if the move came from us (accounting for random suffix in login)
      */
     private boolean isOurMove(String movePlayerName, String ourBaseName) {
@@ -111,6 +136,11 @@ public class TicTacToeGame {
                 aiRol = 'O';
                 spelerRol = 'X';
             }
+        } else if (gameMode.equals("SERVER")) {
+            // Fixed syntax error and keep default roles empty until MATCH arrives
+            // We'll determine spelerRol based on server MATCH message.
+            aiRol = 'O';
+            // spelerRol left uninitialized here; will be set on MATCH
         }
     }
 
@@ -143,6 +173,44 @@ public class TicTacToeGame {
                     }
                     if (serverMsg.contains("MATCH")) {
                         inGame = true;
+
+                        // Parse match details: PLAYERTOMOVE and OPPONENT
+                        String playerToMove = extractFieldValue(serverMsg, "PLAYERTOMOVE");
+                        if (playerToMove.isEmpty()) {
+                            // try lowercase/alternate
+                            playerToMove = extractFieldValue(serverMsg, "PLAYERTO MOVE".replace(" ", ""));
+                        }
+                        String opponent = extractFieldValue(serverMsg, "OPPONENT");
+
+                        // Determine local/opponent names and who is X
+                        // localPlayerName was set before login (see below) - use startsWith to allow suffixes
+                        boolean playerToMoveIsLocal = false;
+                        if (!playerToMove.isEmpty() && !localPlayerName.isEmpty()) {
+                            if (playerToMove.startsWith(localPlayerName) || localPlayerName.startsWith(playerToMove))
+                                playerToMoveIsLocal = true;
+                        }
+
+                        // Update internal state and GUI on EDT
+                        final boolean starterIsLocal = playerToMoveIsLocal;
+                        final String opponentFinal = opponent;
+                        final String playerToMoveFinal = playerToMove;
+                        SwingUtilities.invokeLater(() -> {
+                            // set opponent name
+                            opponentName = opponentFinal != null ? opponentFinal : "";
+
+                            // assign roles: starter gets X
+                            if (starterIsLocal) {
+                                spelerRol = 'X';
+                            } else {
+                                spelerRol = 'O';
+                            }
+                            // turnX should reflect who starts: X starts
+                            turnX = true; // X always starts at beginning of game
+                            // but if starter is opponent and they are X, then it's not local player's turn:
+                            // handle clicks by isPlayersTurn()
+
+                            updateStatusLabel();
+                        });
                     }
                     if (serverMsg.contains("YOURTURN")) {
                         SwingUtilities.invokeLater(() -> updateStatusLabel());
@@ -155,7 +223,9 @@ public class TicTacToeGame {
 
                         // Only apply move if it's from opponent (not from us)
                         String ourName = gameMode.equals("PVP") ? speler1 :
-                                (spelerRol == 'X' ? speler1 : speler2);
+                                // For SERVER mode, localPlayerName is the one we logged in with
+                                ("SERVER".equals(gameMode) ? localPlayerName :
+                                        (spelerRol == 'X' ? speler1 : speler2));
 
                         if (movePos != -1 && !isOurMove(playerName, ourName)) {
                             SwingUtilities.invokeLater(() -> applyOpponentMove(movePos));
@@ -171,8 +241,20 @@ public class TicTacToeGame {
         try { Thread.sleep(100); } catch (InterruptedException ignored) {}
 
         // Send login
-        String playerName = gameMode.equals("PVP") ? speler1 :
-                (spelerRol == 'X' ? speler1 : speler2);
+        String playerName;
+        if ("SERVER".equals(gameMode)) {
+            // Determine which constructor parameter is the human player name.
+            // TicTacToeNameServer calls startTicTacToeGame("SERVER", "AI", spelerNaam),
+            // so the non-"AI" parameter is the local player's base name.
+            playerName = speler1.equals("AI") ? speler2 : speler1;
+        } else if ("PVP".equals(gameMode)) {
+            playerName = speler1;
+        } else { // PVA
+            playerName = (spelerRol == 'X' ? speler1 : speler2);
+        }
+
+        // store local player name for later matching with server messages
+        localPlayerName = playerName;
         client.login(playerName);
 
         // Wait for login confirmation
@@ -418,6 +500,10 @@ public class TicTacToeGame {
         } else if (gameMode.equals("PVA")) {
             if (symbol == spelerRol) return (spelerRol == 'X') ? speler1 : speler2;
             else return "AI";
+        } else if ("SERVER".equals(gameMode)) {
+            // In server mode, we rely on localPlayerName and opponentName
+            if (symbol == spelerRol) return localPlayerName != null ? localPlayerName : "";
+            else return opponentName != null ? opponentName : "";
         }
         return "";
     }
@@ -426,6 +512,11 @@ public class TicTacToeGame {
         if (gameDone) return;
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
+        if ("SERVER".equals(gameMode) && (opponentName == null || opponentName.isEmpty())) {
+            // waiting for match details
+            statusLabel.setText(lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails")));
+            return;
+        }
         statusLabel.setText(lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")"));
     }
 
