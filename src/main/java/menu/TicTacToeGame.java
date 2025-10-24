@@ -395,12 +395,24 @@ public class TicTacToeGame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 int arc = 20;
-                g2.setColor(isEnabled() ? baseColor : Color.LIGHT_GRAY);
+                // Always paint with base/hover color; don't change for disabled state
+                Color fill = (getModel().isRollover() && isEnabled()) ? hoverColor : baseColor;
+                g2.setColor(fill);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
                 g2.setColor(borderColor);
                 g2.setStroke(new BasicStroke(2));
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, arc, arc);
-                super.paintComponent(g2);
+
+                // draw text ourselves so it's the same color even when the button is disabled
+                String txt = getText();
+                g2.setFont(getFont());
+                FontMetrics fm = g2.getFontMetrics();
+                int tx = (getWidth() - fm.stringWidth(txt)) / 2;
+                int ty = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+
+                g2.setColor(getForeground());
+                g2.drawString(txt, tx, ty);
+
                 g2.dispose();
             }
         };
@@ -408,15 +420,16 @@ public class TicTacToeGame {
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setOpaque(false);
+        // keep symbol/text color constant
         button.setForeground(new Color(5, 5, 169));
         button.setEnabled(enabled);
 
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (button.isEnabled()) button.setBackground(hoverColor);
+                if (button.isEnabled()) button.repaint();
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (button.isEnabled()) button.setBackground(baseColor);
+                if (button.isEnabled()) button.repaint();
             }
         });
         return button;
