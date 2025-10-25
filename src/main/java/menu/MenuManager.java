@@ -33,8 +33,9 @@ public final class MenuManager {
         // sven
         ticTacToeNamePvp = new TicTacToeNamePvp(this);
         ticTacToeNamePva = new TicTacToeNamePva(this);
-        reversiMenu = new ReversiMenu(this);           // Add this
-        reversiNamePvp = new ReversiNamePvp(this);     // And this
+        // reversi
+        reversiMenu = new ReversiMenu(this);           
+        reversiNamePvp = new ReversiNamePvp(this);     
     }
 
     /**

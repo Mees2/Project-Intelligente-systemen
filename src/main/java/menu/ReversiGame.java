@@ -18,6 +18,7 @@ public class ReversiGame {
     private Reversi game;
     private boolean gameDone = false;
     private boolean turnBlack = true; // Black always starts
+    private JLabel scoreLabel;
 
     public ReversiGame(MenuManager menuManager, String gameMode, String speler1, String speler2) {
         this.menuManager = menuManager;
@@ -64,6 +65,15 @@ public class ReversiGame {
         southPanel.add(menuButton);
         gameFrame.add(southPanel, BorderLayout.SOUTH);
 
+        JPanel scorePanel = new JPanel();
+        scorePanel.setBackground(new Color(247, 247, 255));
+        scorePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        scoreLabel = new JLabel();
+        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        scoreLabel.setForeground(new Color(5, 5, 169));
+        scorePanel.add(scoreLabel);
+        gameFrame.add(scorePanel, BorderLayout.EAST);
+
         gameFrame.setVisible(true);
 
         updateStatusLabel();
@@ -88,22 +98,29 @@ public class ReversiGame {
         boardPanel.updateBoard();
     }
 
+    
+
     private void updateStatusLabel() {
-        if (gameDone) {
-            int black = game.count('B');
-            int white = game.count('W');
-            if (black > white) {
-                statusLabel.setText(lang.get("reversi.game.win", speler1));
-            } else if (white > black) {
-                statusLabel.setText(lang.get("reversi.game.win", speler2));
-            } else {
-                statusLabel.setText(lang.get("reversi.game.draw"));
-            }
+    // Update score first
+    int black = game.count('B');
+    int white = game.count('W');
+    scoreLabel.setText(String.format("<html>%s (●): %d<br>%s (○): %d</html>", 
+        speler1, black, speler2, white));
+
+    // Existing status updates
+    if (gameDone) {
+        if (black > white) {
+            statusLabel.setText(lang.get("reversi.game.win", speler1));
+        } else if (white > black) {
+            statusLabel.setText(lang.get("reversi.game.win", speler2));
         } else {
-            String name = turnBlack ? speler1 : speler2;
-            statusLabel.setText(lang.get("reversi.game.turn", name));
+            statusLabel.setText(lang.get("reversi.game.draw"));
         }
-    }
+    } else {
+        String name = turnBlack ? speler1 : speler2;
+        statusLabel.setText(lang.get("reversi.game.turn", name));
+        }
+    }   
 
     private void returnToMenu() {
         int option = JOptionPane.showConfirmDialog(
@@ -195,7 +212,7 @@ public class ReversiGame {
                         btn.setBackground(new Color(184, 107, 214, 180)); // Highlight color
                         btn.setBorder(BorderFactory.createLineBorder(new Color(120, 60, 150), 3));
                     }
-                    btn.setEnabled(!gameDone && game.isValidMove(row, col, current));
+                    btn.setEnabled(true); 
                 }
             }
         }
@@ -207,7 +224,7 @@ public class ReversiGame {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(color);
             g2.fillOval(2, 2, size - 4, size - 4);
-            g2.setColor(color.equals(Color.WHITE) ? Color.BLACK : Color.WHITE);
+            g2.setColor(color.equals(Color.BLACK) ? Color.WHITE : Color.BLACK);
             g2.setStroke(new BasicStroke(2));
             g2.drawOval(2, 2, size - 4, size - 4);
             g2.dispose();
