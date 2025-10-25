@@ -72,6 +72,7 @@ public final class LanguageManager {
         // TicTacToe spel vertalingen
         addTranslation("tictactoe.game.title.pvp", "TicTacToe - Speler vs Speler", "TicTacToe - Player vs Player","Cờ ca-rô -Người chơi đấu với người chơi","井字棋 - 玩家对战");
         addTranslation("tictactoe.game.title.pva", "TicTacToe - Speler vs AI", "TicTacToe - Player vs AI","Cờ ca-rô - Chơi với AI","玩家对战 AI");
+        addTranslation("tictactoe.game.title.server", "TicTacToe - Speler vs Speler Online", "TicTacToe - Player vs Player Online", "temp", "temp2");
         addTranslation("tictactoe.game.turn", "Beurt van speler: {0}", "Player {0}'s turn","Lượt của người chơi {0}"," 玩家 {0} 的回合");
         addTranslation("tictactoe.game.win", "Speler {0} wint!", "Player {0} wins!","Người chơi {0} thắng"," 玩家 {0} 获胜");
         addTranslation("tictactoe.game.draw", "Gelijkspel!", "It's a draw!","Vẽ tranh!","平局!");

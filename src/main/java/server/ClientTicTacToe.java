@@ -20,11 +20,12 @@ import java.util.Scanner;
 
 public class ClientTicTacToe implements Runnable {
 
+
     private String hostName = "127.0.0.1"; // localhost address
     private int portNumber = 7789; // port nummer van de server
 
     private Socket client; // aanmaken van de socket
-    private BufferedReader in; // aanmaken van input reader
+    BufferedReader in; // aanmaken van input reader
     private PrintWriter out; // aanmaken van output writer
     private boolean done; // boolean voor het bewaren of we klaar zijn (voor disconnect)
 
@@ -32,6 +33,10 @@ public class ClientTicTacToe implements Runnable {
     private boolean connected = false; // Voor het bijhouden van de verbindingsstatus
 
     private List<Integer> gohitthese;
+
+    public BufferedReader getReader() {
+        return in;
+    }
 
     /**
      * Connect to the server (gebruikt door GUI)
@@ -77,11 +82,11 @@ public class ClientTicTacToe implements Runnable {
             Thread thread = new Thread(inputHandler); // we zetten de inputhandler op een apparte thread
             thread.start(); //we starten de thread, gebruik nooit run(); dat start geen apparte thread
 
-            out.println("login "+ "iemand"+ LocalDateTime.now().getSecond()+LocalDateTime.now().getNano());
+            //out.println("login "+ "temp"+ LocalDateTime.now().getNano());
 
-            out.println("get gamelist");
+            //out.println("get gamelist");
 
-            out.println("subscribe tic-tac-toe");
+            //out.println("subscribe tic-tac-toe");
 
             String inputMessage; // we maken een input message aan
 
@@ -122,6 +127,8 @@ public class ClientTicTacToe implements Runnable {
 	 * Deze methode logt in met de opgegeven gebruikersnaam parameter
 	 * @param name
 	 */
+    private static int clientCounter = 0;
+
 	public void login(String name)
 	{
 		System.out.println("Logging in as " + name);
@@ -179,7 +186,8 @@ public class ClientTicTacToe implements Runnable {
 						String name = i[1];
 						login(name);
 						//out.println("login " + name);
-					} else { // anders printen we het message
+					}
+                    else { // anders printen we het message
 						out.println(message);
 					}
 
@@ -196,5 +204,18 @@ public class ClientTicTacToe implements Runnable {
 
 		client.run();
 	}
+
+    public void quit() {
+        try {
+            if (out != null) {
+                out.println("quit");
+                System.out.println("Sent quit to server");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send quit: " + e.getMessage());
+        } finally {
+            shutdown();
+        }
+    }
 
 }
