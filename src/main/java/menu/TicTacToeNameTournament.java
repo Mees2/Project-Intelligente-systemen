@@ -73,6 +73,7 @@ public class TicTacToeNameTournament extends JFrame{
                 return;
             }
             //menuManager.startTicTacToeGame("SERVER", spelerNaam, "AI"); });
+            hideMenu();
             menuManager.startTicTacToeGame("TOURNAMENT", "AI", spelerNaam); });
         // gaat terug
         backButton = createRoundedButton(lang.get("tictactoe.name.back"),
