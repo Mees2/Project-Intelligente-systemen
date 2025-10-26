@@ -60,28 +60,28 @@ public class TicTacToeMenu extends JFrame {
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         pvpButton.addActionListener(e -> menuManager.openNameSelection("PVP"));
         buttonPanel.add(pvpButton);
-        buttonPanel.add(Box.createVerticalStrut(20));
+        buttonPanel.add(Box.createVerticalStrut(10));
 
         // Speler vs AI knop
         pvaButton = createRoundedButton(lang.get("tictactoe.menu.pva"),
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         pvaButton.addActionListener(e -> menuManager.openNameSelection("PVA"));
         buttonPanel.add(pvaButton);
-        buttonPanel.add(Box.createVerticalStrut(20));
+        buttonPanel.add(Box.createVerticalStrut(10));
 
         // Server knop
         serverButton = createRoundedButton(lang.get("tictactoe.menu.server"),
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         serverButton.addActionListener(e -> menuManager.openNameSelection("SERVER"));
         buttonPanel.add(serverButton);
-        buttonPanel.add(Box.createVerticalStrut(20));
+        buttonPanel.add(Box.createVerticalStrut(10));
 
         // Toernooi knop
         tournamentButton = createRoundedButton(lang.get("toernooi"),
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         tournamentButton.addActionListener(e -> menuManager.openNameSelection("TOURNAMENT"));
         buttonPanel.add(tournamentButton);
-        buttonPanel.add(Box.createVerticalStrut(40));
+        buttonPanel.add(Box.createVerticalStrut(30));
 
         // Terug naar hoofdmenu knop
         backButton = createRoundedButton(lang.get("tictactoe.menu.back"),

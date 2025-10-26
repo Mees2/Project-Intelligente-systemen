@@ -73,7 +73,11 @@ public class TicTacToeNameServer extends JFrame{
                     return;
                 }
                 //menuManager.startTicTacToeGame("SERVER", spelerNaam, "AI"); });
+
+                hideMenu();
                 menuManager.startTicTacToeGame("SERVER", "AI", spelerNaam); });
+
+
             // gaat terug
             backButton = createRoundedButton(lang.get("tictactoe.name.back"),
                     new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
