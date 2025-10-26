@@ -37,6 +37,7 @@ public final class LanguageManager {
         addTranslation("main.welcome", "<html>Welkom<br>bij de<br>Spelcollectie</html>", "<html>Welcome<br>to the<br>Game Collection","<html>Chào mừng<br>đến với bộ sưu<br>tập trò Game</html>","<html>欢迎<br>来到<br>游戏合集</html>");
         addTranslation("main.tictactoe", "TicTacToe", "TicTacToe","Cờ ca-rô","井字棋");
         addTranslation("main.reversi.soon", "Reversi (Binnenkort beschikbaar)", "Reversi (Coming Soon)","Cờ Lật(Sắp ra)","黑白棋（即将推出）");
+        addTranslation("main.reversi", "Reversi", "Reversi", "Reversi", "黑白棋");
         addTranslation("main.settings", "Instellingen", "Settings","Cai đặt","设置");
         addTranslation("main.exit", "Afsluiten", "Exit", "Ra","推出");
         addTranslation("main.exit.confirm", "Weet je zeker dat je het programma wilt afsluiten?", 
@@ -93,6 +94,27 @@ public final class LanguageManager {
         addTranslation("tictactoe.name.back", "Terug", "Back", "Quay lại","返回");
         addTranslation("tictactoe.name.error.emptyname", "Naam mag niet leeg zijn.", "Name cannot be empty.", "Tên không được để trống","名称不能为空");
         addTranslation("tictactoe.name.error.emptyrole", "Rol mag niet leeg zijn.", "Role cannot be empty.", "Vai trò không được để trống","角色不能为空");
+
+        // Reversi menu translations
+        addTranslation("reversi.menu.title", "Reversi - Kies Spelmode", "Reversi - Choose Game Mode", "Reversi - Chọn chế độ", "黑白棋 - 选择模式");
+        addTranslation("reversi.menu.header", "Kies je spelmode", "Choose your game mode", "Chọn chế độ game", "选择模式");
+        addTranslation("reversi.menu.pvp", "Speler vs Speler", "Player vs Player", "Người chơi đấu với người chơi", "玩家对战");
+        addTranslation("reversi.menu.pva.soon", "Speler vs AI (binnenkort)", "Player vs AI (coming soon)", "Người chơi vs AI (sắp có)", "玩家对战AI（即将推出）");
+        addTranslation("reversi.menu.back", "Terug", "Back", "Quay lại", "返回");
+
+        // Reversi name input
+        addTranslation("reversi.name.title", "Reversi - Kies Namen", "Reversi - Choose Names", "Reversi - Chọn tên", "黑白棋 - 选择名称");
+        addTranslation("reversi.name.playername1", "Naam Speler 1 (Zwart):", "Player Name 1 (Black):", "Tên người chơi 1 (Đen):", "玩家1名称（黑）:");
+        addTranslation("reversi.name.playername2", "Naam Speler 2 (Wit):", "Player Name 2 (White):", "Tên người chơi 2 (Trắng):", "玩家2名称（白）:");
+        addTranslation("reversi.name.startgame", "Start Spel", "Start Game", "Bắt đầu chơi", "开始游戏");
+        addTranslation("reversi.name.back", "Terug", "Back", "Quay lại", "返回");
+        addTranslation("reversi.name.error.emptyname", "Naam mag niet leeg zijn.", "Name cannot be empty.", "Tên không được để trống", "名称不能为空");
+
+        // Reversi game
+        addTranslation("reversi.game.title.pvp", "Reversi - Speler vs Speler", "Reversi - Player vs Player", "Reversi - Người chơi đấu với người chơi", "黑白棋 - 玩家对战");
+        addTranslation("reversi.game.turn", "Beurt van speler: {0}", "Player {0}'s turn", "Lượt của người chơi {0}", "玩家 {0} 的回合");
+        addTranslation("reversi.game.win", "Speler {0} wint!", "Player {0} wins!", "Người chơi {0} thắng", "玩家 {0} 获胜");
+        addTranslation("reversi.game.draw", "Gelijkspel!", "It's a draw!", "Vẽ tranh!", "平局!");
 
         // Algemene vertalingen
         addTranslation("common.yes", "Ja", "Yes","Đúng","是");
