@@ -25,7 +25,7 @@ public class TicTacToeNameServer extends JFrame{
          * Initialiseert de tictactoenamepva interface test***
          */
         private void initializeMenu() {
-            setTitle(lang.get("tictactoe.name.title"));
+            setTitle("tictactoe.name.title");
             setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             setSize(500, 350);
             setLocationRelativeTo(null);
@@ -201,7 +201,6 @@ public class TicTacToeNameServer extends JFrame{
             setTitle(lang.get("tictactoe.name.title"));
             titleLabel.setText(lang.get("tictactoe.name.title"));
             speler1Label.setText(lang.get("tictactoe.name.playername"));
-            rolLabel.setText(lang.get("tictactoe.name.selectrole"));
             startButton.setText(lang.get("tictactoe.name.startgame"));
             backButton.setText(lang.get("tictactoe.name.back"));
         }

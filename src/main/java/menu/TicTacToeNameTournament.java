@@ -198,7 +198,6 @@ public class TicTacToeNameTournament extends JFrame{
         setTitle(lang.get("tictactoe.name.title"));
         titleLabel.setText(lang.get("tictactoe.name.title"));
         speler1Label.setText(lang.get("tictactoe.name.playername"));
-        rolLabel.setText(lang.get("tictactoe.name.selectrole"));
         startButton.setText(lang.get("tictactoe.name.startgame"));
         backButton.setText(lang.get("tictactoe.name.back"));
     }

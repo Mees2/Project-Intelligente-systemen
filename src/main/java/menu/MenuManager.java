@@ -188,6 +188,8 @@ public final class MenuManager {
         settingsMenu.updateLanguage();
         ticTacToeNamePvp.updateLanguage();
         ticTacToeNamePva.updateLanguage();
+        ticTacToeNameServer.updateLanguage();
+        ticTacToeNameTournament.updateLanguage();
         reversiMenu.updateLanguage();
         reversiNamePvp.updateLanguage();
 
