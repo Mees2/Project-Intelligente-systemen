@@ -20,6 +20,7 @@ public class TicTacToeMenu extends JFrame {
     private JButton pvpButton;
     private JButton pvaButton;
     private JButton serverButton;
+    private JButton tournamentButton;
     private JButton backButton;
 
     /**
@@ -73,6 +74,13 @@ public class TicTacToeMenu extends JFrame {
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         serverButton.addActionListener(e -> menuManager.openNameSelection("SERVER"));
         buttonPanel.add(serverButton);
+        buttonPanel.add(Box.createVerticalStrut(20));
+
+        // Toernooi knop
+        tournamentButton = createRoundedButton(lang.get("toernooi"),
+        new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
+        tournamentButton.addActionListener(e -> menuManager.openNameSelection("TOURNAMENT"));
+        buttonPanel.add(tournamentButton);
         buttonPanel.add(Box.createVerticalStrut(40));
 
         // Terug naar hoofdmenu knop

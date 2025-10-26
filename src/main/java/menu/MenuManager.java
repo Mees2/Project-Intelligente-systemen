@@ -11,6 +11,7 @@ public final class MenuManager {
     private static final String MODE_PVP = "PVP";
     private static final String MODE_PVA = "PVA";
     private static final String MODE_SERVER = "SERVER";
+    private static final String MODE_TOURNAMENT = "TOURNAMENT";
 
     private final MainMenu mainMenu;
     private final TicTacToeMenu ticTacToeMenu;
@@ -18,6 +19,7 @@ public final class MenuManager {
     private final TicTacToeNamePvp ticTacToeNamePvp;
     private final TicTacToeNamePva ticTacToeNamePva;
     private final TicTacToeNameServer ticTacToeNameServer;
+    private final TicTacToeNameTournament ticTacToeNameTournament;
     private final LanguageManager lang = LanguageManager.getInstance();
     
     private ClientTicTacToe serverClient;
@@ -33,6 +35,7 @@ public final class MenuManager {
         ticTacToeNamePvp = new TicTacToeNamePvp(this);
         ticTacToeNamePva = new TicTacToeNamePva(this);
         ticTacToeNameServer = new TicTacToeNameServer(this);
+        ticTacToeNameTournament = new TicTacToeNameTournament(this);
     }
 
     /**
@@ -98,6 +101,7 @@ public final class MenuManager {
             case MODE_PVP -> ticTacToeNamePvp.showMenu();
             case MODE_PVA -> ticTacToeNamePva.showMenu();
             case MODE_SERVER -> ticTacToeNameServer.showMenu();
+            case MODE_TOURNAMENT -> ticTacToeNameTournament.showMenu();
             default -> throw new IllegalArgumentException("Onbekende gameMode: " + gameMode);
         }
     }

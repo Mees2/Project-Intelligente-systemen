@@ -11,11 +11,13 @@ import server.ClientTicTacToe;
 
 public class TicTacToeGame {
     private final MenuManager menuManager;
-    private final String gameMode; // "PVP" of "PVA"
+    private final String gameMode; // "PVP" or "PVA" or "SERVER" or "TOURNAMENT"
     private final LanguageManager lang = LanguageManager.getInstance();
     private boolean turnX = true;
     private final String speler1;
     private final String speler2;
+    private volatile boolean aiTurnPending = false;
+    private volatile boolean aiBusy = false;
 
     private JLabel statusLabel;
     private JButton menuButton;
@@ -33,9 +35,10 @@ public class TicTacToeGame {
     private String localPlayerName = "";
     private String opponentName = "";
 
+
+
     private int extractMovePosition(String serverMsg) {
         try {
-            // Find MOVE: "X" pattern
             int moveIndex = serverMsg.indexOf("MOVE:");
             if (moveIndex == -1) return -1;
 
@@ -53,10 +56,6 @@ public class TicTacToeGame {
         return -1;
     }
 
-    /**
-     * Extract player name from server message
-     * Example: "SVR GAME MOVE {PLAYER: "Piet5939", MOVE: "3", DETAILS: ""}" -> returns "Piet5939"
-     */
     private String extractPlayerName(String serverMsg) {
         try {
             int playerIndex = serverMsg.indexOf("PLAYER:");
@@ -75,14 +74,10 @@ public class TicTacToeGame {
         return "";
     }
 
-    /**
-     * Generic extractor for fields in server messages like MATCH {PLAYERTOMOVE: "spelerA", OPPONENT: "spelerB"}
-     */
     private String extractFieldValue(String serverMsg, String fieldName) {
         try {
             int idx = serverMsg.indexOf(fieldName + ":");
             if (idx == -1) {
-                // try uppercase keys with braces whitespace
                 idx = serverMsg.indexOf(fieldName.toUpperCase() + ":");
                 if (idx == -1) return "";
             }
@@ -98,27 +93,40 @@ public class TicTacToeGame {
         return "";
     }
 
-    /**
-     * Check if the move came from us (accounting for random suffix in login)
-     */
-    private boolean isOurMove(String movePlayerName, String ourBaseName) {
-        // Check if the move player name starts with our base name
-        return movePlayerName.startsWith(ourBaseName);
-    }
+        private boolean isOurMove(String movePlayerName, String ourBaseName) {
+            if (movePlayerName.isEmpty() || ourBaseName.isEmpty()) {
+                return false;
+            }
 
-    /**
-     * Apply opponent's move to the board
-     */
-    private void applyOpponentMove(int pos) {
+            // Try exact match first
+            if (movePlayerName.equalsIgnoreCase(ourBaseName)) {
+                return true;
+            }
+
+            // Try prefix match (server might append suffix)
+            if (movePlayerName.startsWith(ourBaseName)) {
+                return true;
+            }
+
+            // Try if our name starts with the move player name
+            if (ourBaseName.startsWith(movePlayerName)) {
+                return true;
+            }
+
+            return false;
+        }
+
+
+    private void applyOpponentMove(int pos, char symbol) {
         if (gameDone || !game.isFree(pos)) return;
 
-        char currentPlayer = turnX ? 'X' : 'O';
-        game.doMove(pos, currentPlayer);
-        boardPanel.getButtons()[pos].setText(String.valueOf(currentPlayer));
+        game.doMove(pos, symbol);
+        boardPanel.getButtons()[pos].setText(String.valueOf(symbol));
 
-        if (checkEnd(currentPlayer)) return;
+        if (checkEnd(symbol)) return;
 
-        turnX = !turnX;
+        // After a move by 'X', next is 'O' -> turnX = false. After 'O', next is 'X' -> turnX = true.
+        turnX = (symbol == 'O');
         updateStatusLabel();
     }
 
@@ -136,17 +144,14 @@ public class TicTacToeGame {
                 aiRol = 'O';
                 spelerRol = 'X';
             }
-        } else if (gameMode.equals("SERVER")) {
-            // Fixed syntax error and keep default roles empty until MATCH arrives
-            // We'll determine spelerRol based on server MATCH message.
-            aiRol = 'O';
-            // spelerRol left uninitialized here; will be set on MATCH
+        } else if (gameMode.equals("SERVER") || gameMode.equals("TOURNAMENT")) {
+            // will be set on MATCH
+            aiRol = 'O'; // placeholder
         }
     }
 
     public void start() {
-        // Check om ervoor te zorgen dat offline play mogelijk is zonder server verbinding
-        if (!"SERVER".equals(gameMode)) {
+        if (!"SERVER".equals(gameMode) && !"TOURNAMENT".equals(gameMode)) {
             initializeGame();
             return;
         }
@@ -161,7 +166,6 @@ public class TicTacToeGame {
             return;
         }
 
-        // Start background thread to process server responses
         new Thread(() -> {
             try {
                 String serverMsg;
@@ -173,61 +177,78 @@ public class TicTacToeGame {
                     }
                     if (serverMsg.contains("MATCH")) {
                         inGame = true;
-
-                        // Parse match details: PLAYERTOMOVE and OPPONENT
                         String playerToMove = extractFieldValue(serverMsg, "PLAYERTOMOVE");
-                        if (playerToMove.isEmpty()) {
-                            // try lowercase/alternate
-                            playerToMove = extractFieldValue(serverMsg, "PLAYERTO MOVE".replace(" ", ""));
-                        }
                         String opponent = extractFieldValue(serverMsg, "OPPONENT");
-
-                        // Determine local/opponent names and who is X
-                        // localPlayerName was set before login (see below) - use startsWith to allow suffixes
                         boolean playerToMoveIsLocal = false;
                         if (!playerToMove.isEmpty() && !localPlayerName.isEmpty()) {
                             if (playerToMove.startsWith(localPlayerName) || localPlayerName.startsWith(playerToMove))
                                 playerToMoveIsLocal = true;
                         }
 
-                        // Update internal state and GUI on EDT
                         final boolean starterIsLocal = playerToMoveIsLocal;
                         final String opponentFinal = opponent;
-                        final String playerToMoveFinal = playerToMove;
                         SwingUtilities.invokeLater(() -> {
-                            // set opponent name
                             opponentName = opponentFinal != null ? opponentFinal : "";
 
-                            // assign roles: starter gets X
-                            if (starterIsLocal) {
-                                spelerRol = 'X';
-                            } else {
-                                spelerRol = 'O';
-                            }
-                            // turnX should reflect who starts: X starts
-                            turnX = true; // X always starts at beginning of game
+                            // Server tells who starts; convention: starter -> X
+                            spelerRol = starterIsLocal ? 'X' : 'O';
 
-                            // Update the status label and board enabled state
+                            // Determine which slot in the game configuration represents the AI:
+                            // convention: speler1 -> X, speler2 -> O
+                            if ("AI".equals(speler1)) {
+                                aiRol = 'X';
+                            } else if ("AI".equals(speler2)) {
+                                aiRol = 'O';
+                            } else {
+                                // No local AI configured: fall back to the opposite symbol (safe default)
+                                aiRol = (spelerRol == 'X') ? 'O' : 'X';
+                            }
+
+                            turnX = true;
                             updateStatusLabel();
+
+                            // Only schedule an AI move if the AI on this client controls the symbol that the server
+                            // just indicated should move (i.e. local player's symbol). This respects server role assignment.
+                            if ("TOURNAMENT".equals(gameMode) && aiRol == spelerRol && starterIsLocal) {
+                                aiTurnPending = true;
+                                if (!aiBusy) doAiMoveServer();
+                            }
                         });
                     }
                     if (serverMsg.contains("YOURTURN")) {
-                        SwingUtilities.invokeLater(() -> updateStatusLabel());
+                        // Server explicitly states it's our turn now
+                        aiTurnPending = true;
+                        // Ensure internal turn state reflects that it's our symbol's turn
+                        turnX = (spelerRol == 'X');
+
+                        SwingUtilities.invokeLater(() -> {
+                            updateStatusLabel();
+                            if ("TOURNAMENT".equals(gameMode) && isPlayersTurn()) {
+                                doAiMoveServer();
+                            }
+                        });
                     }
-                    // Inside the server listener thread in start() method, update the MOVE handler:
+
                     if (serverMsg.contains("MOVE") && serverMsg.contains("PLAYER:")) {
                         String playerName = extractPlayerName(serverMsg);
                         int movePos = extractMovePosition(serverMsg);
 
-
-                        // Only apply move if it's from opponent (not from us)
                         String ourName = gameMode.equals("PVP") ? speler1 :
-                                // For SERVER mode, localPlayerName is the one we logged in with
-                                ("SERVER".equals(gameMode) ? localPlayerName :
-                                        (spelerRol == 'X' ? speler1 : speler2));
+                                ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) ? localPlayerName :
+                                        (spelerRol == 'X' ? speler1 : speler2);
 
-                        if (movePos != -1 && !isOurMove(playerName, ourName)) {
-                            SwingUtilities.invokeLater(() -> applyOpponentMove(movePos));
+                        System.out.println("[DEBUG] Move from player: '" + playerName + "', our name: '" + ourName + "', our role: " + spelerRol);
+
+                        if (movePos != -1) {
+                            if (isOurMove(playerName, ourName)) {
+                                System.out.println("[DEBUG] Recognized as OUR move - ignoring");
+                                aiBusy = false;
+                                aiTurnPending = false;
+                            } else {
+                                System.out.println("[DEBUG] Recognized as OPPONENT move - applying");
+                                char opponentSymbol = (spelerRol == 'X') ? 'O' : 'X';
+                                SwingUtilities.invokeLater(() -> applyOpponentMove(movePos, opponentSymbol));
+                            }
                         }
                     }
                 }
@@ -236,27 +257,20 @@ public class TicTacToeGame {
             }
         }, "server-listener").start();
 
-        // Wait a moment for connection to stabilize
         try { Thread.sleep(100); } catch (InterruptedException ignored) {}
 
-        // Send login
         String playerName;
-        if ("SERVER".equals(gameMode)) {
-            // Determine which constructor parameter is the human player name.
-            // TicTacToeNameServer calls startTicTacToeGame("SERVER", "AI", spelerNaam),
-            // so the non-"AI" parameter is the local player's base name.
+        if ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) {
             playerName = speler1.equals("AI") ? speler2 : speler1;
         } else if ("PVP".equals(gameMode)) {
             playerName = speler1;
-        } else { // PVA
+        } else {
             playerName = (spelerRol == 'X' ? speler1 : speler2);
         }
 
-        // store local player name for later matching with server messages
         localPlayerName = playerName;
         client.login(playerName);
 
-        // Wait for login confirmation
         int attempts = 0;
         while (!loggedIn && attempts < 20) {
             try { Thread.sleep(100); } catch (InterruptedException ignored) {}
@@ -270,7 +284,6 @@ public class TicTacToeGame {
             return;
         }
 
-        // Request match
         client.requestMatch();
 
         initializeGame();
@@ -288,19 +301,22 @@ public class TicTacToeGame {
         gameFrame.setLayout(new BorderLayout());
         gameFrame.getContentPane().setBackground(new Color(247, 247, 255));
 
-        // Status label
         statusLabel = new JLabel("", JLabel.CENTER);
         statusLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
         statusLabel.setForeground(new Color(5, 5, 169));
         statusLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
         gameFrame.add(statusLabel, BorderLayout.NORTH);
 
-        // Board panel
         boardPanel = new SquareBoardPanel();
         boardPanel.setBackground(new Color(247, 247, 255));
         gameFrame.add(boardPanel, BorderLayout.CENTER);
 
-        // Menu button
+        if ("TOURNAMENT".equals(gameMode)) {
+            for (JButton b : boardPanel.getButtons()) {
+                b.setEnabled(false);
+            }
+        }
+
         menuButton = createRoundedButton(lang.get("tictactoe.game.menu"),
                 new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
         menuButton.setFont(new Font("SansSerif", Font.BOLD, 18));
@@ -313,7 +329,6 @@ public class TicTacToeGame {
         southPanel.add(menuButton);
         gameFrame.add(southPanel, BorderLayout.SOUTH);
 
-        // Window resize listener for scaling
         gameFrame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -331,19 +346,20 @@ public class TicTacToeGame {
         }
     }
 
-    // Custom JPanel for square board and scaling
     private class SquareBoardPanel extends JPanel {
         private final JButton[] buttons = new JButton[9];
 
         public SquareBoardPanel() {
-            setLayout(null); // We'll position buttons manually
+            setLayout(null);
             setBackground(new Color(247, 247, 255));
             for (int i = 0; i < 9; i++) {
                 JButton btn = createRoundedButton("", Color.WHITE, new Color(230, 230, 255), new Color(120, 60, 150), true);
                 btn.setFocusPainted(false);
                 btn.setFont(new Font("SansSerif", Font.BOLD, 40));
                 final int pos = i;
-                btn.addActionListener(e -> handleButtonClick(pos));
+                if (!"TOURNAMENT".equals(gameMode)) {
+                    btn.addActionListener(e -> handleButtonClick(pos));
+                }
                 buttons[i] = btn;
                 add(btn);
             }
@@ -395,24 +411,12 @@ public class TicTacToeGame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 int arc = 20;
-                // Always paint with base/hover color; don't change for disabled state
-                Color fill = (getModel().isRollover() && isEnabled()) ? hoverColor : baseColor;
-                g2.setColor(fill);
+                g2.setColor(isEnabled() ? baseColor : Color.LIGHT_GRAY);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
                 g2.setColor(borderColor);
                 g2.setStroke(new BasicStroke(2));
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, arc, arc);
-
-                // draw text ourselves so it's the same color even when the button is disabled
-                String txt = getText();
-                g2.setFont(getFont());
-                FontMetrics fm = g2.getFontMetrics();
-                int tx = (getWidth() - fm.stringWidth(txt)) / 2;
-                int ty = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
-
-                g2.setColor(getForeground());
-                g2.drawString(txt, tx, ty);
-
+                super.paintComponent(g2);
                 g2.dispose();
             }
         };
@@ -420,16 +424,15 @@ public class TicTacToeGame {
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setOpaque(false);
-        // keep symbol/text color constant
         button.setForeground(new Color(5, 5, 169));
         button.setEnabled(enabled);
 
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (button.isEnabled()) button.repaint();
+                if (button.isEnabled()) button.setBackground(hoverColor);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (button.isEnabled()) button.repaint();
+                if (button.isEnabled()) button.setBackground(baseColor);
             }
         });
         return button;
@@ -437,10 +440,9 @@ public class TicTacToeGame {
 
     private void handleButtonClick(int pos) {
         if (gameDone || !game.isFree(pos)) return;
-        // Prevent making a move when it's not your turn in online (SERVER) or PVA modes
-        if (("PVA".equals(gameMode) || "SERVER".equals(gameMode)) && !isPlayersTurn()) return;
+        if (gameMode.equals("PVA") && !isPlayersTurn()) return;
+        if ("TOURNAMENT".equals(gameMode)) return;
 
-        // Send move to server
         if (client != null && client.isConnected()) {
             client.sendMove(pos);
         }
@@ -468,9 +470,44 @@ public class TicTacToeGame {
                 boardPanel.getButtons()[move].setText(String.valueOf(aiRol));
             }
             if (checkEnd(aiRol)) return;
-            turnX = (spelerRol == 'X');
+            // Next turn depends on the symbol the AI just played
+            turnX = (aiRol == 'O'); // if AI played O -> next is X
             updateStatusLabel();
         });
+    }
+
+    private void doAiMoveServer() {
+        if (!"TOURNAMENT".equals(gameMode)) return;
+        if (gameDone || client == null || !client.isConnected()) return;
+
+        if (!aiTurnPending || aiBusy) return;
+        aiBusy = true;
+        aiTurnPending = false;
+
+        new Thread(() -> {
+            int move = MinimaxAI.bestMove(game, aiRol, spelerRol);
+            if (move == -1) {
+                aiBusy = false;
+                return;
+            }
+
+            client.sendMove(move);
+
+            SwingUtilities.invokeLater(() -> {
+                if (gameDone || !game.isFree(move)) {
+                    return;
+                }
+                game.doMove(move, aiRol);
+                boardPanel.getButtons()[move].setText(String.valueOf(aiRol));
+                if (checkEnd(aiRol)) {
+                    aiBusy = false;
+                    return;
+                }
+                // After AI move, next turn depends on the symbol the AI played
+                turnX = (aiRol == 'O');
+                updateStatusLabel();
+            });
+        }, "tournament-ai").start();
     }
 
     private boolean checkEnd(char player) {
@@ -497,7 +534,7 @@ public class TicTacToeGame {
         } else if (gameMode.equals("PVA")){
             return lang.get("tictactoe.game.title.pva");
         }
-        else if(gameMode.equals("SERVER")){
+        else if(gameMode.equals("SERVER") || gameMode.equals("TOURNAMENT")){
             return lang.get("tictactoe.game.title.server");
         }
         return lang.get("tictactoe.game.title");
@@ -513,62 +550,29 @@ public class TicTacToeGame {
         } else if (gameMode.equals("PVA")) {
             if (symbol == spelerRol) return (spelerRol == 'X') ? speler1 : speler2;
             else return "AI";
-        } else if ("SERVER".equals(gameMode)) {
-            // In server mode, we rely on localPlayerName and opponentName
+        } else if ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) {
             if (symbol == spelerRol) return localPlayerName != null ? localPlayerName : "";
             else return opponentName != null ? opponentName : "";
         }
         return "";
     }
 
-    /**
-     * Enable or disable the board buttons based on whether the local player may act.
-     * Only affects buttons that are still free (empty).
-     */
-    private void setBoardEnabled(boolean enabled) {
-        if (boardPanel == null) return;
-        JButton[] buttons = boardPanel.getButtons();
-        for (int i = 0; i < buttons.length; i++) {
-            // only enable free cells
-            boolean shouldEnable = enabled && game.isFree(i) && !gameDone;
-            buttons[i].setEnabled(shouldEnable);
-        }
-    }
-
     private void updateStatusLabel() {
-        if (gameDone) {
-            // ensure board is disabled when the game is finished
-            setBoardEnabled(false);
-            return;
-        }
+        if (gameDone) return;
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
-        if ("SERVER".equals(gameMode) && (opponentName == null || opponentName.isEmpty())) {
-            // waiting for match details
+        if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && (opponentName == null || opponentName.isEmpty())) {
             statusLabel.setText(lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails")));
-            // don't allow moves until match details arrive
-            setBoardEnabled(false);
             return;
         }
         statusLabel.setText(lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")"));
-
-        // If we are playing online (SERVER), only allow moves when it's our turn.
-        if ("SERVER".equals(gameMode)) {
-            setBoardEnabled(isPlayersTurn());
-        } else if ("PVA".equals(gameMode)) {
-            // In PVA mode the player may move only when it's their turn (kept for safety)
-            setBoardEnabled(isPlayersTurn());
-        } else {
-            // PVP local: enable all free buttons
-            setBoardEnabled(true);
-        }
     }
 
     private void returnToMenu() {
         int option = JOptionPane.showConfirmDialog(gameFrame, lang.get("main.exit.confirm"), lang.get("main.exit.title"), JOptionPane.YES_NO_OPTION);
         if (option == JOptionPane.YES_OPTION) {
 
-            if ("SERVER".equals(gameMode) && client != null) {
+            if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && client != null) {
                 try {
                     client.quit();
                 } catch (Exception e) {
@@ -599,4 +603,6 @@ public class TicTacToeGame {
         }
         return false;
     }
+
+
 }
