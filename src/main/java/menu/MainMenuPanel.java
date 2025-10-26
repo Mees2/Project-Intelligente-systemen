@@ -74,8 +74,8 @@ public final class MainMenuPanel extends JPanel {
         buttonContainer.add(tttButton);
         buttonContainer.add(Box.createVerticalStrut(10)); 
         
-        reversiButton = createRoundedButton(lang.get("main.reversi.soon"), () -> {},
-            new Color(200,200,200), new Color(200,200,200), new Color(150,150,150), false, BASE_BUTTON_W_LARGE);
+        reversiButton = createRoundedButton(lang.get("main.reversi"), menuManager::openReversiMenu,
+            new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true, BASE_BUTTON_W_LARGE);
         buttonContainer.add(reversiButton);
         buttonContainer.add(Box.createVerticalGlue());
         buttonPanel.add(buttonContainer, BorderLayout.EAST);

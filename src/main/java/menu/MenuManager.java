@@ -18,6 +18,9 @@ public final class MenuManager {
     private final TicTacToeNamePvp ticTacToeNamePvp;
     private final TicTacToeNamePva ticTacToeNamePva;
     private final TicTacToeNameServer ticTacToeNameServer;
+    private ReversiMenu reversiMenu;
+    private ReversiNamePvp reversiNamePvp;
+    private ReversiGame reversiGame;
     private final LanguageManager lang = LanguageManager.getInstance();
     
     private ClientTicTacToe serverClient;
@@ -33,6 +36,9 @@ public final class MenuManager {
         ticTacToeNamePvp = new TicTacToeNamePvp(this);
         ticTacToeNamePva = new TicTacToeNamePva(this);
         ticTacToeNameServer = new TicTacToeNameServer(this);
+        // reversi
+        reversiMenu = new ReversiMenu(this);           
+        reversiNamePvp = new ReversiNamePvp(this);     
     }
 
     /**
@@ -106,6 +112,17 @@ public final class MenuManager {
         TicTacToeGame game = new TicTacToeGame(this, gameMode, speler1Naam, speler2Naam);
         game.start();
     }
+
+    private void hideAllMenus() {
+        mainMenu.hideMenu();
+        ticTacToeMenu.hideMenu();
+        settingsMenu.hideMenu();
+        ticTacToeNamePvp.hideMenu();
+        ticTacToeNamePva.hideMenu();
+        reversiMenu.hideMenu();
+        reversiNamePvp.hideMenu();
+    }
+    
     /**
      * Start TicTacToe in Speler vs Speler mode
 
@@ -130,6 +147,34 @@ public final class MenuManager {
         ticTacToeMenu.showMenu();
     }
 
+    public void openReversiMenu() {
+        if (reversiMenu == null) reversiMenu = new ReversiMenu(this);
+        hideAllMenus();
+        reversiMenu.showMenu();
+    }
+
+    public void openReversiNamePvp() {
+        if (reversiNamePvp == null) reversiNamePvp = new ReversiNamePvp(this);
+        hideAllMenus();
+        reversiNamePvp.showMenu();
+    }
+
+    public void startReversiGame(String mode, String speler1, String speler2) {
+        reversiGame = new ReversiGame(this, mode, speler1, speler2);
+        hideAllMenus();
+        reversiGame.start();
+    }
+
+    public void closeReversiNameSelectionPVP() {
+        if (reversiNamePvp != null) reversiNamePvp.hideMenu();
+        openReversiMenu();
+    }
+
+    public void onReversiGameFinished() {
+        if (reversiGame != null) reversiGame.close();
+        openReversiMenu();
+    }
+
     /**
      * Update de taal in alle menu's
      */
@@ -139,6 +184,8 @@ public final class MenuManager {
         settingsMenu.updateLanguage();
         ticTacToeNamePvp.updateLanguage();
         ticTacToeNamePva.updateLanguage();
+        reversiMenu.updateLanguage();
+        reversiNamePvp.updateLanguage();
 
     }
 
