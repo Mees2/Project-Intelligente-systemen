@@ -18,6 +18,10 @@ public class SettingsMenu extends JFrame {
     private JComboBox<String> languageComboBox;
     private final String[] languageCodes = { "nl", "en", "vn", "cn" };
     private JButton backButton;
+    private JButton darkModeButton;
+    private JPanel centerPanel;
+    private JPanel topPanel;
+
 
     public SettingsMenu(MenuManager menuManager) {
         this.menuManager = menuManager;
@@ -32,7 +36,7 @@ public class SettingsMenu extends JFrame {
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(247, 247, 255));
         
-        JPanel topPanel = new JPanel();
+        topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBackground(new Color(247, 247, 255));
 
@@ -47,7 +51,7 @@ public class SettingsMenu extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel();
+        centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         centerPanel.setBackground(new Color(247, 247, 255));
@@ -90,6 +94,20 @@ public class SettingsMenu extends JFrame {
             }
         });
 
+        // Darkmode Button
+        darkModeButton = createRoundedButton(("settings.darkmode"),
+                new Color(184, 107, 214),
+                new Color(204, 127, 234),
+                new Color(120, 60, 150), true);
+        darkModeButton.addActionListener(e -> {
+            ThemeManager theme = ThemeManager.getInstance();
+            theme.setDarkMode(!theme.isDarkMode());
+            updateTheme();
+            darkModeButton.setText(theme.isDarkMode() ?"settings.lightmode" : "settings.darkmode");
+
+        });
+
+
         // terug knop
         backButton = createRoundedButton(lang.get("settings.back"),
                 new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
@@ -102,8 +120,11 @@ public class SettingsMenu extends JFrame {
         centerPanel.add(languageLabel);
         centerPanel.add(Box.createVerticalStrut(3));
         centerPanel.add(languageComboBox);
+        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(darkModeButton);
         centerPanel.add(Box.createVerticalStrut(125));
         centerPanel.add(backButton);
+
 
         add(centerPanel, BorderLayout.CENTER);
             
@@ -138,7 +159,13 @@ public class SettingsMenu extends JFrame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getModel().isRollover() && isEnabled() ? hoverColor : baseColor);
+
+                Color base = (Color) getClientProperty("baseColor");
+                Color hover = (Color) getClientProperty("hoverColor");
+                if (base == null) base = baseColor;
+                if (hover == null) hover = hoverColor;
+
+                g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
                 g2.setColor(borderColor);
                 g2.setStroke(new BasicStroke(2));
@@ -229,6 +256,26 @@ public class SettingsMenu extends JFrame {
         titleLabel.setText(lang.get("settings.title"));
         languageLabel.setText(lang.get("settings.language"));
         backButton.setText(lang.get("settings.back"));
+    }
+
+    private void updateTheme() {
+        ThemeManager theme = ThemeManager.getInstance();
+        getContentPane().setBackground(theme.getBackgroundColor());
+        centerPanel.setBackground(theme.getBackgroundColor());
+        topPanel.setBackground(theme.getBackgroundColor());
+
+        // Update button colors using client properties
+        backButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        backButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+
+        darkModeButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        darkModeButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+
+        // Update text colors
+        titleLabel.setForeground(theme.getFontColor1());
+        languageLabel.setForeground(theme.getFontColor2());
+
+        repaint();
     }
 
     public void showMenu() {
