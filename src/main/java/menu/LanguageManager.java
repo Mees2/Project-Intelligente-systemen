@@ -36,8 +36,8 @@ public final class LanguageManager {
         addTranslation("main.title", "Spelcollectie - Hoofdmenu", "Game Collection - Main Menu","Bộ sưu tập trò Game - Menu chính","游戏合集 - 主菜单");
         addTranslation("main.welcome", "<html>Welkom<br>bij de<br>Spelcollectie</html>", "<html>Welcome<br>to the<br>Game Collection","<html>Chào mừng<br>đến với bộ sưu<br>tập trò Game</html>","<html>欢迎<br>来到<br>游戏合集</html>");
         addTranslation("main.tictactoe", "TicTacToe", "TicTacToe","Cờ ca-rô","井字棋");
-        addTranslation("main.reversi.soon", "Reversi (Binnenkort beschikbaar)", "Reversi (Coming Soon)","Cờ Lật(Sắp ra)","黑白棋（即将推出）");
-        addTranslation("main.reversi", "Reversi", "Reversi", "Reversi", "黑白棋");
+        addTranslation("main.reversi.soon", "Reversi (Binnenkort beschikbaar)", "Reversi (Coming Soon)","Cờ Lật","黑白棋（即将推出）"); // currently not in use
+        addTranslation("main.reversi", "Reversi", "Reversi", "Cờ Lật", "黑白棋");
         addTranslation("main.settings", "Instellingen", "Settings","Cai đặt","设置");
         addTranslation("main.exit", "Afsluiten", "Exit", "Ra","推出");
         addTranslation("main.exit.confirm", "Weet je zeker dat je het programma wilt afsluiten?", 
@@ -49,7 +49,7 @@ public final class LanguageManager {
         
         // Instellingen menu vertalingen
         addTranslation("settings.title", "Instellingen", "Settings","Cai đặt","设置");
-        addTranslation("settings.language", "Taal:", "Language:", "Ngôn ngữ","语d言");
+        addTranslation("settings.language", "Taal:", "Language:", "Ngôn ngữ","语言");
         addTranslation("settings.language.dutch", "Nederlands", "Nederlands", "Nederlands","Nederlands");
         addTranslation("settings.language.english", "Engels", "English","Tiếng Anh","英文");
         addTranslation("settings.language.vietnamese", "Tiếng Việt", "Tiếng Việt","Tiếng Việt","Tiếng Việt");
@@ -57,8 +57,8 @@ public final class LanguageManager {
         addTranslation("settings.language.changed", "Taal is gewijzigd naar Nederlands",
                       "Language changed to English",
                             "Ngôn ngữ đã thay đổi thành Tiếng Việt" ,"语言已更改为中文");
-        addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","ngôn ngữ đã thay đổi ","语言已更改");
-        addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","quay lại menu chính","返回主菜单");
+        addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","Ngôn ngữ đã thay đổi ","语言已更改");
+        addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","Quay lại menu chính","返回主菜单");
         
         // TicTacToe menu vertalingen
         addTranslation("tictactoe.menu.title", "TicTacToe - Kies Spelmode", "TicTacToe - Choose Game Mode","Cờ ca-rô chọn Game","");
@@ -68,14 +68,15 @@ public final class LanguageManager {
         addTranslation("tictactoe.menu.pva", "Speler vs AI", "Player vs AI","Chơi với AI"," 玩家对战 AI");
         addTranslation("tictactoe.menu.pva.desc", "Speel tegen de computer", "Play against the computer","Chơi với máy tính","电脑对战");
         addTranslation("tictactoe.menu.server", "Server", "Server","Máy chủ","服务器");
+        addTranslation("tictactoe.menu.tournament", "Toernooi", "Tournament", "Giải đấu", "比赛");
         addTranslation("tictactoe.menu.back", "Terug", "Back","Quay lại","返回");
         
         // TicTacToe spel vertalingen
-        addTranslation("tictactoe.game.title.pvp", "TicTacToe - Speler vs Speler", "TicTacToe - Player vs Player","Cờ ca-rô -Người chơi đấu với người chơi","井字棋 - 玩家对战");
+        addTranslation("tictactoe.game.title.pvp", "TicTacToe - Speler vs Speler", "TicTacToe - Player vs Player","Cờ ca-rô - Người chơi đấu với người chơi","井字棋 - 玩家对战");
         addTranslation("tictactoe.game.title.pva", "TicTacToe - Speler vs AI", "TicTacToe - Player vs AI","Cờ ca-rô - Chơi với AI","玩家对战 AI");
-        addTranslation("tictactoe.game.title.server", "TicTacToe - Speler vs Speler Online", "TicTacToe - Player vs Player Online", "temp", "temp2");
-        addTranslation("tictactoe.game.turn", "Beurt van speler: {0}", "Player {0}'s turn","Lượt của người chơi {0}"," 玩家 {0} 的回合");
-        addTranslation("tictactoe.game.win", "Speler {0} wint!", "Player {0} wins!","Người chơi {0} thắng"," 玩家 {0} 获胜");
+        addTranslation("tictactoe.game.title.server", "TicTacToe - Speler vs Speler Online", "TicTacToe - Player vs Player Online", "Cờ ca-rô - Người chơi đấu với người chơi trên mạng", "井字棋 - 玩家对战 ....");
+        addTranslation("tictactoe.game.turn", "Beurt van speler: {0}", "Player {0}'s turn","Lượt của người chơi {0}","玩家 {0} 的回合");
+        addTranslation("tictactoe.game.win", "Speler {0} wint!", "Player {0} wins!","Người chơi {0} thắng","玩家 {0} 获胜");
         addTranslation("tictactoe.game.draw", "Gelijkspel!", "It's a draw!","Vẽ tranh!","平局!");
         addTranslation("tictactoe.game.newgame", "Nieuw Spel", "New Game","Game mới","新游戏d");
         addTranslation("tictactoe.game.menu", "Terug naar Menu", "Back to Menu","Quay lại menu","返回菜单");
@@ -96,22 +97,22 @@ public final class LanguageManager {
         addTranslation("tictactoe.name.error.emptyrole", "Rol mag niet leeg zijn.", "Role cannot be empty.", "Vai trò không được để trống","角色不能为空");
 
         // Reversi menu translations
-        addTranslation("reversi.menu.title", "Reversi - Kies Spelmode", "Reversi - Choose Game Mode", "Reversi - Chọn chế độ", "黑白棋 - 选择模式");
+        addTranslation("reversi.menu.title", "Reversi - Kies Spelmode", "Reversi - Choose Game Mode", "Cờ Lật - Chọn chế độ", "黑白棋 - 选择模式");
         addTranslation("reversi.menu.header", "Kies je spelmode", "Choose your game mode", "Chọn chế độ game", "选择模式");
         addTranslation("reversi.menu.pvp", "Speler vs Speler", "Player vs Player", "Người chơi đấu với người chơi", "玩家对战");
-        addTranslation("reversi.menu.pva.soon", "Speler vs AI (binnenkort)", "Player vs AI (coming soon)", "Người chơi vs AI (sắp có)", "玩家对战AI（即将推出）");
+        addTranslation("reversi.menu.pva.soon", "Speler vs AI (binnenkort)", "Player vs AI (coming soon)", "Người chơi vs AI (sắp ra)", "玩家对战AI（即将推出）");
         addTranslation("reversi.menu.back", "Terug", "Back", "Quay lại", "返回");
 
         // Reversi name input
-        addTranslation("reversi.name.title", "Reversi - Kies Namen", "Reversi - Choose Names", "Reversi - Chọn tên", "黑白棋 - 选择名称");
-        addTranslation("reversi.name.playername1", "Naam Speler 1 (Zwart):", "Player Name 1 (Black):", "Tên người chơi 1 (Đen):", "玩家1名称（黑）:");
-        addTranslation("reversi.name.playername2", "Naam Speler 2 (Wit):", "Player Name 2 (White):", "Tên người chơi 2 (Trắng):", "玩家2名称（白）:");
-        addTranslation("reversi.name.startgame", "Start Spel", "Start Game", "Bắt đầu chơi", "开始游戏");
+        addTranslation("reversi.name.title", "Reversi - Kies Namen", "Reversi - Choose Names", "Cờ Lật - Chọn tên", "黑白棋 - 选择名称");
+        addTranslation("reversi.name.playername1", "Naam Speler 1 (Zwart):", "Player Name 1 (Black):", "Tên người chơi 1 (Đen):", "玩家名称 1（黑）:");
+        addTranslation("reversi.name.playername2", "Naam Speler 2 (Wit):", "Player Name 2 (White):", "Tên người chơi 2 (Trắng):", "玩家名称 2（白）:");
+        addTranslation("reversi.name.startgame", "Start Spel", "Start Game", "Bắt đầu chơi Game", "开始游戏");
         addTranslation("reversi.name.back", "Terug", "Back", "Quay lại", "返回");
         addTranslation("reversi.name.error.emptyname", "Naam mag niet leeg zijn.", "Name cannot be empty.", "Tên không được để trống", "名称不能为空");
 
         // Reversi game
-        addTranslation("reversi.game.title.pvp", "Reversi - Speler vs Speler", "Reversi - Player vs Player", "Reversi - Người chơi đấu với người chơi", "黑白棋 - 玩家对战");
+        addTranslation("reversi.game.title.pvp", "Reversi - Speler vs Speler", "Reversi - Player vs Player", "Cờ Lật - Người chơi đấu với người chơi", "黑白棋 - 玩家对战");
         addTranslation("reversi.game.turn", "Beurt van speler: {0}", "Player {0}'s turn", "Lượt của người chơi {0}", "玩家 {0} 的回合");
         addTranslation("reversi.game.win", "Speler {0} wint!", "Player {0} wins!", "Người chơi {0} thắng", "玩家 {0} 获胜");
         addTranslation("reversi.game.draw", "Gelijkspel!", "It's a draw!", "Vẽ tranh!", "平局!");

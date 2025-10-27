@@ -77,7 +77,7 @@ public class TicTacToeMenu extends JFrame {
         buttonPanel.add(Box.createVerticalStrut(10));
 
         // Toernooi knop
-        tournamentButton = createRoundedButton(lang.get("toernooi"),
+        tournamentButton = createRoundedButton(lang.get("tictactoe.menu.tournament"),
         new Color(61,169,166), new Color(81,189,186), new Color(40,120,120), true);
         tournamentButton.addActionListener(e -> menuManager.openNameSelection("TOURNAMENT"));
         buttonPanel.add(tournamentButton);
@@ -194,6 +194,7 @@ private void resizeAllButtons(Container container, double scale) {
         pvpButton.setText(lang.get("tictactoe.menu.pvp"));
         pvaButton.setText(lang.get("tictactoe.menu.pva"));
         serverButton.setText(lang.get("tictactoe.menu.server"));
+        tournamentButton.setText(lang.get("tictactoe.menu.tournament"));
         backButton.setText(lang.get("tictactoe.menu.back"));
     }
 
