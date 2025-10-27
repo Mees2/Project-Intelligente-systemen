@@ -57,8 +57,8 @@ public final class LanguageManager {
         addTranslation("settings.language.changed", "Taal is gewijzigd naar Nederlands",
                       "Language changed to English",
                             "Ngôn ngữ đã thay đổi thành Tiếng Việt" ,"语言已更改为中文");
-        addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","ngôn ngữ đã thay đổi ","语言已更改");
-        addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","quay lại menu chính","返回主菜单");
+        addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","Ngôn ngữ đã thay đổi ","语言已更改");
+        addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","Quay lại menu chính","返回主菜单");
         
         // TicTacToe menu vertalingen
         addTranslation("tictactoe.menu.title", "TicTacToe - Kies Spelmode", "TicTacToe - Choose Game Mode","Cờ ca-rô chọn Game","");
