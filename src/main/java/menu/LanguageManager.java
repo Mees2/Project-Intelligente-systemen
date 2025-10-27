@@ -36,7 +36,7 @@ public final class LanguageManager {
         addTranslation("main.title", "Spelcollectie - Hoofdmenu", "Game Collection - Main Menu","Bộ sưu tập trò Game - Menu chính","游戏合集 - 主菜单");
         addTranslation("main.welcome", "<html>Welkom<br>bij de<br>Spelcollectie</html>", "<html>Welcome<br>to the<br>Game Collection","<html>Chào mừng<br>đến với bộ sưu<br>tập trò Game</html>","<html>欢迎<br>来到<br>游戏合集</html>");
         addTranslation("main.tictactoe", "TicTacToe", "TicTacToe","Cờ ca-rô","井字棋");
-        addTranslation("main.reversi.soon", "Reversi (Binnenkort beschikbaar)", "Reversi (Coming Soon)","Cờ Lật","黑白棋（即将推出）"); // currently not in use
+        addTranslation("main.reversi.soon", "Reversi (Binnenkort beschikbaar)", "Reversi (Coming Soon)","Cờ Lật(Sap Ra)","黑白棋（即将推出）"); // currently not in use
         addTranslation("main.reversi", "Reversi", "Reversi", "Cờ Lật", "黑白棋");
         addTranslation("main.settings", "Instellingen", "Settings","Cai đặt","设置");
         addTranslation("main.exit", "Afsluiten", "Exit", "Ra","推出");
@@ -50,17 +50,17 @@ public final class LanguageManager {
         // Instellingen menu vertalingen
         addTranslation("settings.title", "Instellingen", "Settings","Cai đặt","设置");
         addTranslation("settings.language", "Taal:", "Language:", "Ngôn ngữ","语言");
-        addTranslation("settings.language.dutch", "Nederlands", "Nederlands", "Nederlands","Nederlands");
+        addTranslation("settings.language.dutch", "Nederlands", "Dutch", "Tiếng Hà Lan","荷兰语");
         addTranslation("settings.language.english", "Engels", "English","Tiếng Anh","英文");
-        addTranslation("settings.language.vietnamese", "Tiếng Việt", "Tiếng Việt","Tiếng Việt","Tiếng Việt");
-        addTranslation("settings.language.chinese", "中文", "中文","中文","中文");
+        addTranslation("settings.language.vietnamese", "Vietnamees", "Vietnamese","Tiếng Việt", "越南语");
+        addTranslation("settings.language.chinese", "Chinees", "Mandarin Chinese","Tieng Trung","中文");
         addTranslation("settings.language.changed", "Taal is gewijzigd naar Nederlands",
                       "Language changed to English",
                             "Ngôn ngữ đã thay đổi thành Tiếng Việt" ,"语言已更改为中文");
         addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","Ngôn ngữ đã thay đổi ","语言已更改");
         addTranslation("settings.changemode", "Verander hier de thema", "Change your theme here", "Thay đổi chủ đề ở đây","在这里更改主题");
         addTranslation("settings.darkmode", "Verander naar Donkere Modus", "Change to Dark Mode", "Thay đổi chủ đề ánh tối","更改为深色模式");
-        addTranslation("settings.lightmode", "Verander naar Lichtere Modus", "Change to Light Mode", "Thay đổi chủ đề ánh sáng","更改为灯光模式");
+        addTranslation("settings.lightmode", "Verander naar Lichtere Modus", "Change to Light Mode", "Thay đổi chủ đề ánh sáng","更改为浅色模式");
         addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","Quay lại menu chính","返回主菜单");
         
         // TicTacToe menu vertalingen

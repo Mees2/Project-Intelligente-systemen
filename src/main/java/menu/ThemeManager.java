@@ -10,7 +10,9 @@ public class ThemeManager {
 
     private Color backgroundColor;
     private Color mainButtonColor;
+    private Color mainButtonColorHover;
     private Color buttonColor;
+    private Color buttonColorHover;
     private Color titleColor;
     private Color smallfontColor;
     private Color fontColor1;
@@ -43,7 +45,9 @@ public class ThemeManager {
 
     public Color getBackgroundColor() { return backgroundColor; }
     public Color getMainButtonColor() { return mainButtonColor; }
+    public Color getMainButtonColorHover() { return mainButtonColorHover; }
     public Color getButtonColor() { return buttonColor; }
+    public Color getButtonColorHover() { return buttonColorHover; }
     public Color getTitleColor() { return titleColor; }
     public Color getSmallfontColor() { return smallfontColor; }
     public Color getFontColor1() { return fontColor1; }
@@ -52,7 +56,9 @@ public class ThemeManager {
 
     public void setBackgroundColor(Color color) { backgroundColor = color; }
     public void setMainButtonColor(Color color) { mainButtonColor = color; }
+    public void setMainButtonColorHover(Color color) { mainButtonColorHover = color; }
     public void setButtonColor(Color color) { buttonColor = color; }
+    public void setButtonColorHover(Color color) { buttonColorHover = color; }
     public void setTitleColor(Color color) { titleColor = color; }
     public void setSmallfontColor(Color color) { smallfontColor = color; }
     public void setFontColor1(Color color) { fontColor1 = color; }
@@ -68,7 +74,9 @@ public class ThemeManager {
         if (dark) {
             backgroundColor = new Color(0, 0, 66);
             mainButtonColor = new Color(129, 45, 163);
+            mainButtonColorHover = new Color(143, 50, 180);
             buttonColor = new Color(44, 124, 122);
+            buttonColorHover = new Color(53, 147, 145);
             titleColor = new Color(205, 205, 255);
             smallfontColor = new Color(205, 205, 255);
             fontColor1 = new Color(205, 205, 255);
@@ -76,8 +84,10 @@ public class ThemeManager {
             textfieldColor = new Color(226,226,255);
         } else {
             backgroundColor = new Color(247, 247, 255);
-            mainButtonColor = new Color(204, 127, 234);
+            mainButtonColor = new Color(184, 107, 214);
+            mainButtonColorHover = new Color(204, 127, 234);
             buttonColor = new Color(61, 169, 166);
+            buttonColorHover = new Color(81, 189, 186);
             titleColor = new Color(255, 255, 255);
             smallfontColor = new Color(255, 255, 255);
             fontColor1 = new Color(5, 5, 169);

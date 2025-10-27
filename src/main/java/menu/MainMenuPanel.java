@@ -228,7 +228,7 @@ public final class MainMenuPanel extends JPanel {
         if (titleLabel == null) return;
         titleLabel.setText(lang.get("main.welcome"));
         tttButton.setText(lang.get("main.tictactoe"));
-        reversiButton.setText(lang.get("main.reversi.soon"));
+        reversiButton.setText(lang.get("main.reversi"));
         settingsButton.setText(lang.get("main.settings"));
         exitButton.setText(lang.get("main.exit"));
     }
@@ -238,19 +238,19 @@ public final class MainMenuPanel extends JPanel {
         setBackground(theme.getBackgroundColor());
 
         tttButton.putClientProperty("baseColor", theme.getButtonColor());
-        tttButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        tttButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         tttButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         reversiButton.putClientProperty("baseColor", theme.getButtonColor());
-        reversiButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        reversiButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         reversiButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         settingsButton.putClientProperty("baseColor", theme.getMainButtonColor());
-        settingsButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+        settingsButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         settingsButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
         exitButton.putClientProperty("baseColor", theme.getMainButtonColor());
-        exitButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+        exitButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         exitButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
         titleLabel.setForeground(theme.getFontColor1());

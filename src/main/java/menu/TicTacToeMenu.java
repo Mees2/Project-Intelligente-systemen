@@ -221,23 +221,23 @@ private void resizeAllButtons(Container container, double scale) {
         getContentPane().setBackground(theme.getBackgroundColor());
 
         pvpButton.putClientProperty("baseColor", theme.getButtonColor());
-        pvpButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        pvpButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         pvpButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         pvaButton.putClientProperty("baseColor", theme.getButtonColor());
-        pvaButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        pvaButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         pvaButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         serverButton.putClientProperty("baseColor", theme.getButtonColor());
-        serverButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        serverButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         serverButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         tournamentButton.putClientProperty("baseColor", theme.getButtonColor());
-        tournamentButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        tournamentButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         tournamentButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         backButton.putClientProperty("baseColor", theme.getMainButtonColor());
-        backButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+        backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
 

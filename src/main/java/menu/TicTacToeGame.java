@@ -648,8 +648,8 @@ public class TicTacToeGame {
             boardPanel.setBackground(theme.getBackgroundColor());
 
             menuButton.putClientProperty("baseColor", theme.getMainButtonColor());
-            menuButton.putClientProperty("hoverColor", new Color(204, 127, 234));
-            menuButton.putClientProperty("borderColor", new Color(120, 60, 150));
+            menuButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
+            menuButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
             menuButton.repaint();
 
             for (JButton btn : boardPanel.getButtons()) {

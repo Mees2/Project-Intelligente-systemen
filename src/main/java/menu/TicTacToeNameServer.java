@@ -231,11 +231,11 @@ public class TicTacToeNameServer extends JFrame{
             topPanel.setBackground(theme.getBackgroundColor());
 
             startButton.putClientProperty("baseColor", theme.getMainButtonColor());
-            startButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+            startButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
             startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
             backButton.putClientProperty("baseColor", theme.getMainButtonColor());
-            backButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+            backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
             backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
             titleLabel.setForeground(theme.getFontColor1());

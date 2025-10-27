@@ -71,6 +71,7 @@ public class SettingsMenu extends JFrame {
             lang.get("settings.language.vietnamese"),
             lang.get("settings.language.chinese")
         };
+
         // combox opmaak
         languageComboBox = new JComboBox<>(languageOptions);
         languageComboBox.setMaximumSize(new Dimension(200, 30));
@@ -268,7 +269,36 @@ public class SettingsMenu extends JFrame {
         backButton.setText(lang.get("settings.back"));
         darkModeButton.setText(lang.get("settings.darkmode"));
         darkmodeLabel.setText(lang.get("settings.changemode"));
+
+        String[] languageOptions = {
+                lang.get("settings.language.dutch"),
+                lang.get("settings.language.english"),
+                lang.get("settings.language.vietnamese"),
+                lang.get("settings.language.chinese")
+        };
+
+        // Store current selection
+        int currentIndex = languageComboBox.getSelectedIndex();
+
+        // Remove listener temporarily to avoid triggering language change
+        java.awt.event.ActionListener[] listeners = languageComboBox.getActionListeners();
+        for (java.awt.event.ActionListener listener : listeners) {
+            languageComboBox.removeActionListener(listener);
+        }
+
+        // Update items
+        languageComboBox.removeAllItems();
+        for (String option : languageOptions) {
+            languageComboBox.addItem(option);
+        }
+        languageComboBox.setSelectedIndex(currentIndex);
+
+        // Re-add listeners
+        for (java.awt.event.ActionListener listener : listeners) {
+            languageComboBox.addActionListener(listener);
+        }
     }
+
 
     private void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
@@ -277,11 +307,11 @@ public class SettingsMenu extends JFrame {
         topPanel.setBackground(theme.getBackgroundColor());
 
         backButton.putClientProperty("baseColor", theme.getMainButtonColor());
-        backButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+        backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
         darkModeButton.putClientProperty("baseColor", theme.getButtonColor());
-        darkModeButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        darkModeButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         darkModeButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         titleLabel.setForeground(theme.getFontColor1());
