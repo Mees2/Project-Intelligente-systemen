@@ -58,9 +58,9 @@ public final class LanguageManager {
                       "Language changed to English",
                             "Ngôn ngữ đã thay đổi thành Tiếng Việt" ,"语言已更改为中文");
         addTranslation("settings.language.changed.title", "Taal gewijzigd", "Language Changed","Ngôn ngữ đã thay đổi ","语言已更改");
-        addTranslation("settings.changemode", "Verander hier de thema", "Change your theme here", "","");
-        addTranslation("settings.darkmode", "Verander naar Donkere Modus", "Change to Dark Mode", "","");
-        addTranslation("settings.lightmode", "Verander naar Lichtere Modus", "Change to Light Mode", "","");
+        addTranslation("settings.changemode", "Verander hier de thema", "Change your theme here", "Thay đổi chủ đề ở đây","在这里更改主题");
+        addTranslation("settings.darkmode", "Verander naar Donkere Modus", "Change to Dark Mode", "Thay đổi chủ đề ánh tối","更改为深色模式");
+        addTranslation("settings.lightmode", "Verander naar Lichtere Modus", "Change to Light Mode", "Thay đổi chủ đề ánh sáng","更改为灯光模式");
         addTranslation("settings.back", "Terug naar hoofdmenu", "Back to Main Menu","Quay lại menu chính","返回主菜单");
         
         // TicTacToe menu vertalingen
