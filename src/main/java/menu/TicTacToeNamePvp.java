@@ -8,9 +8,12 @@ import java.awt.event.ComponentEvent;
 public class TicTacToeNamePvp extends JFrame {
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
+    private final ThemeManager theme = ThemeManager.getInstance();
 
     // Store UI components as fields
     private JLabel titleLabel;
+    private JPanel topPanel;
+    private JPanel centerPanel;
     private JLabel speler1Label;
     private JLabel speler2Label;
     private JButton startButton;
@@ -21,6 +24,15 @@ public class TicTacToeNamePvp extends JFrame {
     public TicTacToeNamePvp(MenuManager menuManager) {
         this.menuManager = menuManager;
         initializeMenu();
+
+        theme.addThemeChangeListener(this::updateTheme);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeComponents();
+            }
+        });
     }
     /**
      * Initialiseert de tictactoenamepvp interface test***
@@ -33,7 +45,7 @@ public class TicTacToeNamePvp extends JFrame {
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(247,247,255));
         
-        JPanel topPanel = new JPanel();
+        topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         // achtergrond
         topPanel.setBackground(new Color(247,247,255));
@@ -50,7 +62,7 @@ public class TicTacToeNamePvp extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel();
+        centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         centerPanel.setBackground(new Color(247,247,255));
@@ -126,9 +138,18 @@ private JButton createRoundedButton(String text, Color baseColor, Color hoverCol
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(getModel().isRollover() && isEnabled() ? hoverColor : baseColor);
+
+            Color base = (Color) getClientProperty("baseColor");
+            Color hover = (Color) getClientProperty("hoverColor");
+            Color border = (Color) getClientProperty("borderColor");
+            if (base == null) base = baseColor;
+            if (hover == null) hover = hoverColor;
+            if (border == null) border = borderColor;
+
+            g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
+
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-            g2.setColor(borderColor);
+            g2.setColor(border);
             g2.setStroke(new BasicStroke(2));
             g2.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 30, 30);
             g2.dispose();
@@ -224,6 +245,32 @@ private void resizeAllButtons(Container container, double scale) {
         speler2Label.setText(lang.get("tictactoe.name.playername2"));
         startButton.setText(lang.get("tictactoe.name.startgame"));
         backButton.setText(lang.get("tictactoe.name.back"));
+    }
+
+    public void updateTheme() {
+        ThemeManager theme = ThemeManager.getInstance();
+        getContentPane().setBackground(theme.getBackgroundColor());
+        centerPanel.setBackground(theme.getBackgroundColor());
+        topPanel.setBackground(theme.getBackgroundColor());
+
+        startButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        startButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+        startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
+
+        backButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        backButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+        startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
+
+        titleLabel.setForeground(theme.getFontColor1());
+        speler1Label.setForeground(theme.getFontColor2());
+        speler2Label.setForeground(theme.getFontColor2());
+
+
+        textField1.setBackground(theme.getTextFieldColor());
+        textField2.setBackground(theme.getTextFieldColor());
+
+
+        repaint();
     }
 
     public void showMenu() {

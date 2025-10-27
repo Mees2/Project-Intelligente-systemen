@@ -32,6 +32,8 @@ public final class MainMenuPanel extends JPanel {
         this.menuManager = menuManager;
         initializeUI();
 
+        theme.addThemeChangeListener(this::updateTheme);
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -124,9 +126,18 @@ public final class MainMenuPanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getModel().isRollover() && isEnabled() ? hoverColor : baseColor);
+
+
+                Color base = (Color) getClientProperty("baseColor");
+                Color hover = (Color) getClientProperty("hoverColor");
+                Color border = (Color) getClientProperty("borderColor");
+                if (base == null) base = baseColor;
+                if (hover == null) hover = hoverColor;
+                if (border == null) border = borderColor;
+
+                g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-                g2.setColor(borderColor);
+                g2.setColor(border);
                 g2.setStroke(new BasicStroke(2));
                 g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 30, 30);
                 g2.dispose();
@@ -222,14 +233,29 @@ public final class MainMenuPanel extends JPanel {
         exitButton.setText(lang.get("main.exit"));
     }
 
-    public void updateColors() {
+    public void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
         setBackground(theme.getBackgroundColor());
 
+        tttButton.putClientProperty("baseColor", theme.getButtonColor());
+        tttButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        tttButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
-        tttButton.setForeground(theme.getButtonColor());
-        reversiButton.setForeground(theme.getButtonColor());
-        settingsButton.setForeground(theme.getMainButtonColor());
-        exitButton.setForeground(theme.getMainButtonColor());
+        reversiButton.putClientProperty("baseColor", theme.getButtonColor());
+        reversiButton.putClientProperty("hoverColor", theme.getButtonColor().brighter());
+        reversiButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+        settingsButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        settingsButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+        settingsButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
+
+        exitButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        exitButton.putClientProperty("hoverColor", theme.getMainButtonColor().brighter());
+        exitButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
+
+        titleLabel.setForeground(theme.getFontColor1());
+
+        repaint();
     }
+
 }

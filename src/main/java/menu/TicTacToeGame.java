@@ -13,6 +13,7 @@ public class TicTacToeGame {
     private final MenuManager menuManager;
     private final String gameMode; // "PVP" or "PVA" or "SERVER" or "TOURNAMENT"
     private final LanguageManager lang = LanguageManager.getInstance();
+    private final ThemeManager theme = ThemeManager.getInstance();
     private boolean turnX = true;
     private final String speler1;
     private final String speler2;
@@ -134,6 +135,9 @@ public class TicTacToeGame {
         } else if (gameMode.equals("SERVER") || gameMode.equals("TOURNAMENT")) {
             aiRol = 'O'; // placeholder, will be set on MATCH
         }
+
+        ThemeManager.getInstance().addThemeChangeListener(this::updateTheme);
+
     }
 
     public void start() {
@@ -284,16 +288,17 @@ public class TicTacToeGame {
         gameFrame.setMinimumSize(new Dimension(400, 500));
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setLayout(new BorderLayout());
-        gameFrame.getContentPane().setBackground(new Color(247, 247, 255));
+        gameFrame.getContentPane().setBackground(ThemeManager.getInstance().getBackgroundColor());
+
 
         statusLabel = new JLabel("", JLabel.CENTER);
         statusLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
-        statusLabel.setForeground(new Color(5, 5, 169));
+        statusLabel.setForeground(ThemeManager.getInstance().getFontColor1());
         statusLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
         gameFrame.add(statusLabel, BorderLayout.NORTH);
 
         boardPanel = new SquareBoardPanel();
-        boardPanel.setBackground(new Color(247, 247, 255));
+        boardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         gameFrame.add(boardPanel, BorderLayout.CENTER);
 
         if ("TOURNAMENT".equals(gameMode)) {
@@ -309,7 +314,7 @@ public class TicTacToeGame {
         menuButton.addActionListener(e -> returnToMenu());
 
         JPanel southPanel = new JPanel();
-        southPanel.setBackground(new Color(247, 247, 255));
+        southPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         southPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 20));
         southPanel.add(menuButton);
         gameFrame.add(southPanel, BorderLayout.SOUTH);
@@ -335,9 +340,9 @@ public class TicTacToeGame {
 
         public SquareBoardPanel() {
             setLayout(null);
-            setBackground(new Color(247, 247, 255));
+            setBackground(ThemeManager.getInstance().getBackgroundColor());
             for (int i = 0; i < 9; i++) {
-                JButton btn = createRoundedButton("", Color.WHITE, new Color(230, 230, 255), new Color(120, 60, 150), true);
+                JButton btn = createRoundedButton("", ThemeManager.getInstance().getTitleColor(), ThemeManager.getInstance().getFontColor1(), new Color(120, 60, 150), true);
                 btn.setFocusPainted(false);
                 btn.setFont(new Font("SansSerif", Font.BOLD, 40));
                 final int pos = i;
@@ -394,6 +399,14 @@ public class TicTacToeGame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                Color base = (Color) getClientProperty("baseColor");
+                Color hover = (Color) getClientProperty("hoverColor");
+                Color border = (Color) getClientProperty("borderColor");
+                if (base == null) base = baseColor;
+                if (hover == null) hover = hoverColor;
+                if (border == null) border = borderColor;
+
                 int arc = 20;
                 g2.setColor(isEnabled() ? baseColor : Color.LIGHT_GRAY);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
@@ -628,4 +641,25 @@ public class TicTacToeGame {
         return false;
     }
 
+    private void updateTheme() {
+        if (gameFrame != null) {
+            gameFrame.getContentPane().setBackground(theme.getBackgroundColor());
+            statusLabel.setForeground(theme.getFontColor1());
+            boardPanel.setBackground(theme.getBackgroundColor());
+
+            menuButton.putClientProperty("baseColor", theme.getMainButtonColor());
+            menuButton.putClientProperty("hoverColor", new Color(204, 127, 234));
+            menuButton.putClientProperty("borderColor", new Color(120, 60, 150));
+            menuButton.repaint();
+
+            for (JButton btn : boardPanel.getButtons()) {
+                btn.putClientProperty("baseColor", theme.getTitleColor());
+                btn.putClientProperty("hoverColor", theme.getTitleColor());
+                btn.putClientProperty("borderColor", new Color(120, 60, 150));
+                btn.repaint();
+            }
+
+            gameFrame.repaint();
+        }
+    }
 }
