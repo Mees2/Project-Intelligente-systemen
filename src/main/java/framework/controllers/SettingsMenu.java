@@ -1,53 +1,47 @@
-package menu;
+package framework.controllers;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.Serial;
 
-public class TicTacToeNameTournament extends JFrame{
+public class SettingsMenu extends JFrame {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
-    private final ThemeManager theme = ThemeManager.getInstance();
 
     private JLabel titleLabel;
-    private JLabel speler1Label;
-    private JPanel topPanel;
-    private JPanel centerPanel;
-    private JTextField textField1;
-    private JButton startButton;
+    private JLabel languageLabel;
+    private JComboBox<String> languageComboBox;
+    private final String[] languageCodes = { "nl", "en", "vn", "cn" };
     private JButton backButton;
+    private JLabel darkmodeLabel;
+    private JButton darkModeButton;
+    private JPanel centerPanel;
+    private JPanel topPanel;
 
-    public TicTacToeNameTournament(MenuManager menuManager) {
+
+    public SettingsMenu(MenuManager menuManager) {
         this.menuManager = menuManager;
         initializeMenu();
-        theme.addThemeChangeListener(this::updateTheme);
-
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                resizeComponents();
-            }
-        });
-
     }
-    /**-
-     * Initialiseert de tictactoenamepva interface test***
-     */
+
     private void initializeMenu() {
-        setTitle(lang.get("tictactoe.name.title"));
+        setTitle(lang.get("settings.title"));
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(500, 350);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(247, 247, 255));
-
+        
         topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBackground(new Color(247, 247, 255));
-        // Titel
-        titleLabel = new JLabel(lang.get("tictactoe.name.title"), JLabel.CENTER);
+
+        titleLabel = new JLabel(lang.get("settings.title"), JLabel.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setForeground(new Color(5, 5, 169));
@@ -62,49 +56,87 @@ public class TicTacToeNameTournament extends JFrame{
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         centerPanel.setBackground(new Color(247, 247, 255));
-        // Achtergrondkleur
+
         Color bodyTextColor = new Color(0x2B6F6E);
-        // Speler 1 tekst
-        speler1Label = new JLabel(lang.get("tictactoe.name.playername"));
-        speler1Label.setForeground(bodyTextColor);
-        speler1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // Speler 1 inputveld
-        textField1 = new JTextField();
-        textField1.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        textField1.setMaximumSize(new Dimension(500, 40));
-        textField1.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // start tictactoe SERVER
-        startButton = createRoundedButton(lang.get("tictactoe.name.startgame"),
-                new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
-        startButton.addActionListener(e -> {
-            String spelerNaam = textField1.getText().trim();
-            if (spelerNaam.isEmpty()) {
-                JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyname"),
-                        lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
-                return;
+
+        languageLabel = new JLabel(lang.get("settings.language"));
+        languageLabel.setForeground(bodyTextColor);
+        languageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // string geeft een aantal en dit gaat in een loop om het aantal comboboxex te gaeven
+
+        String[] languageOptions = {
+            lang.get("settings.language.dutch"),
+            lang.get("settings.language.english"),
+            lang.get("settings.language.vietnamese"),
+            lang.get("settings.language.chinese")
+        };
+
+        // combox opmaak
+        languageComboBox = new JComboBox<>(languageOptions);
+        languageComboBox.setMaximumSize(new Dimension(200, 30));
+        languageComboBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+        languageComboBox.setBackground(new Color(247, 247, 255));
+        languageComboBox.setForeground(bodyTextColor);
+        languageComboBox.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        String currentLang = lang.getCurrentLanguage();
+        for (int i = 0; i < languageCodes.length; i++) {
+            if (languageCodes[i].equals(currentLang)) {
+                languageComboBox.setSelectedIndex(i);
+                break;
             }
-            //menuManager.startTicTacToeGame("SERVER", spelerNaam, "AI"); });
-            hideMenu();
-            menuManager.startTicTacToeGame("TOURNAMENT", "AI", spelerNaam); });
-        // gaat terug
-        backButton = createRoundedButton(lang.get("tictactoe.name.back"),
+        }
+
+        languageComboBox.addActionListener(e -> {
+            int selectedIndex = languageComboBox.getSelectedIndex();
+            String selectedCode = languageCodes[selectedIndex];
+            if (!selectedCode.equals(lang.getCurrentLanguage())) {
+                changeLanguage(selectedCode);
+            }
+        });
+
+        // Darkmode Button
+        darkmodeLabel = new JLabel(lang.get("settings.changemode"));
+        darkmodeLabel.setForeground(bodyTextColor);
+        darkmodeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        darkModeButton = createRoundedButton(lang.get("settings.darkmode"),
+                new Color(61, 169, 166),
+                new Color(81, 189, 186),
+                new Color(40, 120, 120), true);
+        darkModeButton.addActionListener(e -> {
+            ThemeManager theme = ThemeManager.getInstance();
+            theme.setDarkMode(!theme.isDarkMode());
+            updateTheme();
+            darkModeButton.setText(theme.isDarkMode() ?(lang.get("settings.lightmode")) : (lang.get("settings.darkmode")));
+
+        });
+
+
+        // terug knop
+        backButton = createRoundedButton(lang.get("settings.back"),
                 new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
         backButton.addActionListener(e -> {
             hideMenu();
-            menuManager.closeNameSelectionPVA();
-
+            menuManager.returnToMainMenuFromSettings();
         });
-        // add en ruimte ertussen
-        centerPanel.add(speler1Label);
+        
+        // ruimte ertussen
+        centerPanel.add(languageLabel);
         centerPanel.add(Box.createVerticalStrut(3));
-        centerPanel.add(textField1);
-        centerPanel.add(Box.createVerticalStrut(40));
-        centerPanel.add(startButton);
-        centerPanel.add(Box.createVerticalStrut(10));
+        centerPanel.add(languageComboBox);
+        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(darkmodeLabel);
+        centerPanel.add(Box.createVerticalStrut(3));
+        centerPanel.add(darkModeButton);
+        centerPanel.add(Box.createVerticalStrut(60));
         centerPanel.add(backButton);
 
-        add(centerPanel, BorderLayout.CENTER);
 
+        add(centerPanel, BorderLayout.CENTER);
+            
+            
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -112,7 +144,23 @@ public class TicTacToeNameTournament extends JFrame{
             }
         });
     }
-    // lijkt op tictactoemenu
+    // het veranderen van de taal
+    private void changeLanguage(String languageCode) {
+            
+        
+            lang.setLanguage(languageCode);
+            String languageName = lang.getCurrentLanguageName();
+        
+            JOptionPane.showMessageDialog(this,
+            lang.get("settings.language.changed", languageName),
+            lang.get("settings.language.changed.title"),
+            JOptionPane.INFORMATION_MESSAGE);
+
+            updateLanguage();
+            menuManager.updateLanguage();
+    }
+
+// opmaak die lijkt op tictactoemenu
     private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
         var btn = new JButton(text) {
             @Override
@@ -127,8 +175,8 @@ public class TicTacToeNameTournament extends JFrame{
                 if (hover == null) hover = hoverColor;
                 if (border == null) border = borderColor;
 
-                g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
 
+                g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
                 g2.setColor(border);
                 g2.setStroke(new BasicStroke(2));
@@ -215,31 +263,62 @@ public class TicTacToeNameTournament extends JFrame{
     }
 
     public void updateLanguage() {
-        setTitle(lang.get("tictactoe.name.title"));
-        titleLabel.setText(lang.get("tictactoe.name.title"));
-        speler1Label.setText(lang.get("tictactoe.name.playername"));
-        startButton.setText(lang.get("tictactoe.name.startgame"));
-        backButton.setText(lang.get("tictactoe.name.back"));
+        setTitle(lang.get("settings.title"));
+        titleLabel.setText(lang.get("settings.title"));
+        languageLabel.setText(lang.get("settings.language"));
+        backButton.setText(lang.get("settings.back"));
+        darkModeButton.setText(lang.get("settings.darkmode"));
+        darkmodeLabel.setText(lang.get("settings.changemode"));
+
+        String[] languageOptions = {
+                lang.get("settings.language.dutch"),
+                lang.get("settings.language.english"),
+                lang.get("settings.language.vietnamese"),
+                lang.get("settings.language.chinese")
+        };
+
+        // Store current selection
+        int currentIndex = languageComboBox.getSelectedIndex();
+
+        // Remove listener temporarily to avoid triggering language change
+        java.awt.event.ActionListener[] listeners = languageComboBox.getActionListeners();
+        for (java.awt.event.ActionListener listener : listeners) {
+            languageComboBox.removeActionListener(listener);
+        }
+
+        // Update items
+        languageComboBox.removeAllItems();
+        for (String option : languageOptions) {
+            languageComboBox.addItem(option);
+        }
+        languageComboBox.setSelectedIndex(currentIndex);
+
+        // Re-add listeners
+        for (java.awt.event.ActionListener listener : listeners) {
+            languageComboBox.addActionListener(listener);
+        }
     }
 
-    public void updateTheme() {
+
+    private void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
         getContentPane().setBackground(theme.getBackgroundColor());
         centerPanel.setBackground(theme.getBackgroundColor());
         topPanel.setBackground(theme.getBackgroundColor());
 
-        startButton.putClientProperty("baseColor", theme.getMainButtonColor());
-        startButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
-        startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
-
         backButton.putClientProperty("baseColor", theme.getMainButtonColor());
         backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
-        titleLabel.setForeground(theme.getFontColor1());
-        speler1Label.setForeground(theme.getFontColor2());
+        darkModeButton.putClientProperty("baseColor", theme.getButtonColor());
+        darkModeButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+        darkModeButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
-        textField1.setBackground(theme.getTextFieldColor());
+        titleLabel.setForeground(theme.getFontColor1());
+        languageLabel.setForeground(theme.getFontColor2());
+        languageComboBox.setBackground(theme.getTextFieldColor());
+        darkmodeLabel.setForeground(theme.getFontColor2());
+
         repaint();
     }
 
@@ -250,7 +329,4 @@ public class TicTacToeNameTournament extends JFrame{
     public void hideMenu() {
         setVisible(false);
     }
-
-
-
 }

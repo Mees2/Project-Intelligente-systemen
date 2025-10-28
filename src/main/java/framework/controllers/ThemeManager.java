@@ -1,4 +1,4 @@
-package menu;
+package framework.controllers;
 
 import java.awt.Color;
 import java.util.ArrayList;

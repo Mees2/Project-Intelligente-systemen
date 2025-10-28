@@ -8,8 +8,8 @@ import java.awt.event.WindowEvent;
 import framework.bordspel.AbstractBordSpel;
 import framework.bordspel.SpelStatus;
 import framework.spelers.AbstractSpeler;
-import menu.LanguageManager;
-import menu.MenuManager;
+import framework.controllers.LanguageManager;
+import framework.controllers.MenuManager;
 
 /**
  * Abstracte basis klasse voor een spel GUI
