@@ -5,12 +5,18 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+/**
+ * Het TicTacToeNameServer submenu waar de gebruiker zijn naam kan invullen,
+ * kan verbinden met de server of kan teruggaan naar het tictactoe submenu
+ */
+
 public class TicTacToeNameServer extends JFrame{
 
         private final MenuManager menuManager;
         private final LanguageManager lang = LanguageManager.getInstance();
         private final ThemeManager theme = ThemeManager.getInstance();
 
+        // store UI components as fields
         private JLabel titleLabel;
         private JLabel speler1Label;
         private JLabel rolLabel;
@@ -20,11 +26,18 @@ public class TicTacToeNameServer extends JFrame{
         private JButton startButton;
         private JButton backButton;
 
+        /**
+        * Constructor voor het TicTacToeNameServer menu
+        * @param menuManager De menumanager die de navigatie beheert
+        */
+
         public TicTacToeNameServer(MenuManager menuManager) {
             this.menuManager = menuManager;
+            // geeft de interface
             initializeMenu();
+            // listener voor het updaten van het thema
             theme.addThemeChangeListener(this::updateTheme);
-
+            // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
             addComponentListener(new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
@@ -34,7 +47,7 @@ public class TicTacToeNameServer extends JFrame{
 
         }
         /**-
-         * Initialiseert de tictactoenamepva interface test***
+         * Initialiseert de tictactoenameserver interface test***
          */
         private void initializeMenu() {
             setTitle("tictactoe.name.title");
@@ -44,36 +57,41 @@ public class TicTacToeNameServer extends JFrame{
             setLayout(new BorderLayout());
             getContentPane().setBackground(new Color(247, 247, 255));
 
+            // titelgedeelte
             topPanel = new JPanel();
             topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
             topPanel.setBackground(new Color(247, 247, 255));
-            // Titel
+
             titleLabel = new JLabel(lang.get("tictactoe.name.title"), JLabel.CENTER);
             titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
             titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             titleLabel.setForeground(new Color(5, 5, 169));
 
+            // voegt de titlelabel en ruimte toe boven en onder de titel
             topPanel.add(Box.createVerticalStrut(10));
             topPanel.add(titleLabel);
             topPanel.add(Box.createVerticalStrut(5));
 
+            // plaatst het topPanel bovenaan het venster
             add(topPanel, BorderLayout.NORTH);
 
+            // gedeelte voor het invoeren van de namen
             centerPanel = new JPanel();
             centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
             centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
             centerPanel.setBackground(new Color(247, 247, 255));
-            // Achtergrondkleur
+            // kleur van dit gedeelte, toppanel en centerpanel moeten beide een achtergrond kleur ingesteld hebben
             Color bodyTextColor = new Color(0x2B6F6E);
-            // Speler 1 tekst
+            // Speler 1 naam titel + inputveld
             speler1Label = new JLabel(lang.get("tictactoe.name.playername"));
             speler1Label.setForeground(bodyTextColor);
             speler1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
-            // Speler 1 inputveld
+
             textField1 = new JTextField();
             textField1.setFont(new Font("SansSerif", Font.PLAIN, 14));
             textField1.setMaximumSize(new Dimension(500, 40));
             textField1.setAlignmentX(Component.CENTER_ALIGNMENT);
+
             // start tictactoe SERVER
             startButton = createRoundedButton(lang.get("tictactoe.name.startgame"),
                     new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
@@ -98,7 +116,7 @@ public class TicTacToeNameServer extends JFrame{
                 menuManager.closeNameSelectionPVA();
 
             });
-            // add en ruimte ertussen
+            // voegt labels en buttens toe en voegt ruimte tussen de componenten van het invoeren en de start en backbutton
             centerPanel.add(speler1Label);
             centerPanel.add(Box.createVerticalStrut(3));
             centerPanel.add(textField1);
@@ -107,8 +125,10 @@ public class TicTacToeNameServer extends JFrame{
             centerPanel.add(Box.createVerticalStrut(10));
             centerPanel.add(backButton);
 
+            // plaatst centerpanel in het midden
             add(centerPanel, BorderLayout.CENTER);
 
+            // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
             addComponentListener(new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
@@ -116,7 +136,7 @@ public class TicTacToeNameServer extends JFrame{
                 }
             });
         }
-        // lijkt op tictactoemenu
+    /** Methodes om de buttons mee te creeren */
         private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
             var btn = new JButton(text) {
                 @Override
@@ -140,6 +160,7 @@ public class TicTacToeNameServer extends JFrame{
                 }
 
                 @Override
+                // het dynamisch schalen van de buttons
                 public Dimension getPreferredSize() {
                     double scale = 1.0;
                     if (getParent() != null) {
@@ -165,6 +186,7 @@ public class TicTacToeNameServer extends JFrame{
                 }
             };
 
+            // de style van de knoppen
             btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
             btn.setForeground(enabled ? Color.WHITE : new Color(100, 100, 100));
             btn.setContentAreaFilled(false);
@@ -176,7 +198,7 @@ public class TicTacToeNameServer extends JFrame{
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
             return btn;
         }
-
+    /** past de groote van de componenten aan afhankelijk van de grote van het venster */
         private void resizeComponents() {
             double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
             scale = Math.max(0.7, Math.min(scale, 2.0));
@@ -184,7 +206,7 @@ public class TicTacToeNameServer extends JFrame{
             revalidate();
             repaint();
         }
-
+    /** schaalt de knoppen */
         private void resizeAllComponents(Container container, double scale) {
             for (Component comp : container.getComponents()) {
                 if (comp instanceof JButton) {
@@ -215,7 +237,7 @@ public class TicTacToeNameServer extends JFrame{
                 }
             }
         }
-
+    /** Update alle UI teksten naar de huidige taal */
         public void updateLanguage() {
             setTitle(lang.get("tictactoe.name.title"));
             titleLabel.setText(lang.get("tictactoe.name.title"));
@@ -223,7 +245,8 @@ public class TicTacToeNameServer extends JFrame{
             startButton.setText(lang.get("tictactoe.name.startgame"));
             backButton.setText(lang.get("tictactoe.name.back"));
         }
-
+    /** De kleuren worden verandert van de componenten als er
+     wordt geswitcht tussen light en dark mode */
         public void updateTheme() {
             ThemeManager theme = ThemeManager.getInstance();
             getContentPane().setBackground(theme.getBackgroundColor());
@@ -245,11 +268,11 @@ public class TicTacToeNameServer extends JFrame{
             repaint();
         }
 
-
+    /** maakt het menu zichtbaar */
     public void showMenu() {
             setVisible(true);
         }
-
+    /** verbergt het menu */
         public void hideMenu() {
             setVisible(false);
         }

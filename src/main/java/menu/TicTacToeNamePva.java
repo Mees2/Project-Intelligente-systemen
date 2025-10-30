@@ -68,7 +68,7 @@ public class TicTacToeNamePva extends JFrame {
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setForeground(new Color(5, 5, 169));
 
-        // voegt ruimte toe boven en onder de titel
+        // voegt titlelabel toe en voegt ruimte toe boven en onder de titel
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(titleLabel);
         topPanel.add(Box.createVerticalStrut(5));
@@ -149,7 +149,7 @@ public class TicTacToeNamePva extends JFrame {
             hideMenu();
             menuManager.closeNameSelectionPVA();
         });
-        // Voegt ruimte toe tussen center componenten van invoer en buttons
+        // Voegt buttons en labels toe en ruimte toe tussen center componenten van invoer en buttons
         centerPanel.add(speler1Label);
         centerPanel.add(Box.createVerticalStrut(3));
         centerPanel.add(textField1);
@@ -175,7 +175,7 @@ public class TicTacToeNamePva extends JFrame {
             }
         });
     }
-    // Methodes om de buttons mee te creeren
+    /** Methodes om de buttons mee te creeren */
     private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
         var btn = new JButton(text) {
             @Override
@@ -237,7 +237,7 @@ public class TicTacToeNamePva extends JFrame {
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         return btn;
     }
-    // past de groote van de componenten aan afhankelijk van de grote van het venster
+    /** past de groote van de componenten aan afhankelijk van de grote van het venster */
     private void resizeComponents() {
         double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
         scale = Math.max(0.7, Math.min(scale, 2.0));
@@ -245,7 +245,7 @@ public class TicTacToeNamePva extends JFrame {
         revalidate();
         repaint();
     }
-    // schaalt de knoppen
+    /** schaalt de knoppen */
     private void resizeAllComponents(Container container, double scale) {
         for (Component comp : container.getComponents()) {
             if (comp instanceof JButton) {
@@ -276,7 +276,7 @@ public class TicTacToeNamePva extends JFrame {
             }
         }
     }
-    // De teksten worden aangepast als de taal verandert
+    /** De teksten worden aangepast als de taal verandert */
     public void updateLanguage() {
         setTitle(lang.get("tictactoe.name.title"));
         titleLabel.setText(lang.get("tictactoe.name.title"));
@@ -285,8 +285,8 @@ public class TicTacToeNamePva extends JFrame {
         startButton.setText(lang.get("tictactoe.name.startgame"));
         backButton.setText(lang.get("tictactoe.name.back"));
     }
-    // De kleuren worden verandert van de componenten als er
-    // wordt geswitcht tussen light en dark mode
+    /** De kleuren worden verandert van de componenten als er
+     wordt geswitcht tussen light en dark mode */
     public void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
         getContentPane().setBackground(theme.getBackgroundColor());
@@ -316,11 +316,11 @@ public class TicTacToeNamePva extends JFrame {
 
         repaint();
     }
-    // maakt het menu zichtbaar
+    /** maakt het menu zichtbaar */
     public void showMenu() {
         setVisible(true);
     }
-    // verbergt het menu
+    /** verbergt het menu */
     public void hideMenu() {
         setVisible(false);
     }

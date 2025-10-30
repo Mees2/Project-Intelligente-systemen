@@ -1,14 +1,14 @@
 package menu;
 
-/**
- * Het TicTacToeNamePvp submenu waar de gebruikers hun namen kan vullen bij de rol X of de rol O
- * en Terug naar kan gaan naar het TicTacToe menu om een variant te kiezen van tictactoe
- */
-
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+
+/**
+ * Het TicTacToeNamePvp submenu waar de gebruikers hun namen kan vullen bij de rol X of de rol O
+ * en Terug naar kan gaan naar het TicTacToe menu om een variant te kiezen van tictactoe
+ */
 
 public class TicTacToeNamePvp extends JFrame {
     private final MenuManager menuManager;
@@ -66,7 +66,7 @@ public class TicTacToeNamePvp extends JFrame {
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setForeground(new Color(5,5,169));
 
-        // voegt ruimte toe boven en onder de titel
+        // voegt de titlelabel en ruimte toe boven en onder de titel
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(titleLabel);
         topPanel.add(Box.createVerticalStrut(10));
@@ -122,7 +122,7 @@ public class TicTacToeNamePvp extends JFrame {
         new Color(184,107,214),new Color(204,127,234), new Color(120,60,150), true);
         backButton.addActionListener(e -> menuManager.closeNameSelectionPVP());
 
-        // voegt ruimte tussen de componenten van het invoeren en de start en backbutton
+        // voegt labels en buttens toe en voegt ruimte tussen de componenten van het invoeren en de start en backbutton
         centerPanel.add(speler1Label);
         centerPanel.add(Box.createVerticalStrut(5));
         centerPanel.add(textField1);
@@ -148,33 +148,33 @@ public class TicTacToeNamePvp extends JFrame {
 
     }
 
-// Methodes om de buttons mee te creeren
-private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled){
-    var btn = new JButton(text){
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+/** Methodes om de buttons mee te creeren */
+    private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled){
+        var btn = new JButton(text){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            Color base = (Color) getClientProperty("baseColor");
-            Color hover = (Color) getClientProperty("hoverColor");
-            Color border = (Color) getClientProperty("borderColor");
-            if (base == null) base = baseColor;
-            if (hover == null) hover = hoverColor;
-            if (border == null) border = borderColor;
+                Color base = (Color) getClientProperty("baseColor");
+                Color hover = (Color) getClientProperty("hoverColor");
+                Color border = (Color) getClientProperty("borderColor");
+                if (base == null) base = baseColor;
+                if (hover == null) hover = hoverColor;
+                if (border == null) border = borderColor;
 
-            g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
+                g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
 
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-            g2.setColor(border);
-            g2.setStroke(new BasicStroke(2));
-            g2.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 30, 30);
-            g2.dispose();
-            super.paintComponent(g);
-        }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+                g2.setColor(border);
+                g2.setStroke(new BasicStroke(2));
+                g2.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 30, 30);
+                g2.dispose();
+                super.paintComponent(g);
+            }
 
-        @Override
-        // het dynamisch schalen van de buttons
+            @Override
+            // het dynamisch schalen van de buttons
         public Dimension getPreferredSize() {
             double scale = 1.0;
             if (getParent() != null) {
@@ -213,7 +213,7 @@ private JButton createRoundedButton(String text, Color baseColor, Color hoverCol
 
     return btn;
 }
-// past de groote van de componenten aan afhankelijk van de grote van het venster
+/** past de groote van de componenten aan afhankelijk van de grote van het venster */
 private void resizeComponents() {
     double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
     scale = Math.max(0.7, Math.min(scale, 2.0));
@@ -221,7 +221,7 @@ private void resizeComponents() {
     revalidate();
     repaint();
 }
-// schaalt de knoppen
+/** schaalt de knoppen */
 private void resizeAllButtons(Container container, double scale) {
     for (Component comp : container.getComponents()) {
         if (comp instanceof JButton) {
@@ -254,8 +254,8 @@ private void resizeAllButtons(Container container, double scale) {
         }
     }
 }
-   
-    // De teksten worden aangepast als de taal verandert
+
+    /** Update alle UI teksten naar de huidige taal */
     public void updateLanguage() {
         setTitle(lang.get("tictactoe.name.title"));
         titleLabel.setText(lang.get("tictactoe.name.title"));
@@ -265,8 +265,8 @@ private void resizeAllButtons(Container container, double scale) {
         backButton.setText(lang.get("tictactoe.name.back"));
     }
 
-    // De kleuren worden verandert van de componenten als er
-    // wordt geswitcht tussen light en dark mode
+    /** De kleuren worden verandert van de componenten als er
+     wordt geswitcht tussen light en dark mode */
     public void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
         getContentPane().setBackground(theme.getBackgroundColor());
@@ -292,11 +292,11 @@ private void resizeAllButtons(Container container, double scale) {
 
         repaint();
     }
-    // maakt het menu zichtbaar
+    /** maakt het menu zichtbaar */
     public void showMenu() {
         setVisible(true);
     }
-    // verbergt het menu
+    /** verbergt het menu */
     public void hideMenu() {
         setVisible(false);
     }
