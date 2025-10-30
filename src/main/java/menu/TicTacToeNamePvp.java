@@ -1,5 +1,10 @@
 package menu;
 
+/**
+ * Het TicTacToeNamePvp submenu waar de gebruikers hun namen kan vullen bij de rol X of de rol O
+ * en Terug naar kan gaan naar het TicTacToe menu om een variant te kiezen van tictactoe
+ */
+
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.ComponentAdapter;
@@ -21,12 +26,18 @@ public class TicTacToeNamePvp extends JFrame {
     private JTextField textField1;
     private JTextField textField2;
 
+    /**
+     * Constructor voor het TicTacToeNamePVP menu
+     * @param menuManager De menumanager die de navigatie beheert
+     */
+
     public TicTacToeNamePvp(MenuManager menuManager) {
         this.menuManager = menuManager;
+        // geeft de interface
         initializeMenu();
-
+        // listener voor het updaten van het thema
         theme.addThemeChangeListener(this::updateTheme);
-
+        // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -44,70 +55,74 @@ public class TicTacToeNamePvp extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(247,247,255));
-        
+
+        // titelgedeelte
         topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        // achtergrond
         topPanel.setBackground(new Color(247,247,255));
 
-        // titel label
         titleLabel = new JLabel(lang.get("tictactoe.name.title"), JLabel.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setForeground(new Color(5,5,169));
 
+        // voegt ruimte toe boven en onder de titel
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(titleLabel);
         topPanel.add(Box.createVerticalStrut(10));
 
+        // plaatst het topPanel bovenaan het venster
         add(topPanel, BorderLayout.NORTH);
 
+        // gedeelte voor het invoeren van de namen
         centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         centerPanel.setBackground(new Color(247,247,255));
-
-        // kleur body tekst
+        // kleur van dit gedeelte, toppanel en centerpanel moeten beide een achtergrond kleur ingesteld hebben
         Color bodyTextColor = new Color(0x2B6F6E);
-        // Speler 1 tekst
+        // Speler 1 naam titel + inputveld
         speler1Label = new JLabel(lang.get("tictactoe.name.playername1"));
         speler1Label.setForeground(bodyTextColor);
         speler1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // Speler 1 inputveld
+
         textField1 = new JTextField();
         textField1.setFont(new Font("SansSerif", Font.PLAIN, 14));
         textField1.setMaximumSize(new Dimension(500, 40));
         textField1.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // Speler 2 tekst
+
+        // Speler 2 naam titel + inputveld
         speler2Label = new JLabel(lang.get("tictactoe.name.playername2"));
         speler2Label.setForeground(bodyTextColor);
         speler2Label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // Speler 2 inputveld
+
         textField2 = new JTextField();
         textField2.setFont(new Font("SansSerif", Font.PLAIN, 14));
         textField2.setMaximumSize(new Dimension(500, 40));
         textField2.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // Startbutton met check
+
+        // Startbutton
         startButton = createRoundedButton(lang.get("tictactoe.name.startgame"),
         new Color(184,107,214),new Color(204,127,234), new Color(120,60,150), true);
         startButton.addActionListener(e -> {
             String speler1naam = textField1.getText().trim();
             String speler2naam = textField2.getText().trim();
 
+            // beide namen moeten ingevuld zijn, anders error
             if (speler1naam.isEmpty() || speler2naam.isEmpty()) {
                 JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyname"), lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
+            // Start het spel via menumanager
             this.hideMenu();
             menuManager.startTicTacToeGame("PVP", speler1naam, speler2naam);
         });
-        // backbutton
+        // backbutton naar tictactoemenu
         backButton = createRoundedButton(lang.get("tictactoe.name.back"),
         new Color(184,107,214),new Color(204,127,234), new Color(120,60,150), true);
         backButton.addActionListener(e -> menuManager.closeNameSelectionPVP());
 
-        // Add met ruimte ertussen
+        // voegt ruimte tussen de componenten van het invoeren en de start en backbutton
         centerPanel.add(speler1Label);
         centerPanel.add(Box.createVerticalStrut(5));
         centerPanel.add(textField1);
@@ -120,8 +135,10 @@ public class TicTacToeNamePvp extends JFrame {
         centerPanel.add(Box.createVerticalStrut(10));
         centerPanel.add(backButton);
 
+        // plaatst centerpanel in het midden
         add(centerPanel, BorderLayout.CENTER);
 
+        // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -131,7 +148,7 @@ public class TicTacToeNamePvp extends JFrame {
 
     }
 
-// Gekopieerd van tictactoemenu
+// Methodes om de buttons mee te creeren
 private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled){
     var btn = new JButton(text){
         @Override
@@ -157,6 +174,7 @@ private JButton createRoundedButton(String text, Color baseColor, Color hoverCol
         }
 
         @Override
+        // het dynamisch schalen van de buttons
         public Dimension getPreferredSize() {
             double scale = 1.0;
             if (getParent() != null) {
@@ -182,7 +200,7 @@ private JButton createRoundedButton(String text, Color baseColor, Color hoverCol
         }
 
     };
-
+    // de style van de knoppen
     btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
     btn.setForeground(enabled ? Color.WHITE : new Color(100,100,100));
     btn.setContentAreaFilled(false);
@@ -195,7 +213,7 @@ private JButton createRoundedButton(String text, Color baseColor, Color hoverCol
 
     return btn;
 }
-
+// past de groote van de componenten aan afhankelijk van de grote van het venster
 private void resizeComponents() {
     double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
     scale = Math.max(0.7, Math.min(scale, 2.0));
@@ -203,7 +221,7 @@ private void resizeComponents() {
     revalidate();
     repaint();
 }
-
+// schaalt de knoppen
 private void resizeAllButtons(Container container, double scale) {
     for (Component comp : container.getComponents()) {
         if (comp instanceof JButton) {
@@ -237,7 +255,7 @@ private void resizeAllButtons(Container container, double scale) {
     }
 }
    
-
+    // De teksten worden aangepast als de taal verandert
     public void updateLanguage() {
         setTitle(lang.get("tictactoe.name.title"));
         titleLabel.setText(lang.get("tictactoe.name.title"));
@@ -247,6 +265,8 @@ private void resizeAllButtons(Container container, double scale) {
         backButton.setText(lang.get("tictactoe.name.back"));
     }
 
+    // De kleuren worden verandert van de componenten als er
+    // wordt geswitcht tussen light en dark mode
     public void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
         getContentPane().setBackground(theme.getBackgroundColor());
@@ -272,11 +292,11 @@ private void resizeAllButtons(Container container, double scale) {
 
         repaint();
     }
-
+    // maakt het menu zichtbaar
     public void showMenu() {
         setVisible(true);
     }
-
+    // verbergt het menu
     public void hideMenu() {
         setVisible(false);
     }
