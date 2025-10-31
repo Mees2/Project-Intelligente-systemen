@@ -1,4 +1,8 @@
-package menu;
+package framework.gui.menu.tictactoe;
+
+import framework.controllers.LanguageManager;
+import framework.controllers.MenuManager;
+import framework.controllers.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,8 +39,7 @@ public class TicTacToeNameServer extends JFrame{
             this.menuManager = menuManager;
             // geeft de interface
             initializeMenu();
-            // listener voor het updaten van het thema
-            theme.addThemeChangeListener(this::updateTheme);
+            theme.addThemeChangeListener(this::updateTheme);// registers for theme notifs
             // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
             addComponentListener(new ComponentAdapter() {
                 @Override
@@ -248,11 +251,12 @@ public class TicTacToeNameServer extends JFrame{
     /** De kleuren worden verandert van de componenten als er
      wordt geswitcht tussen light en dark mode */
         public void updateTheme() {
-            ThemeManager theme = ThemeManager.getInstance();
-            getContentPane().setBackground(theme.getBackgroundColor());
-            centerPanel.setBackground(theme.getBackgroundColor());
-            topPanel.setBackground(theme.getBackgroundColor());
+            ThemeManager theme = ThemeManager.getInstance(); // Get current theme instance
+            getContentPane().setBackground(theme.getBackgroundColor()); // Update background color
+            centerPanel.setBackground(theme.getBackgroundColor()); // Update center panel background
+            topPanel.setBackground(theme.getBackgroundColor()); // Update top panel background
 
+            //Gets new theme button colors and stores them in client properties
             startButton.putClientProperty("baseColor", theme.getMainButtonColor());
             startButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
             startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
@@ -261,14 +265,18 @@ public class TicTacToeNameServer extends JFrame{
             backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
             backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
+            // Updates font colors
             titleLabel.setForeground(theme.getFontColor1());
             speler1Label.setForeground(theme.getFontColor2());
 
+            // Updates text field background
             textField1.setBackground(theme.getTextFieldColor());
             repaint();
         }
 
-    /** maakt het menu zichtbaar */
+    /**
+     * Toont het TicTacToe menu
+     */
     public void showMenu() {
             setVisible(true);
         }

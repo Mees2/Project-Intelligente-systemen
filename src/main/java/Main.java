@@ -1,5 +1,5 @@
 
-import menu.MenuManager;
+import framework.controllers.MenuManager;
 import javax.swing.UIManager;
 
 import server.ClientTicTacToe;

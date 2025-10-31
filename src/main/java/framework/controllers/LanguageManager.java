@@ -1,4 +1,4 @@
-package menu;
+package framework.controllers;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,8 @@
-package menu;
+package framework.gui.menu.tictactoe;
+
+import framework.controllers.LanguageManager;
+import framework.controllers.MenuManager;
+import framework.controllers.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +36,7 @@ public class TicTacToeMenu extends JFrame {
         this.menuManager = menuManager;
         initializeMenu();
 
-        theme.addThemeChangeListener(this::updateTheme);
+        theme.addThemeChangeListener(this::updateTheme); // registers for theme notifs
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -246,9 +250,10 @@ public class TicTacToeMenu extends JFrame {
      * Update het thema van het menu
      */
     public void updateTheme() {
-        ThemeManager theme = ThemeManager.getInstance();
-        getContentPane().setBackground(theme.getBackgroundColor());
+        ThemeManager theme = ThemeManager.getInstance(); // Get current theme instance
+        getContentPane().setBackground(theme.getBackgroundColor()); // Update background color
 
+        //Gets new theme button colors and stores them in client properties
         pvpButton.putClientProperty("baseColor", theme.getButtonColor());
         pvpButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         pvpButton.putClientProperty("borderColor", theme.getButtonColor().darker());
@@ -271,7 +276,7 @@ public class TicTacToeMenu extends JFrame {
 
 
 
-
+        // Updates button text colors
         titleLabel.setForeground(theme.getFontColor1());
 
         repaint();
@@ -292,5 +297,4 @@ public class TicTacToeMenu extends JFrame {
         setVisible(false);
     }
 }
-
 

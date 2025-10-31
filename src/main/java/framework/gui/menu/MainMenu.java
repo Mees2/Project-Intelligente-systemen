@@ -1,24 +1,29 @@
-package menu;
+package framework.gui.menu;
+
+import framework.controllers.LanguageManager;
+import framework.controllers.MenuManager;
 
 import javax.swing.*;
-import java.awt.*;
+import java.io.Serial;
 
 /**
  * Het hoofdmenu van de spelcollectie.
  */
-public final class MainMenu extends JFrame {
+public final class MainMenu extends JFrame { // creates the final MM class that inherits from JFrame
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
     private MainMenuPanel mainMenuPanel; // Add reference to the panel
 
-
+    // constructor for the MainMenu class
     public MainMenu(MenuManager menuManager) {
         this.menuManager = menuManager;
         initializeMenu();
     }
 
+    // Creates and configures the main Jframe window
     private void initializeMenu() {
         setTitle(lang.get("main.title"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -40,10 +45,16 @@ public final class MainMenu extends JFrame {
         }
     }
 
+    /**
+     * Toont het TicTacToe menu
+     */
     public void showMenu() {
         setVisible(true);
     }
 
+    /**
+     * Verbergt het TicTacToe menu
+     */
     public void hideMenu() {
         setVisible(false);
     }

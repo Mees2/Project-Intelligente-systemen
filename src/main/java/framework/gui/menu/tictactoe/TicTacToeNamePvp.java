@@ -1,4 +1,8 @@
-package menu;
+package framework.gui.menu.tictactoe;
+
+import framework.controllers.LanguageManager;
+import framework.controllers.MenuManager;
+import framework.controllers.ThemeManager;
 
 import java.awt.*;
 import javax.swing.*;
@@ -35,8 +39,7 @@ public class TicTacToeNamePvp extends JFrame {
         this.menuManager = menuManager;
         // geeft de interface
         initializeMenu();
-        // listener voor het updaten van het thema
-        theme.addThemeChangeListener(this::updateTheme);
+        theme.addThemeChangeListener(this::updateTheme);// registers for theme notifs
         // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -108,7 +111,6 @@ public class TicTacToeNamePvp extends JFrame {
             String speler1naam = textField1.getText().trim();
             String speler2naam = textField2.getText().trim();
 
-            // beide namen moeten ingevuld zijn, anders error
             if (speler1naam.isEmpty() || speler2naam.isEmpty()) {
                 JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyname"), lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                 return;
@@ -254,6 +256,7 @@ private void resizeAllButtons(Container container, double scale) {
         }
     }
 }
+   
 
     /** Update alle UI teksten naar de huidige taal */
     public void updateLanguage() {
@@ -268,11 +271,12 @@ private void resizeAllButtons(Container container, double scale) {
     /** De kleuren worden verandert van de componenten als er
      wordt geswitcht tussen light en dark mode */
     public void updateTheme() {
-        ThemeManager theme = ThemeManager.getInstance();
-        getContentPane().setBackground(theme.getBackgroundColor());
-        centerPanel.setBackground(theme.getBackgroundColor());
-        topPanel.setBackground(theme.getBackgroundColor());
+        ThemeManager theme = ThemeManager.getInstance(); // Get current theme instance
+        getContentPane().setBackground(theme.getBackgroundColor()); // Update background color
+        centerPanel.setBackground(theme.getBackgroundColor()); // Update center panel background
+        topPanel.setBackground(theme.getBackgroundColor()); // Update top panel background
 
+        //Gets new theme button colors and stores them in client properties
         startButton.putClientProperty("baseColor", theme.getMainButtonColor());
         startButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
@@ -281,22 +285,29 @@ private void resizeAllButtons(Container container, double scale) {
         backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
+        // Update font colors
         titleLabel.setForeground(theme.getFontColor1());
         speler1Label.setForeground(theme.getFontColor2());
         speler2Label.setForeground(theme.getFontColor2());
 
-
+        // Update text field colors
         textField1.setBackground(theme.getTextFieldColor());
         textField2.setBackground(theme.getTextFieldColor());
 
 
         repaint();
     }
-    /** maakt het menu zichtbaar */
+
+    /**
+     * Toont het TicTacToe menu
+     */
     public void showMenu() {
         setVisible(true);
     }
-    /** verbergt het menu */
+
+    /**
+     * Verbergt het TicTacToe menu
+     */
     public void hideMenu() {
         setVisible(false);
     }

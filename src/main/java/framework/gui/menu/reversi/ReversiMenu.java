@@ -1,4 +1,7 @@
-package menu;
+package framework.gui.menu.reversi;
+
+import framework.controllers.LanguageManager;
+import framework.controllers.MenuManager;
 
 import javax.swing.*;
 import java.awt.*;

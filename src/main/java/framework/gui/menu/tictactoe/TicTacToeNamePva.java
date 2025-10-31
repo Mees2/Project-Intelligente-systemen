@@ -1,4 +1,8 @@
-package menu;
+package framework.gui.menu.tictactoe;
+
+import framework.controllers.LanguageManager;
+import framework.controllers.MenuManager;
+import framework.controllers.ThemeManager;
 
 import java.awt.*;
 import javax.swing.*;
@@ -37,7 +41,8 @@ public class TicTacToeNamePva extends JFrame {
         // geeft interface
         initializeMenu();
         // listener voor het updaten van het thema
-        theme.addThemeChangeListener(this::updateTheme);
+        theme.addThemeChangeListener(this::updateTheme);// registers for theme notifs
+
         // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -304,23 +309,30 @@ public class TicTacToeNamePva extends JFrame {
         backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
+        // Updates font colors
         titleLabel.setForeground(theme.getFontColor1());
         speler1Label.setForeground(theme.getFontColor2());
         rolLabel.setForeground(theme.getFontColor2());
         obutton.setForeground(theme.getFontColor2());
         xbutton.setForeground(theme.getFontColor2());
 
-
+        // Updates text field background color
         textField1.setBackground(theme.getTextFieldColor());
 
 
         repaint();
     }
-    /** maakt het menu zichtbaar */
+
+    /**
+     * Toont het TicTacToe menu
+     */
     public void showMenu() {
         setVisible(true);
     }
-    /** verbergt het menu */
+
+    /**
+     * Verbergt het TicTacToe menu
+     */
     public void hideMenu() {
         setVisible(false);
     }

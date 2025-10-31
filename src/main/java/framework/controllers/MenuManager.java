@@ -1,6 +1,12 @@
-package menu;
+package framework.controllers;
 
 import javax.swing.JOptionPane;
+
+import framework.gui.menu.*;
+import framework.gui.menu.reversi.ReversiGame;
+import framework.gui.menu.reversi.ReversiMenu;
+import framework.gui.menu.reversi.ReversiNamePvp;
+import framework.gui.menu.tictactoe.*;
 import server.ClientTicTacToe;
 
 
