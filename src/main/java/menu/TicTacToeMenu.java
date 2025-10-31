@@ -15,6 +15,7 @@ import java.awt.event.ComponentEvent;
 public class TicTacToeMenu extends JFrame {
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
+    private final ThemeManager theme = ThemeManager.getInstance();
 
     private JLabel titleLabel;
     private JButton pvpButton;
@@ -30,6 +31,15 @@ public class TicTacToeMenu extends JFrame {
     public TicTacToeMenu(MenuManager menuManager) {
         this.menuManager = menuManager;
         initializeMenu();
+
+        theme.addThemeChangeListener(this::updateTheme);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeComponents();
+            }
+        });
     }
 
     /**
@@ -105,9 +115,17 @@ private JButton createRoundedButton(String text, Color baseColor, Color hoverCol
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(getModel().isRollover() && isEnabled() ? hoverColor : baseColor);
+
+            Color base = (Color) getClientProperty("baseColor");
+            Color hover = (Color) getClientProperty("hoverColor");
+            Color border = (Color) getClientProperty("borderColor");
+            if (base == null) base = baseColor;
+            if (hover == null) hover = hoverColor;
+            if (border == null) border = borderColor;
+
+            g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-            g2.setColor(borderColor);
+            g2.setColor(border);
             g2.setStroke(new BasicStroke(2));
             g2.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 30, 30);
             g2.dispose();
@@ -198,6 +216,39 @@ private void resizeAllButtons(Container container, double scale) {
         backButton.setText(lang.get("tictactoe.menu.back"));
     }
 
+    public void updateTheme() {
+        ThemeManager theme = ThemeManager.getInstance();
+        getContentPane().setBackground(theme.getBackgroundColor());
+
+        pvpButton.putClientProperty("baseColor", theme.getButtonColor());
+        pvpButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+        pvpButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+        pvaButton.putClientProperty("baseColor", theme.getButtonColor());
+        pvaButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+        pvaButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+        serverButton.putClientProperty("baseColor", theme.getButtonColor());
+        serverButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+        serverButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+        tournamentButton.putClientProperty("baseColor", theme.getButtonColor());
+        tournamentButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+        tournamentButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+        backButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
+        backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
+
+
+
+
+        titleLabel.setForeground(theme.getFontColor1());
+
+        repaint();
+    }
+
+
     /**
      * Toont het TicTacToe menu
      */
@@ -213,4 +264,4 @@ private void resizeAllButtons(Container container, double scale) {
     }
 }
 
-//nieuwe
+

@@ -5,22 +5,47 @@ import javax.swing.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+/**
+ * Het TicTacToeNamePva submenu waar de gebruiker zijn naam en rol in kan vullen
+ * en Terug naar kan gaan naar het TicTacToe menu om een variant te kiezen van tictactoe
+ */
+
 public class TicTacToeNamePva extends JFrame {
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
+    private final ThemeManager theme = ThemeManager.getInstance();
 
+    // Store UI components as fields
     private JLabel titleLabel;
     private JLabel speler1Label;
     private JLabel rolLabel;
     private JTextField textField1;
+    private JPanel topPanel;
+    private JPanel centerPanel;
     private JRadioButton xbutton;
     private JRadioButton obutton;
     private JButton startButton;
     private JButton backButton;
 
+    /**
+     * Constructor voor het TicTacToeNamePVA menu
+     * @param menuManager De menumanager die de navigatie beheert
+     */
+
     public TicTacToeNamePva(MenuManager menuManager) {
         this.menuManager = menuManager;
+        // geeft interface
         initializeMenu();
+        // listener voor het updaten van het thema
+        theme.addThemeChangeListener(this::updateTheme);
+        // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeComponents();
+            }
+        });
+
     }
     /**
      * Initialiseert de tictactoenamepva interface test***
@@ -33,48 +58,55 @@ public class TicTacToeNamePva extends JFrame {
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(247, 247, 255));
 
-        JPanel topPanel = new JPanel();
+        // titelgedeelte
+        topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBackground(new Color(247, 247, 255));
-        // Titel
+
         titleLabel = new JLabel(lang.get("tictactoe.name.title"), JLabel.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setForeground(new Color(5, 5, 169));
 
+        // voegt titlelabel toe en voegt ruimte toe boven en onder de titel
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(titleLabel);
         topPanel.add(Box.createVerticalStrut(5));
 
+        // plaatst het toppanel bovenaan het venster
         add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel();
+        // gedeelte voor het invoeren van de namen
+        centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         centerPanel.setBackground(new Color(247, 247, 255));
-        // Achtergrondkleur
+        // kleur van dit gedeelte, toppanel en centerpanel moeten beide een achtergrond kleur ingesteld hebben
         Color bodyTextColor = new Color(0x2B6F6E);
-        // Speler 1 tekst
+        // Speler 1 naam titel + inputveld
         speler1Label = new JLabel(lang.get("tictactoe.name.playername"));
         speler1Label.setForeground(bodyTextColor);
         speler1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // Speler 1 inputveld
+
         textField1 = new JTextField();
         textField1.setFont(new Font("SansSerif", Font.PLAIN, 14));
         textField1.setMaximumSize(new Dimension(500, 40));
         textField1.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // Rol tekst
+
+        // Rol titel + radiobuttons
         rolLabel = new JLabel(lang.get("tictactoe.name.selectrole"));
         rolLabel.setForeground(bodyTextColor);
         rolLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // radio knoppen voor rol
+
         xbutton = new JRadioButton("X");
         obutton = new JRadioButton("O");
 
+        // Hierdoor kan alleen 1 button geselecteerd worden
         ButtonGroup roleGroup = new ButtonGroup();
         roleGroup.add(xbutton);
         roleGroup.add(obutton);
-        // achtergrond voor buttons en allignment
+
+        // achtergrond voor buttons en de uitlijning
         xbutton.setForeground(bodyTextColor);
         obutton.setForeground(bodyTextColor);
         xbutton.setBackground(new Color(247, 247, 255));
@@ -83,24 +115,26 @@ public class TicTacToeNamePva extends JFrame {
         obutton.setOpaque(true);
         xbutton.setAlignmentX(Component.CENTER_ALIGNMENT);
         obutton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // start tictactoepva
+
+        // startbutton
         startButton = createRoundedButton(lang.get("tictactoe.name.startgame"),
                 new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
         startButton.addActionListener(e -> {
             String spelerNaam = textField1.getText().trim();
 
+            // beide namen moeten ingevuld zijn, anders error
             if (spelerNaam.isEmpty()) {
                 JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyname"),
                         lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
+            // er moet perse een rol geselecteerd zijn
             if (!xbutton.isSelected() && !obutton.isSelected()) {
                 JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyrole"),
                         lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
+            // start het spel via menumanager
             hideMenu();
             if (xbutton.isSelected()) {
                 menuManager.startTicTacToeGame("PVA", spelerNaam, "AI");
@@ -108,14 +142,14 @@ public class TicTacToeNamePva extends JFrame {
                 menuManager.startTicTacToeGame("PVA", "AI", spelerNaam);
             }
         });
-        // gaat terug
+        // backbutton naar tictactoemenu
         backButton = createRoundedButton(lang.get("tictactoe.name.back"),
                 new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
         backButton.addActionListener(e -> {
             hideMenu();
             menuManager.closeNameSelectionPVA();
         });
-        // add en ruimte ertussen
+        // Voegt buttons en labels toe en ruimte toe tussen center componenten van invoer en buttons
         centerPanel.add(speler1Label);
         centerPanel.add(Box.createVerticalStrut(3));
         centerPanel.add(textField1);
@@ -130,8 +164,10 @@ public class TicTacToeNamePva extends JFrame {
         centerPanel.add(Box.createVerticalStrut(10));
         centerPanel.add(backButton);
 
+        // plaatst centerpanel in het midden
         add(centerPanel, BorderLayout.CENTER);
 
+        // listeneer voor het automatisch herschalen bij verstergrootteveranderingen
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -139,14 +175,22 @@ public class TicTacToeNamePva extends JFrame {
             }
         });
     }
-    // lijkt op tictactoemenu
+    /** Methodes om de buttons mee te creeren */
     private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
         var btn = new JButton(text) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getModel().isRollover() && isEnabled() ? hoverColor : baseColor);
+
+                Color base = (Color) getClientProperty("baseColor");
+                Color hover = (Color) getClientProperty("hoverColor");
+                Color border = (Color) getClientProperty("borderColor");
+                if (base == null) base = baseColor;
+                if (hover == null) hover = hoverColor;
+                if (border == null) border = borderColor;
+
+                g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
                 g2.setColor(borderColor);
                 g2.setStroke(new BasicStroke(2));
@@ -156,6 +200,7 @@ public class TicTacToeNamePva extends JFrame {
             }
 
             @Override
+            // het dynamisch schalen van de buttons
             public Dimension getPreferredSize() {
                 double scale = 1.0;
                 if (getParent() != null) {
@@ -180,7 +225,7 @@ public class TicTacToeNamePva extends JFrame {
                 return getPreferredSize();
             }
         };
-
+        // de style van de knoppen
         btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
         btn.setForeground(enabled ? Color.WHITE : new Color(100, 100, 100));
         btn.setContentAreaFilled(false);
@@ -192,7 +237,7 @@ public class TicTacToeNamePva extends JFrame {
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         return btn;
     }
-
+    /** past de groote van de componenten aan afhankelijk van de grote van het venster */
     private void resizeComponents() {
         double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
         scale = Math.max(0.7, Math.min(scale, 2.0));
@@ -200,7 +245,7 @@ public class TicTacToeNamePva extends JFrame {
         revalidate();
         repaint();
     }
-
+    /** schaalt de knoppen */
     private void resizeAllComponents(Container container, double scale) {
         for (Component comp : container.getComponents()) {
             if (comp instanceof JButton) {
@@ -231,7 +276,7 @@ public class TicTacToeNamePva extends JFrame {
             }
         }
     }
-
+    /** De teksten worden aangepast als de taal verandert */
     public void updateLanguage() {
         setTitle(lang.get("tictactoe.name.title"));
         titleLabel.setText(lang.get("tictactoe.name.title"));
@@ -240,11 +285,42 @@ public class TicTacToeNamePva extends JFrame {
         startButton.setText(lang.get("tictactoe.name.startgame"));
         backButton.setText(lang.get("tictactoe.name.back"));
     }
+    /** De kleuren worden verandert van de componenten als er
+     wordt geswitcht tussen light en dark mode */
+    public void updateTheme() {
+        ThemeManager theme = ThemeManager.getInstance();
+        getContentPane().setBackground(theme.getBackgroundColor());
+        centerPanel.setBackground(theme.getBackgroundColor());
+        topPanel.setBackground(theme.getBackgroundColor());
+        obutton.setBackground(theme.getBackgroundColor());
+        xbutton.setBackground(theme.getBackgroundColor());
 
+
+        startButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        startButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
+        startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
+
+        backButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
+        startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
+
+        titleLabel.setForeground(theme.getFontColor1());
+        speler1Label.setForeground(theme.getFontColor2());
+        rolLabel.setForeground(theme.getFontColor2());
+        obutton.setForeground(theme.getFontColor2());
+        xbutton.setForeground(theme.getFontColor2());
+
+
+        textField1.setBackground(theme.getTextFieldColor());
+
+
+        repaint();
+    }
+    /** maakt het menu zichtbaar */
     public void showMenu() {
         setVisible(true);
     }
-
+    /** verbergt het menu */
     public void hideMenu() {
         setVisible(false);
     }
