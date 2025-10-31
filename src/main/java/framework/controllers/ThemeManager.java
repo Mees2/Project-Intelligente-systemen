@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ThemeManager {
     private static ThemeManager instance;
-    private List<ThemeChangeListener> listeners = new ArrayList<>();
+    private List<ThemeChangeListener> listeners = new ArrayList<>(); //Gets notified when theme changes
 
     private Color backgroundColor;
     private Color mainButtonColor;
@@ -18,10 +18,10 @@ public class ThemeManager {
     private Color fontColor1;
     private Color fontColor2;
     private Color textfieldColor;
-    private boolean darkMode = false;
+    private boolean darkMode = false; //Tracks dark mode state
 
     private ThemeManager() {
-        setDarkMode(false); // Initialize with light mode
+        setDarkMode(false); // Initialize with light mode by default
     }
 
     public static ThemeManager getInstance() {
@@ -31,18 +31,21 @@ public class ThemeManager {
 
     public void addThemeChangeListener(ThemeChangeListener listener) {
         listeners.add(listener);
-    }
+    } // Registers new listener to receive theme changes
 
     public void removeThemeChangeListener(ThemeChangeListener listener) {
         listeners.remove(listener);
-    }
+    } //Unregisters a listener from receiving theme changes
 
+
+    // Loops all listeners to notify on a theme change call
     private void notifyThemeChanged() {
         for (ThemeChangeListener listener : listeners) {
             listener.onThemeChanged();
         }
     }
 
+    //Getters to retrieve current theme colors
     public Color getBackgroundColor() { return backgroundColor; }
     public Color getMainButtonColor() { return mainButtonColor; }
     public Color getMainButtonColorHover() { return mainButtonColorHover; }
@@ -54,6 +57,7 @@ public class ThemeManager {
     public Color getFontColor2() { return fontColor2; }
     public Color getTextFieldColor(){return textfieldColor;}
 
+    //Setters to manually set updated theme colors
     public void setBackgroundColor(Color color) { backgroundColor = color; }
     public void setMainButtonColor(Color color) { mainButtonColor = color; }
     public void setMainButtonColorHover(Color color) { mainButtonColorHover = color; }
@@ -67,8 +71,9 @@ public class ThemeManager {
 
     public boolean isDarkMode() {
         return darkMode;
-    }
+    } // returns DM state
 
+    // Sets dark mode and updates colors accordingly
     public void setDarkMode(boolean dark) {
         darkMode = dark;
         if (dark) {
@@ -99,6 +104,7 @@ public class ThemeManager {
         notifyThemeChanged();
     }
 
+    // Defines the interface for theme change listeners
     public interface ThemeChangeListener {
         void onThemeChanged();
     }
