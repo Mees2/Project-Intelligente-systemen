@@ -105,6 +105,8 @@ public class SettingsMenu extends JFrame {
                 new Color(61, 169, 166),
                 new Color(81, 189, 186),
                 new Color(40, 120, 120), true);
+
+        // Updates theme according to what mode is selected
         darkModeButton.addActionListener(e -> {
             ThemeManager theme = ThemeManager.getInstance();
             theme.setDarkMode(!theme.isDarkMode());
@@ -168,7 +170,7 @@ public class SettingsMenu extends JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                Color base = (Color) getClientProperty("baseColor");
+                Color base = (Color) getClientProperty("baseColor"); // stores the previous state and updates accordingly
                 Color hover = (Color) getClientProperty("hoverColor");
                 Color border = (Color) getClientProperty("borderColor");
                 if (base == null) base = baseColor;
@@ -299,7 +301,7 @@ public class SettingsMenu extends JFrame {
         }
     }
 
-
+// Updates themes similarily to UpdateLang...
     private void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
         getContentPane().setBackground(theme.getBackgroundColor());
