@@ -82,12 +82,6 @@ public class ClientTicTacToe implements Runnable {
             Thread thread = new Thread(inputHandler); // we zetten de inputhandler op een apparte thread
             thread.start(); //we starten de thread, gebruik nooit run(); dat start geen apparte thread
 
-            //out.println("login "+ "temp"+ LocalDateTime.now().getNano());
-
-            //out.println("get gamelist");
-
-            //out.println("subscribe tic-tac-toe");
-
             String inputMessage; // we maken een input message aan
 
             while((inputMessage = in.readLine()) != null) { // het moet in een loop zodat we input kunnen blijven verwerken
@@ -95,9 +89,6 @@ public class ClientTicTacToe implements Runnable {
 
                 if(inputMessage.contains("YOURTURN")){
                     System.out.println("YOURTURN");
-
-                    //out.println("move 0"); // een eerste kruisje/nulletje komt op plek 0, eeruste vakje links bovenaan
-
                 }
 
             }
@@ -127,7 +118,6 @@ public class ClientTicTacToe implements Runnable {
 	 * Deze methode logt in met de opgegeven gebruikersnaam parameter
 	 * @param name
 	 */
-    private static int clientCounter = 0;
 
 	public void login(String name)
 	{
@@ -149,7 +139,7 @@ public class ClientTicTacToe implements Runnable {
 	}
 	
 	/**
-	 * Vraag de server om een match te starten
+	 * Vraag de server om een match te starten (de server bepaald tegen welke speler wij spelen (random))
 	 */
 	public void requestMatch() {
 		if (isConnected() && out != null) {

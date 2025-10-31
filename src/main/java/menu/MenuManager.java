@@ -209,37 +209,5 @@ public final class MenuManager {
         }
     }
     
-    /**
-     * Verbind met de TicTacToe server
-     */
-    public void connectToServer() {
-        // Maak een nieuwe client aan als deze nog niet bestaat
-        if (serverClient == null) {
-            serverClient = new ClientTicTacToe();
-        }
-        
-        // Probeer te verbinden
-        boolean connected = serverClient.connectToServer();
-        
-        if (connected) {
-            JOptionPane.showMessageDialog(
-                null,
-                "Succesvol verbonden met de server!\nServer: 127.0.0.1:7789",
-                "Server Verbinding",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-            
-            // Start de client thread voor het ontvangen van berichten
-            Thread clientThread = new Thread(serverClient);
-            clientThread.start();
-            
-        } else {
-            JOptionPane.showMessageDialog(
-                null,
-                "Kon niet verbinden met de server.\nZorg ervoor dat de server draait op 127.0.0.1:7789",
-                "Verbindingsfout",
-                JOptionPane.ERROR_MESSAGE
-            );
-        }
-    }
+
 }

@@ -170,6 +170,8 @@ public class TicTacToeGame {
     }
 
     public void start() {
+        // Checked of we in gamemode SERVER of TOURNAMENT zitten, zo ja, maak verbinding met de server en wacht op een tegenstander.
+        // Zo niet? start het spel lokaal en skip alles server gerelateerd.
         if (!"SERVER".equals(gameMode) && !"TOURNAMENT".equals(gameMode)) {
             initializeGame();
             return;
@@ -184,7 +186,7 @@ public class TicTacToeGame {
             menuManager.onGameFinished();
             return;
         }
-
+        // Luistert naar berichten van de server in een aparte thread en checked de inhoud, zodat wij accuraat kunnen blijven reageren op de UI.
         new Thread(() -> {
             try {
                 String serverMsg;
@@ -200,6 +202,7 @@ public class TicTacToeGame {
                         String playerToMove = extractFieldValue(serverMsg, "PLAYERTOMOVE");
                         String opponent = extractFieldValue(serverMsg, "OPPONENT");
 
+                        // bepaald of de speler die aan de beurt is onze lokale speler is.
                         boolean playerToMoveIsLocal = false;
                         if (!playerToMove.isEmpty() && !localPlayerName.isEmpty()) {
                             if (playerToMove.startsWith(localPlayerName) || localPlayerName.startsWith(playerToMove))
@@ -212,15 +215,15 @@ public class TicTacToeGame {
                         SwingUtilities.invokeLater(() -> {
                             opponentName = opponentFinal != null ? opponentFinal : "";
 
-                            // Server tells who starts; convention: starter -> X
+                            // Server bepaald wie welke rol krijgt op basis van wie er start.
                             spelerRol = starterIsLocal ? 'X' : 'O';
-                            aiRol = spelerRol; // In TOURNAMENT mode, AI plays with our assigned symbol
+                            aiRol = spelerRol; // In TOURNAMENT gamemode, AI speelt met onze rol.
 
-                            // Set initial turn: X always goes first
+                            // Zet de juiste beurt op basis van wie er start. (X gaat altijd eerst)
                             turnX = true;
                             updateStatusLabel();
 
-                            // Schedule AI move if we start (our symbol is X)
+                            // geplande AI zet als wij de starter zijn (onze symbool is X)
                             if ("TOURNAMENT".equals(gameMode) && spelerRol == 'X') {
                                 aiTurnPending = true;
                                 if (!aiBusy) doAiMoveServer();
@@ -230,7 +233,7 @@ public class TicTacToeGame {
 
                     if (serverMsg.contains("YOURTURN")) {
                         SwingUtilities.invokeLater(() -> {
-                            // Ensure turn state matches our symbol
+                            // zorgt ervoor dat de beurt status overeenkomt met ons symbool
                             turnX = (spelerRol == 'X');
                             updateStatusLabel();
 
@@ -240,11 +243,12 @@ public class TicTacToeGame {
                             }
                         });
                     }
-
+                    // Verwerkt zet (MOVE) berichten van de server
                     if (serverMsg.contains("MOVE") && serverMsg.contains("PLAYER:")) {
                         String playerName = extractPlayerName(serverMsg);
                         int movePos = extractMovePosition(serverMsg);
 
+                        // Bepaalt onze basisnaam voor vergelijking (in PVP is dat speler1, in SERVER/TOURNAMENT is dat onze lokale naam, anders op basis van rol).
                         String ourName = gameMode.equals("PVP") ? speler1 :
                                 ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) ? localPlayerName :
                                         (spelerRol == 'X' ? speler1 : speler2);
@@ -252,6 +256,7 @@ public class TicTacToeGame {
                         System.out.println("[DEBUG] Move from player: '" + playerName + "', our name: '" + ourName + "', our role: " + spelerRol);
 
                         if (movePos != -1) {
+                            // checkt of de zet van onszelf is of van de tegenstander. is de zet van ons? negeer de zet anders pas de zet toe.
                             if (isOurMove(playerName, ourName)) {
                                 System.out.println("[DEBUG] Recognized as OUR move - ignoring");
                                 aiBusy = false;
@@ -275,6 +280,7 @@ public class TicTacToeGame {
         } catch (InterruptedException ignored) {
         }
 
+        // Bepaalt de spelersnaam voor login op basis van gamemode.
         String playerName;
         if ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) {
             playerName = speler1.equals("AI") ? speler2 : speler1;
@@ -287,6 +293,7 @@ public class TicTacToeGame {
         localPlayerName = playerName;
         client.login(playerName);
 
+        // Wacht tot we ingelogd zijn of timeout na 2 seconden
         int attempts = 0;
         while (!loggedIn && attempts < 20) {
             try {
@@ -295,7 +302,7 @@ public class TicTacToeGame {
             }
             attempts++;
         }
-
+        // Als inloggen mislukt, toon foutmelding en keer terug naar menu
         if (!loggedIn) {
             JOptionPane.showMessageDialog(null, "Login failed", "Error", JOptionPane.ERROR_MESSAGE);
             client.shutdown();
@@ -330,6 +337,7 @@ public class TicTacToeGame {
         boardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         gameFrame.add(boardPanel, BorderLayout.CENTER);
 
+        // In gamemode TOURNAMENT, disable alle knoppen zodat de speler geen zetten kan doen.
         if ("TOURNAMENT".equals(gameMode)) {
             for (JButton b : boardPanel.getButtons()) {
                 b.setEnabled(false);
@@ -466,7 +474,7 @@ public class TicTacToeGame {
     }
 
     /**
-     * Handle button click in PVP or PVA modes.
+     * Zorgt ervoor dat je zet word verwerkt en het bord wordt bijgewerkt zodra je op het bord klikt bij gamemodes: PVP, PVA en SERVER.
      * After a move, toggle turn based on the symbol that just played.
      */
     private void handleButtonClick(int pos) {
@@ -493,10 +501,7 @@ public class TicTacToeGame {
         }
     }
 
-    /**
-     * AI move in PVA mode.
-     * After AI plays, toggle turn based on the AI's symbol.
-     */
+
     private void doAiMove() {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -522,17 +527,19 @@ public class TicTacToeGame {
     }
 
     /**
-     * AI move in TOURNAMENT mode.
-     * After AI plays, toggle turn based on the AI's symbol.
+     * AI move in de gamemode TOURNAMENT.
+     * Nadat AI zijn zet doet, wissel de beurt op basis van het symbool van de AI.
      */
     private void doAiMoveServer() {
         if (!"TOURNAMENT".equals(gameMode)) return;
         if (gameDone || client == null || !client.isConnected()) return;
 
+        // Zorgt ervoor dat er niet meerdere AI zetten tegelijk worden gedaan door de aiTurnPending en aiBusy flags.
         if (!aiTurnPending || aiBusy) return;
         aiBusy = true;
         aiTurnPending = false;
 
+        // Voer de AI zet uit in een aparte thread om de UI update soepel te houden.
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
@@ -541,7 +548,7 @@ public class TicTacToeGame {
                 aiBusy = false;
                 return;
             }
-
+            // Bepaal de beste zet voor de AI
             char opponentSymbol = (aiRol == 'X') ? 'O' : 'X';
             int move = MinimaxAI.bestMove(game, aiRol, opponentSymbol);
 
@@ -557,7 +564,7 @@ public class TicTacToeGame {
                     aiBusy = false;
                     return;
                 }
-
+                // Voer de zet van de AI uit op het bord
                 game.doMove(move, aiRol);
                 boardPanel.getButtons()[move].setText(String.valueOf(aiRol));
 
@@ -566,7 +573,7 @@ public class TicTacToeGame {
                     return;
                 }
 
-                // After AI plays, toggle turn: if AI played X, next is O; if AI played O, next is X
+                // Nadat AI zijn zet doet, wissel de beurt op basis van het symbool van de AI. (als AI X speelde, is volgende O en andersom).
                 turnX = (aiRol == 'O');
                 updateStatusLabel();
                 aiBusy = false;
@@ -593,9 +600,8 @@ public class TicTacToeGame {
     }
 
     /**
-     * Gets the appropriate window title based on the current game mode.
-     *
-     * @return The localized title string for the current game mode
+     * Haalt de titel op voor de huidige spelmodus.
+     * @return de correcte titel voor het huidige spelmodus gebaseerd op gameMode en taalinstellingen
      */
     private String getTitleForMode() {
         if (gameMode.equals("PVP")) {
@@ -609,9 +615,10 @@ public class TicTacToeGame {
     }
 
     /**
-     * Checks if it's currently the human player's turn.
-     *
-     * @return true if it's the player's turn, false if it's AI's or opponent's turn
+     * Checked of het de beurt is van de speler.
+     * als turnX true is, is het de beurt van X anders O.
+     * == spelerRol vergelijkt dit met het symbool van de speler.
+     * Returns true als het symbool van de speler overeenkomt met de huidige beurt.
      */
     private boolean isPlayersTurn() {
         return (turnX ? 'X' : 'O') == spelerRol;
@@ -637,13 +644,14 @@ public class TicTacToeGame {
     }
 
     /**
-     * Updates the game's status label with current turn information or game result.
-     * Shows waiting message if opponent details aren't available in server mode.
+     * Updates het label om aan te geven wie er aan de beurt is.
+     * Laat een tijdelijk wacht bericht zien totdat we de naam van de tegenstander hebben ontvangen van de gameserver.
      */
     private void updateStatusLabel() {
         if (gameDone) return;
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
+        // in gamemode Server of Tournament, laat een tijdelijk wacht bericht zien totdat we de naam van de tegenstander hebben ontvangen van de gameserver.
         if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && (opponentName == null || opponentName.isEmpty())) {
             statusLabel.setText(lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails")));
             return;
@@ -712,7 +720,7 @@ public class TicTacToeGame {
     private void returnToMenu() {
         int option = JOptionPane.showConfirmDialog(gameFrame, lang.get("main.exit.confirm"), lang.get("main.exit.title"), JOptionPane.YES_NO_OPTION);
         if (option == JOptionPane.YES_OPTION) {
-
+            //check of we verbonden zijn met de server (alleen in gamemode SERVER en TOURNAMENT) en zo ja, verbreek de verbinding met de server.
             if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && client != null) {
                 try {
                     client.quit();
