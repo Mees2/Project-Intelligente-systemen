@@ -36,7 +36,7 @@ public class TicTacToeMenu extends JFrame {
         this.menuManager = menuManager;
         initializeMenu();
 
-        theme.addThemeChangeListener(this::updateTheme);
+        theme.addThemeChangeListener(this::updateTheme); // registers for theme notifs
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -221,9 +221,10 @@ private void resizeAllButtons(Container container, double scale) {
     }
 
     public void updateTheme() {
-        ThemeManager theme = ThemeManager.getInstance();
-        getContentPane().setBackground(theme.getBackgroundColor());
+        ThemeManager theme = ThemeManager.getInstance(); // Get current theme instance
+        getContentPane().setBackground(theme.getBackgroundColor()); // Update background color
 
+        //Gets new theme button colors and stores them in client properties
         pvpButton.putClientProperty("baseColor", theme.getButtonColor());
         pvpButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         pvpButton.putClientProperty("borderColor", theme.getButtonColor().darker());
@@ -246,7 +247,7 @@ private void resizeAllButtons(Container container, double scale) {
 
 
 
-
+        // Updates button text colors
         titleLabel.setForeground(theme.getFontColor1());
 
         repaint();

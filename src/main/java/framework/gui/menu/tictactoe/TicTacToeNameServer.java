@@ -27,7 +27,7 @@ public class TicTacToeNameServer extends JFrame{
         public TicTacToeNameServer(MenuManager menuManager) {
             this.menuManager = menuManager;
             initializeMenu();
-            theme.addThemeChangeListener(this::updateTheme);
+            theme.addThemeChangeListener(this::updateTheme); // registers for theme notifs
 
             addComponentListener(new ComponentAdapter() {
                 @Override
@@ -229,11 +229,12 @@ public class TicTacToeNameServer extends JFrame{
         }
 
         public void updateTheme() {
-            ThemeManager theme = ThemeManager.getInstance();
-            getContentPane().setBackground(theme.getBackgroundColor());
-            centerPanel.setBackground(theme.getBackgroundColor());
-            topPanel.setBackground(theme.getBackgroundColor());
+            ThemeManager theme = ThemeManager.getInstance(); // Get current theme instance
+            getContentPane().setBackground(theme.getBackgroundColor()); // Update background color
+            centerPanel.setBackground(theme.getBackgroundColor()); // Update center panel background
+            topPanel.setBackground(theme.getBackgroundColor()); // Update top panel background
 
+            //Gets new theme button colors and stores them in client properties
             startButton.putClientProperty("baseColor", theme.getMainButtonColor());
             startButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
             startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
@@ -242,14 +243,18 @@ public class TicTacToeNameServer extends JFrame{
             backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
             backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
+            // Updates font colors
             titleLabel.setForeground(theme.getFontColor1());
             speler1Label.setForeground(theme.getFontColor2());
 
+            // Updates text field background
             textField1.setBackground(theme.getTextFieldColor());
             repaint();
         }
 
-
+    /**
+     * Toont het TicTacToe menu
+     */
     public void showMenu() {
             setVisible(true);
         }

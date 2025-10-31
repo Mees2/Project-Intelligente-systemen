@@ -139,7 +139,7 @@ public class TicTacToeGame {
             aiRol = 'O'; // placeholder, will be set on MATCH
         }
 
-        ThemeManager.getInstance().addThemeChangeListener(this::updateTheme);
+        ThemeManager.getInstance().addThemeChangeListener(this::updateTheme); // registers for theme notifs
 
     }
 
@@ -645,16 +645,18 @@ public class TicTacToeGame {
     }
 
     private void updateTheme() {
-        if (gameFrame != null) {
-            gameFrame.getContentPane().setBackground(theme.getBackgroundColor());
-            statusLabel.setForeground(theme.getFontColor1());
-            boardPanel.setBackground(theme.getBackgroundColor());
+        if (gameFrame != null) { //checks if gameframe exists
+            gameFrame.getContentPane().setBackground(theme.getBackgroundColor()); //Changes background color
+            statusLabel.setForeground(theme.getFontColor1()); //Changes font color
+            boardPanel.setBackground(theme.getBackgroundColor()); //Changes board background color
 
+            // Update menu button colors and save to client properties
             menuButton.putClientProperty("baseColor", theme.getMainButtonColor());
             menuButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
             menuButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
             menuButton.repaint();
 
+            // Update board buttons colors and save to client properties
             for (JButton btn : boardPanel.getButtons()) {
                 btn.putClientProperty("baseColor", theme.getTitleColor());
                 btn.putClientProperty("hoverColor", theme.getTitleColor());
@@ -662,6 +664,7 @@ public class TicTacToeGame {
                 btn.repaint();
             }
 
+            //Redraws the game frame to apply changes
             gameFrame.repaint();
         }
     }

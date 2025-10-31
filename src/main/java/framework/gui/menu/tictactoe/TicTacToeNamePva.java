@@ -28,7 +28,7 @@ public class TicTacToeNamePva extends JFrame {
     public TicTacToeNamePva(MenuManager menuManager) {
         this.menuManager = menuManager;
         initializeMenu();
-        theme.addThemeChangeListener(this::updateTheme);
+        theme.addThemeChangeListener(this::updateTheme); // registers for theme notifs
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -266,14 +266,14 @@ public class TicTacToeNamePva extends JFrame {
     }
 
     public void updateTheme() {
-        ThemeManager theme = ThemeManager.getInstance();
-        getContentPane().setBackground(theme.getBackgroundColor());
-        centerPanel.setBackground(theme.getBackgroundColor());
-        topPanel.setBackground(theme.getBackgroundColor());
-        obutton.setBackground(theme.getBackgroundColor());
-        xbutton.setBackground(theme.getBackgroundColor());
+        ThemeManager theme = ThemeManager.getInstance(); // Get current theme instance
+        getContentPane().setBackground(theme.getBackgroundColor()); // Update panel background color
+        centerPanel.setBackground(theme.getBackgroundColor()); // Update center panel background color
+        topPanel.setBackground(theme.getBackgroundColor()); // Update top panel background color
+        obutton.setBackground(theme.getBackgroundColor()); // Update radio button background colors
+        xbutton.setBackground(theme.getBackgroundColor()); // Update radio button background colors
 
-
+        //Gets new theme button colors and stores them in client properties
         startButton.putClientProperty("baseColor", theme.getMainButtonColor());
         startButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
@@ -282,23 +282,30 @@ public class TicTacToeNamePva extends JFrame {
         backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
+        // Updates font colors
         titleLabel.setForeground(theme.getFontColor1());
         speler1Label.setForeground(theme.getFontColor2());
         rolLabel.setForeground(theme.getFontColor2());
         obutton.setForeground(theme.getFontColor2());
         xbutton.setForeground(theme.getFontColor2());
 
-
+        // Updates text field background color
         textField1.setBackground(theme.getTextFieldColor());
 
 
         repaint();
     }
 
+    /**
+     * Toont het TicTacToe menu
+     */
     public void showMenu() {
         setVisible(true);
     }
 
+    /**
+     * Verbergt het TicTacToe menu
+     */
     public void hideMenu() {
         setVisible(false);
     }

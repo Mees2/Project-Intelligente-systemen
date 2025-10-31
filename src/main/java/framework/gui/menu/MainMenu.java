@@ -45,10 +45,16 @@ public final class MainMenu extends JFrame { // creates the final MM class that 
         }
     }
 
+    /**
+     * Toont het TicTacToe menu
+     */
     public void showMenu() {
         setVisible(true);
     }
 
+    /**
+     * Verbergt het TicTacToe menu
+     */
     public void hideMenu() {
         setVisible(false);
     }

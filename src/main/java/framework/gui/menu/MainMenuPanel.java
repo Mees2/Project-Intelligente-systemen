@@ -259,9 +259,10 @@ public final class MainMenuPanel extends JPanel {
     }
 //Updates the theme colors for all components
     public void updateTheme() {
-        ThemeManager theme = ThemeManager.getInstance();
-        setBackground(theme.getBackgroundColor());
+        ThemeManager theme = ThemeManager.getInstance(); // Get current theme instance
+        setBackground(theme.getBackgroundColor()); // Update panel background color
 
+        //Gets new theme button colors and stores them in client properties
         tttButton.putClientProperty("baseColor", theme.getButtonColor());
         tttButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         tttButton.putClientProperty("borderColor", theme.getButtonColor().darker());
@@ -278,6 +279,7 @@ public final class MainMenuPanel extends JPanel {
         exitButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         exitButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
+        // Update title font colors
         titleLabel.setForeground(theme.getFontColor1());
 
         repaint();
