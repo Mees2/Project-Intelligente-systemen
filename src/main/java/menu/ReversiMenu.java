@@ -3,20 +3,44 @@ package menu;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * The menu interface for the Reversi game.
+ * Provides options to start different game modes and navigate back to the main menu.
+ * Currently supports Player vs Player mode, with Player vs AI mode planned for future implementation.
+ */
 public class ReversiMenu extends JFrame {
+    /** The menu manager for handling navigation between different menus */
     private final MenuManager menuManager;
+    
+    /** Language manager for handling multilingual support */
     private final LanguageManager lang = LanguageManager.getInstance();
 
+    /** UI components for the menu */
     private JLabel titleLabel;
     private JButton pvpButton;
     private JButton pvaButton;
     private JButton backButton;
 
+    /**
+     * Creates a new Reversi menu with the specified menu manager.
+     * Initializes and displays the menu interface.
+     *
+     * @param menuManager The menu manager to handle navigation
+     */
     public ReversiMenu(MenuManager menuManager) {
         this.menuManager = menuManager;
         initializeMenu();
     }
 
+    /**
+     * Initializes the menu interface with all its components.
+     * Sets up the layout, creates buttons, and configures the window properties.
+     * The menu includes:
+     * - A title header
+     * - Player vs Player button (enabled)
+     * - Player vs AI button (disabled, coming soon)
+     * - Back button to return to main menu
+     */
     private void initializeMenu() {
         setTitle(lang.get("reversi.menu.title"));
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -57,7 +81,19 @@ public class ReversiMenu extends JFrame {
         add(buttonPanel, BorderLayout.CENTER);
     }
 
-    private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled){
+    /**
+     * Creates a custom button with rounded corners and hover effects.
+     * The button's appearance changes based on its enabled state and mouse hover.
+     *
+     * @param text The text to display on the button
+     * @param baseColor The default background color
+     * @param hoverColor The background color when mouse hovers over
+     * @param borderColor The color of the button's border
+     * @param enabled Whether the button should be enabled
+     * @return A styled JButton with the specified properties
+     */
+    private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, 
+            Color borderColor, boolean enabled){
         var btn = new JButton(text){
             @Override
             protected void paintComponent(Graphics g) {
@@ -102,6 +138,11 @@ public class ReversiMenu extends JFrame {
         return btn;
     }
 
+    /**
+     * Updates all text elements in the menu to the current language setting.
+     * This includes the window title, menu header, and all button texts.
+     * Called when the application language is changed.
+     */
     public void updateLanguage() {
         setTitle(lang.get("reversi.menu.title"));
         titleLabel.setText(lang.get("reversi.menu.header"));
@@ -110,6 +151,13 @@ public class ReversiMenu extends JFrame {
         backButton.setText(lang.get("reversi.menu.back"));
     }
 
+    /**
+     * Makes the menu visible to the user.
+     */
     public void showMenu() { setVisible(true); }
+
+    /**
+     * Hides the menu from the user.
+     */
     public void hideMenu() { setVisible(false); }
 }

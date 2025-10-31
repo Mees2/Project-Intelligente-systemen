@@ -1,25 +1,65 @@
 package menu;
 
 import reversi.Reversi;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+/**
+ * Handles the graphical user interface and game logic for a Reversi game.
+ * This class manages the game window, board display, player turns, and score tracking.
+ * It provides a visual interface for playing Reversi with features like:
+ * - An 8x8 game board with clickable cells
+ * - Visual indicators for valid moves
+ * - Score tracking for both players
+ * - Turn indicators
+ * - Game state management (win/draw conditions)
+ */
 public class ReversiGame {
+    /** MenuManager instance for handling navigation between different menus */
     private final MenuManager menuManager;
+    
+    /** Current game mode (e.g., "PVP") */
     private final String gameMode;
+    
+    /** Language manager for handling multilingual support */
     private final LanguageManager lang = LanguageManager.getInstance();
+    
+    /** Name of the first player (black pieces) */
     private final String speler1;
+    
+    /** Name of the second player (white pieces) */
     private final String speler2;
+    
+    /** Main game window */
     private JFrame gameFrame;
+    
+    /** Label showing current game status (turn, win, draw) */
     private JLabel statusLabel;
+    
+    /** Panel containing the game board */
     private BoardPanel boardPanel;
+    
+    /** The Reversi game logic instance */
     private Reversi game;
+    
+    /** Indicates if the game has ended */
     private boolean gameDone = false;
-    private boolean turnBlack = true; // Black always starts
+    
+    /** Indicates whose turn it is (true for black, false for white) */
+    private boolean turnBlack = true;
+    
+    /** Label showing the current score */
     private JLabel scoreLabel;
 
+    /**
+     * Creates a new Reversi game instance.
+     *
+     * @param menuManager The menu manager for handling navigation
+     * @param gameMode The game mode (e.g., "PVP")
+     * @param speler1 Name of the first player (black)
+     * @param speler2 Name of the second player (white)
+     */
     public ReversiGame(MenuManager menuManager, String gameMode, String speler1, String speler2) {
         this.menuManager = menuManager;
         this.gameMode = gameMode;
@@ -27,11 +67,19 @@ public class ReversiGame {
         this.speler2 = speler2;
     }
 
+    /**
+     * Initializes and starts a new game.
+     * Creates the game logic instance and sets up the UI.
+     */
     public void start() {
         game = new Reversi();
         initializeGame();
     }
 
+    /**
+     * Initializes the game window and all UI components.
+     * Sets up the board, status displays, and control buttons.
+     */
     private void initializeGame() {
         gameDone = false;
         turnBlack = true;
@@ -79,6 +127,13 @@ public class ReversiGame {
         updateStatusLabel();
     }
 
+    /**
+     * Handles a player's move when they click a cell on the board.
+     * Validates the move, updates the game state, and checks for win/draw conditions.
+     *
+     * @param row The row of the clicked cell
+     * @param col The column of the clicked cell
+     */
     private void handleButtonClick(int row, int col) {
         if (gameDone) return;
         char current = turnBlack ? 'B' : 'W';
@@ -98,8 +153,10 @@ public class ReversiGame {
         boardPanel.updateBoard();
     }
 
-    
-
+    /**
+     * Updates the status and score labels based on current game state.
+     * Shows current player's turn or game result, and updates the score display.
+     */
     private void updateStatusLabel() {
     // Update score first
     int black = game.count('B');
@@ -122,6 +179,10 @@ public class ReversiGame {
         }
     }   
 
+    /**
+     * Handles the return to menu action.
+     * Shows a confirmation dialog before closing the game window.
+     */
     private void returnToMenu() {
         int option = JOptionPane.showConfirmDialog(
                 gameFrame,
@@ -135,15 +196,28 @@ public class ReversiGame {
         }
     }
 
+    /**
+     * Closes the game window and cleans up resources.
+     */
     public void close() {
         if (gameFrame != null) gameFrame.dispose();
     }
 
-    // --- BoardPanel inner class ---
+    /**
+     * Inner class representing the game board.
+     * Manages the visual representation of the Reversi board and handles cell interactions.
+     */
     private class BoardPanel extends JPanel {
+        /** Size of the board (8x8) */
         private final int SIZE = 8;
+        
+        /** 2D array of buttons representing board cells */
         private final JButton[][] buttons = new JButton[SIZE][SIZE];
 
+        /**
+         * Creates a new board panel with an 8x8 grid of buttons.
+         * Initializes all cells with appropriate styling and click handlers.
+         */
         public BoardPanel() {
             setLayout(null);
             setBackground(new Color(247, 247, 255));
@@ -163,12 +237,22 @@ public class ReversiGame {
             updateBoard();
         }
 
+        /**
+         * Custom painting for the board panel.
+         * Ensures proper layout of all board cells.
+         *
+         * @param g The Graphics context to paint with
+         */
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             layoutButtons();
         }
 
+        /**
+         * Calculates and sets the position and size of all board cells.
+         * Ensures the board remains square and properly scaled.
+         */
         private void layoutButtons() {
             int size = Math.min(getWidth(), getHeight());
             int marginX = (getWidth() - size) / 2;
@@ -189,6 +273,10 @@ public class ReversiGame {
             }
         }
 
+        /**
+         * Updates the visual state of all board cells.
+         * Shows current pieces, highlights valid moves, and updates cell styling.
+         */
         public void updateBoard() {
             char current = turnBlack ? 'B' : 'W';
             for (int row = 0; row < SIZE; row++) {
@@ -217,6 +305,12 @@ public class ReversiGame {
             }
         }
 
+        /**
+         * Creates an icon representing a game piece (disc).
+         * 
+         * @param color The color of the disc (black or white)
+         * @return An Icon object representing the game piece
+         */
         private Icon createDiscIcon(Color color) {
             int size = 32;
             BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);

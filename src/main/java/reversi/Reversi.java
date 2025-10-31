@@ -2,7 +2,18 @@ package reversi;
 
 import framework.bordspel.AbstractBordSpel;
 
+/**
+ * Implements the game logic for Reversi (also known as Othello).
+ * This class handles the rules, move validation, and state management for a Reversi game.
+ * The game is played on an 8x8 board where players alternate placing black ('B') and white ('W') pieces.
+ */
 public class Reversi extends AbstractBordSpel {
+    
+    /**
+     * Creates a new Reversi game with an 8x8 board.
+     * Initializes the board with the standard starting position:
+     * two black and two white pieces in the center, diagonally arranged.
+     */
     public Reversi() {
         super(8, 8, ' ');
         // Startpositie
@@ -12,6 +23,13 @@ public class Reversi extends AbstractBordSpel {
         bord[36] = 'W'; // (4,4)
     }
 
+    /**
+     * Determines if the specified player has won the game.
+     * A player wins if they have more pieces than their opponent when no more moves are possible.
+     *
+     * @param speler The player to check for winning ('B' or 'W')
+     * @return true if the specified player has won, false otherwise
+     */
     @Override
     public boolean isWin(char speler) {
         if (!hasValidMove('B') && !hasValidMove('W')) {
@@ -21,6 +39,12 @@ public class Reversi extends AbstractBordSpel {
         return false;
     }
 
+    /**
+     * Determines if the game has ended in a draw.
+     * A draw occurs when no more moves are possible and both players have the same number of pieces.
+     *
+     * @return true if the game is a draw, false otherwise
+     */
     @Override
     public boolean isDraw() {
         if (!hasValidMove('B') && !hasValidMove('W')) {
@@ -30,6 +54,17 @@ public class Reversi extends AbstractBordSpel {
         return false;
     }
 
+    /**
+     * Checks if a move is valid for the specified player.
+     * A move is valid if:
+     * - The target cell is empty
+     * - The move would flip at least one opponent's piece
+     *
+     * @param row The row where the piece would be placed (0-7)
+     * @param col The column where the piece would be placed (0-7)
+     * @param player The player making the move ('B' or 'W')
+     * @return true if the move is valid, false otherwise
+     */
     public boolean isValidMove(int row, int col, char player) {
         if (getSymboolOp(row, col) != leegSymbool) return false;
         char opponent = (player == 'B') ? 'W' : 'B';
@@ -47,6 +82,15 @@ public class Reversi extends AbstractBordSpel {
         return false;
     }
 
+    /**
+     * Executes a move for the specified player.
+     * Places a piece at the specified position and flips all captured opponent pieces.
+     * Assumes the move has already been validated.
+     *
+     * @param row The row where the piece is placed (0-7)
+     * @param col The column where the piece is placed (0-7)
+     * @param player The player making the move ('B' or 'W')
+     */
     public void doMove(int row, int col, char player) {
         int pos = row * 8 + col;
         bord[pos] = player;
@@ -70,6 +114,12 @@ public class Reversi extends AbstractBordSpel {
         updateStatus();
     }
 
+    /**
+     * Checks if the specified player has any valid moves available.
+     *
+     * @param player The player to check for valid moves ('B' or 'W')
+     * @return true if the player has at least one valid move, false otherwise
+     */
     public boolean hasValidMove(char player) {
         for (int row = 0; row < 8; row++)
             for (int col = 0; col < 8; col++)
@@ -77,6 +127,12 @@ public class Reversi extends AbstractBordSpel {
         return false;
     }
 
+    /**
+     * Counts the number of pieces belonging to the specified player.
+     *
+     * @param player The player whose pieces to count ('B' or 'W')
+     * @return The number of pieces the player has on the board
+     */
     public int count(char player) {
         int cnt = 0;
         for (char c : bord)

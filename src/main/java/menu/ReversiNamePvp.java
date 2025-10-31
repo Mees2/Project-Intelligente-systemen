@@ -3,6 +3,12 @@ package menu;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * A dialog window for entering player names in Reversi Player vs Player mode.
+ * This class creates and manages a form where two players can enter their names
+ * before starting a Reversi game. It includes input validation and navigation
+ * back to the main Reversi menu.
+ */
 public class ReversiNamePvp extends JFrame {
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
@@ -15,11 +21,24 @@ public class ReversiNamePvp extends JFrame {
     private JButton startButton;
     private JButton backButton;
 
+    /**
+     * Creates a new ReversiNamePvp dialog.
+     * 
+     * @param menuManager The MenuManager instance for handling navigation between menus
+     */
     public ReversiNamePvp(MenuManager menuManager) {
         this.menuManager = menuManager;
         initializeMenu();
     }
 
+    /**
+     * Initializes and configures the menu interface.
+     * Creates and layouts all UI components including:
+     * - Title label
+     * - Name input fields for both players
+     * - Start and Back buttons
+     * All components are styled according to the game's visual theme.
+     */
     private void initializeMenu() {
         setTitle(lang.get("reversi.name.title"));
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -103,7 +122,18 @@ public class ReversiNamePvp extends JFrame {
         add(centerPanel, BorderLayout.CENTER);
     }
 
-    private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
+    /**
+     * Creates a custom styled button with rounded corners and hover effects.
+     * 
+     * @param text The text to display on the button
+     * @param baseColor The default background color of the button
+     * @param hoverColor The background color when mouse hovers over the button
+     * @param borderColor The color of the button's border
+     * @param enabled Whether the button should be enabled or disabled
+     * @return A JButton with custom styling
+     */
+    private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, 
+            Color borderColor, boolean enabled) {
         var btn = new JButton(text) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -148,6 +178,14 @@ public class ReversiNamePvp extends JFrame {
         return btn;
     }
 
+    /**
+     * Updates all text elements in the menu to the current language setting.
+     * This includes:
+     * - Window title
+     * - Header text
+     * - Player name labels
+     * - Button texts
+     */
     public void updateLanguage() {
         setTitle(lang.get("reversi.name.title"));
         titleLabel.setText(lang.get("reversi.name.title"));
@@ -157,6 +195,13 @@ public class ReversiNamePvp extends JFrame {
         backButton.setText(lang.get("reversi.name.back"));
     }
 
+    /**
+     * Makes the menu visible to the user.
+     */
     public void showMenu() { setVisible(true); }
+
+    /**
+     * Hides the menu from the user.
+     */
     public void hideMenu() { setVisible(false); }
 }

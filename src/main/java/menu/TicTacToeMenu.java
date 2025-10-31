@@ -109,100 +109,126 @@ public class TicTacToeMenu extends JFrame {
         });
     }
 
-private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled){
-    var btn = new JButton(text){
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    /**
+     * Creates a custom button with rounded corners and hover effects.
+     * The button's appearance is customized with:
+     * - Rounded corners
+     * - Custom colors for normal state, hover state, and border
+     * - Scaling based on window size
+     * 
+     * @param text The text to display on the button
+     * @param baseColor The default background color
+     * @param hoverColor The background color when mouse hovers over
+     * @param borderColor The color of the button's border
+     * @param enabled Whether the button should be enabled
+     * @return A styled JButton with the specified properties
+     */
+    private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
+        var btn = new JButton(text){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            Color base = (Color) getClientProperty("baseColor");
-            Color hover = (Color) getClientProperty("hoverColor");
-            Color border = (Color) getClientProperty("borderColor");
-            if (base == null) base = baseColor;
-            if (hover == null) hover = hoverColor;
-            if (border == null) border = borderColor;
+                Color base = (Color) getClientProperty("baseColor");
+                Color hover = (Color) getClientProperty("hoverColor");
+                Color border = (Color) getClientProperty("borderColor");
+                if (base == null) base = baseColor;
+                if (hover == null) hover = hoverColor;
+                if (border == null) border = borderColor;
 
-            g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-            g2.setColor(border);
-            g2.setStroke(new BasicStroke(2));
-            g2.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 30, 30);
-            g2.dispose();
-            super.paintComponent(g);
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            double scale = 1.0;
-            if (getParent() != null) {
-                Window window = SwingUtilities.getWindowAncestor(this);
-                if (window != null) {
-                    scale = Math.min(window.getWidth() / 500.0, window.getHeight() / 350.0);
-                    scale = Math.max(0.7, Math.min(scale, 2.0));
-                }
+                g2.setColor(getModel().isRollover() && isEnabled() ? hover : base);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+                g2.setColor(border);
+                g2.setStroke(new BasicStroke(2));
+                g2.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 30, 30);
+                g2.dispose();
+                super.paintComponent(g);
             }
-            int scaledWidth = (int)(200 * scale);
-            int scaledHeight = (int)(35 * scale);
-            return new Dimension(scaledWidth, scaledHeight);
-        }
 
-        @Override
-        public Dimension getMinimumSize() {
-            return getPreferredSize();
-        }
+            @Override
+            public Dimension getPreferredSize() {
+                double scale = 1.0;
+                if (getParent() != null) {
+                    Window window = SwingUtilities.getWindowAncestor(this);
+                    if (window != null) {
+                        scale = Math.min(window.getWidth() / 500.0, window.getHeight() / 350.0);
+                        scale = Math.max(0.7, Math.min(scale, 2.0));
+                    }
+                }
+                int scaledWidth = (int)(200 * scale);
+                int scaledHeight = (int)(35 * scale);
+                return new Dimension(scaledWidth, scaledHeight);
+            }
 
-        @Override
-        public Dimension getMaximumSize() {
-            return getPreferredSize();
-        }
+            @Override
+            public Dimension getMinimumSize() {
+                return getPreferredSize();
+            }
 
-    };
+            @Override
+            public Dimension getMaximumSize() {
+                return getPreferredSize();
+            }
 
-    btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
-    btn.setForeground(enabled ? Color.WHITE : new Color(100,100,100));
-    btn.setContentAreaFilled(false);
-    btn.setOpaque(false);
-    btn.setFocusPainted(false);
-    btn.setBorderPainted(false);
-    btn.setRolloverEnabled(true);
-    btn.setEnabled(enabled);
-    btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        };
 
-    return btn;
-}
+        btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        btn.setForeground(enabled ? Color.WHITE : new Color(100,100,100));
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(false);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setRolloverEnabled(true);
+        btn.setEnabled(enabled);
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-private void resizeComponents() {
-    double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
-    scale = Math.max(0.7, Math.min(scale, 2.0));
-    resizeAllButtons(this, scale);
-    revalidate();
-    repaint();
-}
+        return btn;
+    }
 
-private void resizeAllButtons(Container container, double scale) {
-    for (Component comp : container.getComponents()) {
-        if (comp instanceof JButton) {
-            JButton btn = (JButton) comp;
-            int newFontSize = (int)(12 * scale);
-            btn.setFont(btn.getFont().deriveFont(Font.PLAIN, newFontSize));
+    /**
+     * Resizes all components when the window is resized.
+     * Calculates the appropriate scale based on window dimensions and
+     * applies it to all buttons and labels.
+     */
+    private void resizeComponents() {
+        double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
+        scale = Math.max(0.7, Math.min(scale, 2.0));
+        resizeAllButtons(this, scale);
+        revalidate();
+        repaint();
+    }
 
-            int newWidth = (int)(200 * scale);
-            int newHeight = (int)(35 * scale);
-            Dimension newSize = new Dimension(newWidth, newHeight);
-            btn.setPreferredSize(newSize);
-            btn.setMinimumSize(newSize);
-            btn.setMaximumSize(newSize);
-        } else if (comp instanceof JLabel) {
-            JLabel label = (JLabel) comp;
-            int newTitleSize = (int)(25 * scale);
-            newTitleSize = Math.max(18, Math.min(newTitleSize, 40));
-            label.setFont(label.getFont().deriveFont(Font.BOLD, newTitleSize));
-        } else if (comp instanceof Container) {
-            resizeAllButtons((Container) comp, scale);
+    /**
+     * Recursively resizes all buttons and labels in a container.
+     * Adjusts font sizes and dimensions based on the provided scale.
+     * 
+     * @param container The container whose components need to be resized
+     * @param scale The scaling factor to apply (between 0.7 and 2.0)
+     */
+    private void resizeAllButtons(Container container, double scale) {
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JButton) {
+                JButton btn = (JButton) comp;
+                int newFontSize = (int)(12 * scale);
+                btn.setFont(btn.getFont().deriveFont(Font.PLAIN, newFontSize));
+
+                int newWidth = (int)(200 * scale);
+                int newHeight = (int)(35 * scale);
+                Dimension newSize = new Dimension(newWidth, newHeight);
+                btn.setPreferredSize(newSize);
+                btn.setMinimumSize(newSize);
+                btn.setMaximumSize(newSize);
+            } else if (comp instanceof JLabel) {
+                JLabel label = (JLabel) comp;
+                int newTitleSize = (int)(25 * scale);
+                newTitleSize = Math.max(18, Math.min(newTitleSize, 40));
+                label.setFont(label.getFont().deriveFont(Font.BOLD, newTitleSize));
+            } else if (comp instanceof Container) {
+                resizeAllButtons((Container) comp, scale);
+            }
         }
     }
-}
     /**
      * Update alle UI teksten naar de huidige taal
      */
@@ -216,6 +242,9 @@ private void resizeAllButtons(Container container, double scale) {
         backButton.setText(lang.get("tictactoe.menu.back"));
     }
 
+    /**
+     * Update het thema van het menu
+     */
     public void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
         getContentPane().setBackground(theme.getBackgroundColor());

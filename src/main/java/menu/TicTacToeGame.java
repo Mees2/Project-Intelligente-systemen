@@ -35,6 +35,13 @@ public class TicTacToeGame {
     private String localPlayerName = "";
     private String opponentName = "";
 
+    /**
+     * Extracts the move position from a server message.
+     * Parses messages containing "MOVE:" and returns the position number.
+     *
+     * @param serverMsg The message received from the server
+     * @return The position of the move, or -1 if no valid move position found
+     */
     private int extractMovePosition(String serverMsg) {
         try {
             int moveIndex = serverMsg.indexOf("MOVE:");
@@ -54,6 +61,13 @@ public class TicTacToeGame {
         return -1;
     }
 
+    /**
+     * Extracts a player name from a server message.
+     * Parses messages containing "PLAYER:" and returns the player's name.
+     *
+     * @param serverMsg The message received from the server
+     * @return The extracted player name, or empty string if not found
+     */
     private String extractPlayerName(String serverMsg) {
         try {
             int playerIndex = serverMsg.indexOf("PLAYER:");
@@ -72,6 +86,14 @@ public class TicTacToeGame {
         return "";
     }
 
+    /**
+     * Extracts a specific field value from a server message.
+     * Looks for fields in format "fieldName:" or "FIELDNAME:" and returns the quoted value.
+     *
+     * @param serverMsg The message received from the server
+     * @param fieldName The name of the field to extract
+     * @return The extracted field value, or empty string if not found
+     */
     private String extractFieldValue(String serverMsg, String fieldName) {
         try {
             int idx = serverMsg.indexOf(fieldName + ":");
@@ -91,6 +113,13 @@ public class TicTacToeGame {
         return "";
     }
 
+    /**
+     * Checks if a move was made by the local player.
+     *
+     * @param movePlayerName The name of the player who made the move
+     * @param ourBaseName Our player's base name for comparison
+     * @return true if the move was made by the local player, false otherwise
+     */
     private boolean isOurMove(String movePlayerName, String ourBaseName) {
         return movePlayerName.startsWith(ourBaseName);
     }
@@ -563,6 +592,11 @@ public class TicTacToeGame {
         return false;
     }
 
+    /**
+     * Gets the appropriate window title based on the current game mode.
+     *
+     * @return The localized title string for the current game mode
+     */
     private String getTitleForMode() {
         if (gameMode.equals("PVP")) {
             return lang.get("tictactoe.game.title.pvp");
@@ -574,10 +608,21 @@ public class TicTacToeGame {
         return lang.get("tictactoe.game.title");
     }
 
+    /**
+     * Checks if it's currently the human player's turn.
+     *
+     * @return true if it's the player's turn, false if it's AI's or opponent's turn
+     */
     private boolean isPlayersTurn() {
         return (turnX ? 'X' : 'O') == spelerRol;
     }
 
+    /**
+     * Gets the display name for a player based on their game symbol.
+     *
+     * @param symbol The player's symbol ('X' or 'O')
+     * @return The name to display for that player
+     */
     private String getNameBySymbol(char symbol) {
         if (gameMode.equals("PVP")) {
             return (symbol == 'X') ? speler1 : speler2;
@@ -591,6 +636,10 @@ public class TicTacToeGame {
         return "";
     }
 
+    /**
+     * Updates the game's status label with current turn information or game result.
+     * Shows waiting message if opponent details aren't available in server mode.
+     */
     private void updateStatusLabel() {
         if (gameDone) return;
         char currentSymbol = turnX ? 'X' : 'O';
@@ -602,30 +651,23 @@ public class TicTacToeGame {
         statusLabel.setText(lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")"));
     }
 
-    private void returnToMenu() {
-        int option = JOptionPane.showConfirmDialog(gameFrame, lang.get("main.exit.confirm"), lang.get("main.exit.title"), JOptionPane.YES_NO_OPTION);
-        if (option == JOptionPane.YES_OPTION) {
-
-            if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && client != null) {
-                try {
-                    client.quit();
-                } catch (Exception e) {
-                    System.err.println("Error while quitting the game: " + e.getMessage());
-                    try {
-                        client.shutdown();
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-            gameFrame.dispose();
-            menuManager.onGameFinished();
-        }
-    }
-
+    /**
+     * Checks if it's still possible for either player to win the game.
+     * Used to determine if the game should end in a draw.
+     *
+     * @return true if a win is still possible, false if only a draw is possible
+     */
     private boolean isWinPossible() {
         return isWinPossibleRecursive(!turnX);
     }
 
+    /**
+     * Recursive helper method for isWinPossible.
+     * Simulates all possible future moves to determine if a win is possible.
+     *
+     * @param xTurn true if it's X's turn in the simulation, false for O's turn
+     * @return true if a win is possible from this position, false otherwise
+     */
     private boolean isWinPossibleRecursive(boolean xTurn) {
         if (game.isWin('X') || game.isWin('O')) return true;
         if (game.isDraw()) return false;
@@ -641,6 +683,10 @@ public class TicTacToeGame {
         return false;
     }
 
+    /**
+     * Updates the visual theme of all game components.
+     * Called when the theme changes to update colors and styling.
+     */
     private void updateTheme() {
         if (gameFrame != null) {
             gameFrame.getContentPane().setBackground(theme.getBackgroundColor());
@@ -660,6 +706,26 @@ public class TicTacToeGame {
             }
 
             gameFrame.repaint();
+        }
+    }
+
+    private void returnToMenu() {
+        int option = JOptionPane.showConfirmDialog(gameFrame, lang.get("main.exit.confirm"), lang.get("main.exit.title"), JOptionPane.YES_NO_OPTION);
+        if (option == JOptionPane.YES_OPTION) {
+
+            if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && client != null) {
+                try {
+                    client.quit();
+                } catch (Exception e) {
+                    System.err.println("Error while quitting the game: " + e.getMessage());
+                    try {
+                        client.shutdown();
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+            gameFrame.dispose();
+            menuManager.onGameFinished();
         }
     }
 }
