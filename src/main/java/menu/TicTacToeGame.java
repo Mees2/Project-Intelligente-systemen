@@ -542,7 +542,7 @@ public class TicTacToeGame {
             statusLabel.setText(lang.get("tictactoe.game.draw"));
             gameDone = true;
             return true;
-        } else if (!isWinPossible()) {
+        } else if (!isWinPossible && ()) {
             statusLabel.setText(lang.get("tictactoe.game.draw"));
             gameDone = true;
             return true;
