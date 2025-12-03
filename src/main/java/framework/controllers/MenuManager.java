@@ -22,10 +22,7 @@ public final class MenuManager {
     private final MainMenu mainMenu;
     private final TicTacToeMenu ticTacToeMenu;
     private final SettingsMenu settingsMenu;
-    private final TicTacToeNamePvp ticTacToeNamePvp;
-    private final TicTacToeNamePva ticTacToeNamePva;
-    private final TicTacToeNameServer ticTacToeNameServer;
-    private final TicTacToeNameTournament ticTacToeNameTournament;
+    private TicTacToeNameSelection ticTacToeNameSelection;
     private ReversiMenu reversiMenu;
     private ReversiNamePvp reversiNamePvp;
     private ReversiGame reversiGame;
@@ -41,10 +38,7 @@ public final class MenuManager {
         mainMenu = new MainMenu(this);
         ticTacToeMenu = new TicTacToeMenu(this);
         settingsMenu = new SettingsMenu(this);
-        ticTacToeNamePvp = new TicTacToeNamePvp(this);
-        ticTacToeNamePva = new TicTacToeNamePva(this);
-        ticTacToeNameServer = new TicTacToeNameServer(this);
-        ticTacToeNameTournament = new TicTacToeNameTournament(this);
+        //ticTacToeNameSelection = new TicTacToeNameSelection(this)
         // reversi
         reversiMenu = new ReversiMenu(this);           
         reversiNamePvp = new ReversiNamePvp(this);     
@@ -74,15 +68,15 @@ public final class MenuManager {
         mainMenu.showMenu();
     }
     // van naam PVP terug naar TTT menu
-    public void closeNameSelectionPVP() {
-        ticTacToeNamePvp.hideMenu();
+    public void closeNameSelection() {
+        ticTacToeNameSelection.hideMenu();
         ticTacToeMenu.showMenu();
     }
     // van naam PVA terug naar TTT menu
-    public void closeNameSelectionPVA() {
-        ticTacToeNamePvp.hideMenu();
+    /*public void closeNameSelectionPVA() {
+        ticTacToeNameSelection.hideMenu();
         ticTacToeMenu.showMenu();
-    }
+    }*/
     /**
      * Opent het instellingen menu
      * Verbergt het hoofdmenu en toont het instellingen-menu
@@ -109,13 +103,29 @@ public final class MenuManager {
     public void openNameSelection(String gameMode) {
         ticTacToeMenu.hideMenu();
 
-        switch (gameMode) {
-            case MODE_PVP -> ticTacToeNamePvp.showMenu();
+        TicTacToeNameSelection.GameMode mode = switch (gameMode) {
+            case MODE_PVP -> TicTacToeNameSelection.GameMode.PVP;
+            case MODE_PVA -> TicTacToeNameSelection.GameMode.PVA;
+            case MODE_SERVER -> TicTacToeNameSelection.GameMode.SERVER;
+            case MODE_TOURNAMENT -> TicTacToeNameSelection.GameMode.TOURNAMENT;
+            default -> throw new IllegalArgumentException("Unknown gameMode: " + gameMode);
+        };
+
+        // Dispose old instance if it exists
+        if (ticTacToeNameSelection != null) {
+            ticTacToeNameSelection.dispose();
+        }
+
+        ticTacToeNameSelection = new TicTacToeNameSelection(this, mode);
+        ticTacToeNameSelection.showMenu();
+
+/*        switch (gameMode) {
+            case MODE_PVP -> ticTacToeNameSelection.showMenu();
             case MODE_PVA -> ticTacToeNamePva.showMenu();
-            case MODE_SERVER -> ticTacToeNameServer.showMenu();
+            //case MODE_SERVER -> ticTacToeNameServer.showMenu();
             case MODE_TOURNAMENT -> ticTacToeNameTournament.showMenu();
             default -> throw new IllegalArgumentException("Onbekende gameMode: " + gameMode);
-        }
+        }*/
     }
 
     public void startTicTacToeGame(String gameMode, String speler1Naam, String speler2Naam) {
@@ -127,8 +137,7 @@ public final class MenuManager {
         mainMenu.hideMenu();
         ticTacToeMenu.hideMenu();
         settingsMenu.hideMenu();
-        ticTacToeNamePvp.hideMenu();
-        ticTacToeNamePva.hideMenu();
+        ticTacToeNameSelection.hideMenu();
         reversiMenu.hideMenu();
         reversiNamePvp.hideMenu();
     }
@@ -192,10 +201,9 @@ public final class MenuManager {
         mainMenu.updateLanguage();
         ticTacToeMenu.updateLanguage();
         settingsMenu.updateLanguage();
-        ticTacToeNamePvp.updateLanguage();
-        ticTacToeNamePva.updateLanguage();
-        ticTacToeNameServer.updateLanguage();
-        ticTacToeNameTournament.updateLanguage();
+        ticTacToeNameSelection.updateLanguage();
+        ticTacToeNameSelection.updateLanguage();
+        //ticTacToeNameServer.updateLanguage();
         reversiMenu.updateLanguage();
         reversiNamePvp.updateLanguage();
 
@@ -214,6 +222,9 @@ public final class MenuManager {
             System.exit(0);
         }
     }
-    
 
+
+    public Object getTicTacToeMenu() {
+        return ticTacToeMenu;
+    }
 }
