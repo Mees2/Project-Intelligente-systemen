@@ -6,27 +6,27 @@ import javax.swing.JButton;
  * Aangepaste JButton voor spelbord vakjes
  * Houdt de positie (index) bij voor gebruik in TicTacToe en Reversi
  */
-public class SpelKnop extends JButton {
-    private final int positie;
+public class GameButton extends JButton {
+    private final int position;
     
     /**
      * Constructor voor een spel knop
-     * @param positie De positie (index) van deze knop op het bord
+     * @param position De positie (index) van deze knop op het bord
      */
-    public SpelKnop(int positie) {
+    public GameButton(int position) {
         super("");
-        this.positie = positie;
+        this.position = position;
         setFont(getFont().deriveFont(40f));
     }
     
     /**
      * Constructor met tekst
-     * @param tekst De initiële tekst
-     * @param positie De positie (index) van deze knop op het bord
+     * @param text De initiële tekst
+     * @param position De positie (index) van deze knop op het bord
      */
-    public SpelKnop(String tekst, int positie) {
-        super(tekst);
-        this.positie = positie;
+    public GameButton(String text, int position) {
+        super(text);
+        this.position = position;
         setFont(getFont().deriveFont(40f));
     }
     
@@ -34,7 +34,7 @@ public class SpelKnop extends JButton {
      * Krijg de positie van deze knop
      * @return De positie (index)
      */
-    public int getPositie() {
-        return positie;
+    public int getPosition() {
+        return position;
     }
 }

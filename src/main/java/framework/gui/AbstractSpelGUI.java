@@ -5,11 +5,11 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import framework.bordspel.AbstractBordSpel;
-import framework.bordspel.SpelStatus;
-import framework.spelers.AbstractSpeler;
+import framework.boardgame.AbstractBoardGame;
+import framework.boardgame.GameStatus;
 import framework.controllers.LanguageManager;
 import framework.controllers.MenuManager;
+import framework.players.AbstractPlayer;
 
 /**
  * Abstracte basis klasse voor een spel GUI
@@ -19,10 +19,10 @@ import framework.controllers.MenuManager;
 public abstract class AbstractSpelGUI {
     protected final MenuManager menuManager;
     protected final LanguageManager lang = LanguageManager.getInstance();
-    protected final AbstractBordSpel spel;
-    protected final AbstractSpeler speler1;
-    protected final AbstractSpeler speler2;
-    protected AbstractSpeler huidigeSpeler;
+    protected final AbstractBoardGame game;
+    protected final AbstractPlayer player1;
+    protected final AbstractPlayer player2;
+    protected AbstractPlayer currentPlayer;
     
     protected JFrame gameFrame;
     protected JLabel statusLabel;
@@ -32,31 +32,31 @@ public abstract class AbstractSpelGUI {
     /**
      * Constructor voor een spel GUI
      * @param menuManager De menu manager voor navigatie
-     * @param spel Het bordspel
-     * @param speler1 De eerste speler
-     * @param speler2 De tweede speler
+     * @param game Het bordspel
+     * @param player1 De eerste speler
+     * @param player2 De tweede speler
      */
-    protected AbstractSpelGUI(MenuManager menuManager, AbstractBordSpel spel, AbstractSpeler speler1, AbstractSpeler speler2) {
+    protected AbstractSpelGUI(MenuManager menuManager, AbstractBoardGame game, AbstractPlayer player1, AbstractPlayer player2) {
         this.menuManager = menuManager;
-        this.spel = spel;
-        this.speler1 = speler1;
-        this.speler2 = speler2;
-        this.huidigeSpeler = speler1; // Speler 1 begint altijd
+        this.game = game;
+        this.player1 = player1;
+        this.player2 = player2;
+        this.currentPlayer = player1; // Speler 1 begint altijd
     }
     
     /**
      * Start het spel en toont de GUI
      */
     public void start() {
-        initialiseerGUI();
+        initializeGUI();
     }
     
     /**
      * Initialiseert de GUI componenten
      * Subklassen kunnen dit overschrijven voor spel-specifieke UI
      */
-    protected void initialiseerGUI() {
-        gameFrame = new JFrame(getSpelTitel());
+    protected void initializeGUI() {
+        gameFrame = new JFrame(getGameTitle());
         gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         gameFrame.addWindowListener(new WindowAdapter() {
             @Override
@@ -64,7 +64,7 @@ public abstract class AbstractSpelGUI {
                 returnToMenu();
             }
         });
-        gameFrame.setSize(getFrameBreedte(), getFrameHoogte());
+        gameFrame.setSize(getFrameWidth(), getFrameHeight());
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setLayout(new BorderLayout());
         
@@ -74,8 +74,8 @@ public abstract class AbstractSpelGUI {
         gameFrame.add(statusLabel, BorderLayout.NORTH);
         
         // Spelbord in het midden
-        JPanel bordPanel = maakBordPanel();
-        gameFrame.add(bordPanel, BorderLayout.CENTER);
+        JPanel boardPanel = createBoardPanel();
+        gameFrame.add(boardPanel, BorderLayout.CENTER);
         
         // Menu knop onderaan
         menuButton = new JButton(lang.get("tictactoe.game.menu"));
@@ -87,8 +87,8 @@ public abstract class AbstractSpelGUI {
         updateStatusLabel();
         
         // Als AI begint, doe de eerste zet
-        if (huidigeSpeler.isAI()) {
-            doeAIZet();
+        if (currentPlayer.isAI()) {
+            doAIMove();
         }
     }
     
@@ -97,19 +97,19 @@ public abstract class AbstractSpelGUI {
      * Subklassen moeten dit implementeren voor spel-specifieke borden
      * @return Het panel met het spelbord
      */
-    protected abstract JPanel maakBordPanel();
+    protected abstract JPanel createBoardPanel();
     
     /**
      * Krijg de titel van het spel venster
      * @return De titel
      */
-    protected abstract String getSpelTitel();
+    protected abstract String getGameTitle();
     
     /**
      * Krijg de breedte van het game frame
      * @return De breedte in pixels
      */
-    protected int getFrameBreedte() {
+    protected int getFrameWidth() {
         return 400;
     }
     
@@ -117,7 +117,7 @@ public abstract class AbstractSpelGUI {
      * Krijg de hoogte van het game frame
      * @return De hoogte in pixels
      */
-    protected int getFrameHoogte() {
+    protected int getFrameHeight() {
         return 450;
     }
     
@@ -129,26 +129,26 @@ public abstract class AbstractSpelGUI {
             return;
         }
         
-        SpelStatus status = spel.getStatus();
+        GameStatus status = game.getStatus();
         switch (status) {
-            case BEZIG:
-                if (huidigeSpeler.isAI()) {
+            case IN_PROGRESS:
+                if (currentPlayer.isAI()) {
                     statusLabel.setText(lang.get("tictactoe.game.turn.ai"));
                 } else {
-                    statusLabel.setText(lang.get("tictactoe.game.turn", huidigeSpeler.getNaam()));
+                    statusLabel.setText(lang.get("tictactoe.game.turn", currentPlayer.getName()));
                 }
                 break;
-            case X_WINT:
-                String winnaarnaamX = speler1.getSymbool() == 'X' ? speler1.getNaam() : speler2.getNaam();
-                statusLabel.setText(lang.get("tictactoe.game.win", winnaarnaamX));
+            case X_WINS:
+                String winnerNameX = player1.getSymbol() == 'X' ? player1.getName() : player2.getName();
+                statusLabel.setText(lang.get("tictactoe.game.win", winnerNameX));
                 gameDone = true;
                 break;
-            case O_WINT:
-                String winnaarnaamO = speler1.getSymbool() == 'O' ? speler1.getNaam() : speler2.getNaam();
-                statusLabel.setText(lang.get("tictactoe.game.win", winnaarnaamO));
+            case O_WINS:
+                String winnerNameO = player1.getSymbol() == 'O' ? player1.getName() : player2.getName();
+                statusLabel.setText(lang.get("tictactoe.game.win", winnerNameO));
                 gameDone = true;
                 break;
-            case GELIJKSPEL:
+            case DRAW:
                 statusLabel.setText(lang.get("tictactoe.game.draw"));
                 gameDone = true;
                 break;
@@ -160,15 +160,15 @@ public abstract class AbstractSpelGUI {
     /**
      * Wissel van huidige speler
      */
-    protected void wisselSpeler() {
-        huidigeSpeler = (huidigeSpeler == speler1) ? speler2 : speler1;
+    protected void switchPlayer() {
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
     
     /**
      * Doe een AI zet
      * Subklassen kunnen dit overschrijven voor spel-specifieke AI logica
      */
-    protected abstract void doeAIZet();
+    protected abstract void doAIMove();
     
     /**
      * Keer terug naar het menu
@@ -185,7 +185,7 @@ public abstract class AbstractSpelGUI {
      */
     public void updateUITexts() {
         if (gameFrame != null) {
-            gameFrame.setTitle(getSpelTitel());
+            gameFrame.setTitle(getGameTitle());
         }
         if (menuButton != null) {
             menuButton.setText(lang.get("tictactoe.game.menu"));

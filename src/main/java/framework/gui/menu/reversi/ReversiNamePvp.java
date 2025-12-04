@@ -17,8 +17,8 @@ public class ReversiNamePvp extends JFrame {
     private final LanguageManager lang = LanguageManager.getInstance();
 
     private JLabel titleLabel;
-    private JLabel speler1Label;
-    private JLabel speler2Label;
+    private JLabel player1Label;
+    private JLabel player2Label;
     private JTextField textField1;
     private JTextField textField2;
     private JButton startButton;
@@ -71,18 +71,18 @@ public class ReversiNamePvp extends JFrame {
         centerPanel.setBackground(new Color(247, 247, 255));
         Color bodyTextColor = new Color(0x2B6F6E);
 
-        speler1Label = new JLabel(lang.get("reversi.name.playername1"));
-        speler1Label.setForeground(bodyTextColor);
-        speler1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        player1Label = new JLabel(lang.get("reversi.name.playername1"));
+        player1Label.setForeground(bodyTextColor);
+        player1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         textField1 = new JTextField();
         textField1.setFont(new Font("SansSerif", Font.PLAIN, 14));
         textField1.setMaximumSize(new Dimension(500, 40));
         textField1.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        speler2Label = new JLabel(lang.get("reversi.name.playername2"));
-        speler2Label.setForeground(bodyTextColor);
-        speler2Label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        player2Label = new JLabel(lang.get("reversi.name.playername2"));
+        player2Label.setForeground(bodyTextColor);
+        player2Label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         textField2 = new JTextField();
         textField2.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -92,15 +92,15 @@ public class ReversiNamePvp extends JFrame {
         startButton = createRoundedButton(lang.get("reversi.name.startgame"),
                 new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
         startButton.addActionListener(e -> {
-            String speler1naam = textField1.getText().trim();
-            String speler2naam = textField2.getText().trim();
-            if (speler1naam.isEmpty() || speler2naam.isEmpty()) {
+            String player1Name = textField1.getText().trim();
+            String player2Name = textField2.getText().trim();
+            if (player1Name.isEmpty() || player2Name.isEmpty()) {
                 JOptionPane.showMessageDialog(this, lang.get("reversi.name.error.emptyname"),
                         lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
             hideMenu();
-            menuManager.startReversiGame("PVP", speler1naam, speler2naam);
+            menuManager.startReversiGame("PVP", player1Name, player2Name);
         });
 
         backButton = createRoundedButton(lang.get("reversi.name.back"),
@@ -110,11 +110,11 @@ public class ReversiNamePvp extends JFrame {
             menuManager.closeReversiNameSelectionPVP();
         });
 
-        centerPanel.add(speler1Label);
+        centerPanel.add(player1Label);
         centerPanel.add(Box.createVerticalStrut(3));
         centerPanel.add(textField1);
         centerPanel.add(Box.createVerticalStrut(10));
-        centerPanel.add(speler2Label);
+        centerPanel.add(player2Label);
         centerPanel.add(Box.createVerticalStrut(3));
         centerPanel.add(textField2);
         centerPanel.add(Box.createVerticalStrut(10));
@@ -192,8 +192,8 @@ public class ReversiNamePvp extends JFrame {
     public void updateLanguage() {
         setTitle(lang.get("reversi.name.title"));
         titleLabel.setText(lang.get("reversi.name.title"));
-        speler1Label.setText(lang.get("reversi.name.playername1"));
-        speler2Label.setText(lang.get("reversi.name.playername2"));
+        player1Label.setText(lang.get("reversi.name.playername1"));
+        player2Label.setText(lang.get("reversi.name.playername2"));
         startButton.setText(lang.get("reversi.name.startgame"));
         backButton.setText(lang.get("reversi.name.back"));
     }

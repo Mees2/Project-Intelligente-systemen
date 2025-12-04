@@ -1,34 +1,34 @@
-package framework.netwerk;
+package framework.network;
 
 /**
  * Enum voor verschillende bericht types in netwerk communicatie
  * Voorbereid voor toekomstige multiplayer functionaliteit
  */
-public enum BerichtType {
+public enum MessageType {
     /**
      * Verbinding aanvraag van een client
      */
-    VERBINDEN,
+    CONNECT,
     
     /**
      * Verbinding geaccepteerd door server
      */
-    VERBINDING_OK,
+    CONNECTION_OK,
     
     /**
      * Verbinding geweigerd door server
      */
-    VERBINDING_GEWEIGERD,
+    CONNECTION_REFUSED,
     
     /**
      * Een zet is gedaan door een speler
      */
-    ZET,
+    MOVE,
     
     /**
      * Het spel is afgelopen
      */
-    SPEL_AFGELOPEN,
+    GAME_OVER,
     
     /**
      * Chat bericht tussen spelers
@@ -38,7 +38,7 @@ public enum BerichtType {
     /**
      * Speler wil het spel verlaten
      */
-    VERLATEN,
+    LEAVE,
     
     /**
      * Keepalive bericht om verbinding actief te houden

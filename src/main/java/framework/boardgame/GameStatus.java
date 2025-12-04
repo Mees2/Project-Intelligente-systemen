@@ -1,32 +1,32 @@
-package framework.bordspel;
+package framework.boardgame;
 
 /**
  * Enum voor de status van een spel
  * Gebruikt om de huidige staat van het spel bij te houden
  */
-public enum SpelStatus {
+public enum GameStatus {
     /**
      * Het spel is aan de gang
      */
-    BEZIG,
+    IN_PROGRESS,
     
     /**
      * Speler X heeft gewonnen
      */
-    X_WINT,
+    X_WINS,
     
     /**
      * Speler O heeft gewonnen
      */
-    O_WINT,
+    O_WINS,
     
     /**
      * Het spel is gelijkspel
      */
-    GELIJKSPEL,
+    DRAW,
     
     /**
      * Het spel is nog niet gestart
      */
-    NIET_GESTART
+    NOT_STARTED
 }

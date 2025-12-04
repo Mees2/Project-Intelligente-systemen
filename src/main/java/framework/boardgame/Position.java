@@ -1,35 +1,35 @@
-package framework.bordspel;
+package framework.boardgame;
 
 /**
  * Representeert een positie op een spelbord
  * Kan gebruikt worden voor verschillende bordspellen (TicTacToe, Reversi, etc.)
  */
-public class Positie {
+public class Position {
     private final int index;        // Lineaire index (0-8 voor TicTacToe, 0-63 voor Reversi)
-    private final int rij;          // Rij nummer
-    private final int kolom;        // Kolom nummer
+    private final int row;          // Rij nummer
+    private final int column;        // Kolom nummer
     
     /**
      * Constructor met lineaire index
      * @param index De positie als lineaire index
-     * @param bordBreedte De breedte van het bord (3 voor TicTacToe, 8 voor Reversi)
+     * @param boardWidth De breedte van het bord (3 voor TicTacToe, 8 voor Reversi)
      */
-    public Positie(int index, int bordBreedte) {
+    public Position(int index, int boardWidth) {
         this.index = index;
-        this.rij = index / bordBreedte;
-        this.kolom = index % bordBreedte;
+        this.row = index / boardWidth;
+        this.column = index % boardWidth;
     }
     
     /**
      * Constructor met rij en kolom
-     * @param rij De rij (0-gebaseerd)
-     * @param kolom De kolom (0-gebaseerd)
-     * @param bordBreedte De breedte van het bord
+     * @param row De rij (0-gebaseerd)
+     * @param column De kolom (0-gebaseerd)
+     * @param boardWidth De breedte van het bord
      */
-    public Positie(int rij, int kolom, int bordBreedte) {
-        this.rij = rij;
-        this.kolom = kolom;
-        this.index = rij * bordBreedte + kolom;
+    public Position(int row, int column, int boardWidth) {
+        this.row = row;
+        this.column = column;
+        this.index = row * boardWidth + column;
     }
     
     /**
@@ -44,24 +44,24 @@ public class Positie {
      * Krijg het rij nummer van deze positie
      * @return De rij
      */
-    public int getRij() {
-        return rij;
+    public int getRow() {
+        return row;
     }
     
     /**
      * Krijg het kolom nummer van deze positie
      * @return De kolom
      */
-    public int getKolom() {
-        return kolom;
+    public int getColumn() {
+        return column;
     }
     
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Positie positie = (Positie) obj;
-        return index == positie.index;
+        Position position = (Position) obj;
+        return index == position.index;
     }
     
     @Override
@@ -71,6 +71,6 @@ public class Positie {
     
     @Override
     public String toString() {
-        return String.format("Positie[index=%d, rij=%d, kolom=%d]", index, rij, kolom);
+        return String.format("Position[index=%d, row=%d, column=%d]", index, row, column);
     }
 }

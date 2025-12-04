@@ -1,13 +1,13 @@
-package framework.spelers;
+package framework.players;
 
 /**
  * Enum voor het type speler
  */
-public enum SpelerType {
+public enum PlayerType {
     /**
      * Menselijke speler
      */
-    MENS,
+    HUMAN,
     
     /**
      * Computer/AI speler
@@ -17,5 +17,5 @@ public enum SpelerType {
     /**
      * Netwerk speler (voor toekomstige multiplayer)
      */
-    NETWERK
+    NETWORK
 }

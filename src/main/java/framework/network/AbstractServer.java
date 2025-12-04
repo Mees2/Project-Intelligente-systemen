@@ -1,4 +1,4 @@
-package framework.netwerk;
+package framework.network;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -13,16 +13,16 @@ import java.util.List;
  */
 public abstract class AbstractServer {
     protected ServerSocket serverSocket;
-    protected int poort;
-    protected boolean actief = false;
+    protected int port;
+    protected boolean active = false;
     protected List<ClientHandler> clients;
     
     /**
      * Constructor voor een server
-     * @param poort De poort waarop de server luistert
+     * @param port De poort waarop de server luistert
      */
-    protected AbstractServer(int poort) {
-        this.poort = poort;
+    protected AbstractServer(int port) {
+        this.port = port;
         this.clients = new ArrayList<>();
     }
     
@@ -32,12 +32,12 @@ public abstract class AbstractServer {
      */
     public boolean start() {
         try {
-            serverSocket = new ServerSocket(poort);
-            actief = true;
-            onGestart();
+            serverSocket = new ServerSocket(port);
+            active = true;
+            onStarted();
             return true;
         } catch (IOException e) {
-            onStartFout(e);
+            onStartError(e);
             return false;
         }
     }
@@ -46,37 +46,37 @@ public abstract class AbstractServer {
      * Stop de server
      */
     public void stop() {
-        actief = false;
+        active = false;
         try {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
             }
             // Sluit alle client verbindingen
             for (ClientHandler client : clients) {
-                client.sluit();
+                client.close();
             }
             clients.clear();
         } catch (IOException e) {
             // Negeer fouten bij sluiten
         }
-        onGestopt();
+        onStopped();
     }
     
     /**
      * Accepteer nieuwe clients
      * Deze methode blokkeert tot een client verbindt
      */
-    public void accepteerClients() {
-        while (actief) {
+    public void acceptClients() {
+        while (active) {
             try {
                 Socket clientSocket = serverSocket.accept();
                 ClientHandler handler = new ClientHandler(clientSocket);
                 clients.add(handler);
-                onClientVerbonden(handler);
+                onClientConnected(handler);
                 new Thread(handler).start();
             } catch (IOException e) {
-                if (actief) { // Alleen loggen als server nog actief is
-                    onAccepteerFout(e);
+                if (active) { // Alleen loggen als server nog actief is
+                    onAcceptError(e);
                 }
             }
         }
@@ -84,11 +84,11 @@ public abstract class AbstractServer {
     
     /**
      * Verstuur een bericht naar alle clients
-     * @param bericht Het bericht om te versturen
+     * @param message Het bericht om te versturen
      */
-    public void broadcastBericht(String bericht) {
+    public void broadcastMessage(String message) {
         for (ClientHandler client : clients) {
-            client.stuurBericht(bericht);
+            client.sendMessage(message);
         }
     }
     
@@ -96,51 +96,51 @@ public abstract class AbstractServer {
      * Verwijder een client uit de lijst
      * @param handler De client handler om te verwijderen
      */
-    protected void verwijderClient(ClientHandler handler) {
+    protected void removeClient(ClientHandler handler) {
         clients.remove(handler);
-        onClientVerbroken(handler);
+        onClientDisconnected(handler);
     }
     
     /**
      * Callback wanneer server is gestart
      */
-    protected abstract void onGestart();
+    protected abstract void onStarted();
     
     /**
      * Callback wanneer server is gestopt
      */
-    protected abstract void onGestopt();
+    protected abstract void onStopped();
     
     /**
      * Callback bij start fout
      * @param e De exceptie
      */
-    protected abstract void onStartFout(IOException e);
+    protected abstract void onStartError(IOException e);
     
     /**
      * Callback bij accepteer fout
      * @param e De exceptie
      */
-    protected abstract void onAccepteerFout(IOException e);
+    protected abstract void onAcceptError(IOException e);
     
     /**
      * Callback wanneer een client verbindt
      * @param handler De client handler
      */
-    protected abstract void onClientVerbonden(ClientHandler handler);
+    protected abstract void onClientConnected(ClientHandler handler);
     
     /**
      * Callback wanneer een client verbreekt
      * @param handler De client handler
      */
-    protected abstract void onClientVerbroken(ClientHandler handler);
+    protected abstract void onClientDisconnected(ClientHandler handler);
     
     /**
      * Callback bij ontvangen bericht van een client
      * @param handler De client handler
-     * @param bericht Het ontvangen bericht
+     * @param message Het ontvangen bericht
      */
-    protected abstract void onBerichtOntvangen(ClientHandler handler, String bericht);
+    protected abstract void onMessageReceived(ClientHandler handler, String message);
     
     /**
      * Inner class voor het afhandelen van individuele clients
@@ -156,32 +156,32 @@ public abstract class AbstractServer {
                 input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 output = new PrintWriter(socket.getOutputStream(), true);
             } catch (IOException e) {
-                sluit();
+                close();
             }
         }
         
         @Override
         public void run() {
             try {
-                String bericht;
-                while ((bericht = input.readLine()) != null) {
-                    onBerichtOntvangen(this, bericht);
+                String message;
+                while ((message = input.readLine()) != null) {
+                    onMessageReceived(this, message);
                 }
             } catch (IOException e) {
                 // Verbinding verbroken
             } finally {
-                sluit();
-                verwijderClient(this);
+                close();
+                removeClient(this);
             }
         }
         
-        public void stuurBericht(String bericht) {
+        public void sendMessage(String message) {
             if (output != null) {
-                output.println(bericht);
+                output.println(message);
             }
         }
         
-        public void sluit() {
+        public void close() {
             try {
                 if (socket != null && !socket.isClosed()) {
                     socket.close();
@@ -191,8 +191,8 @@ public abstract class AbstractServer {
             }
         }
         
-        public String getAdres() {
-            return socket != null ? socket.getInetAddress().getHostAddress() : "onbekend";
+        public String getAddress() {
+            return socket != null ? socket.getInetAddress().getHostAddress() : "unknown";
         }
     }
 }

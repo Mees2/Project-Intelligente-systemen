@@ -28,10 +28,10 @@ public class ReversiGame {
     private final LanguageManager lang = LanguageManager.getInstance();
     
     /** Name of the first player (black pieces) */
-    private final String speler1;
+    private final String player1;
     
     /** Name of the second player (white pieces) */
-    private final String speler2;
+    private final String player2;
     
     /** Main game window */
     private JFrame gameFrame;
@@ -59,14 +59,14 @@ public class ReversiGame {
      *
      * @param menuManager The menu manager for handling navigation
      * @param gameMode The game mode (e.g., "PVP")
-     * @param speler1 Name of the first player (black)
-     * @param speler2 Name of the second player (white)
+     * @param player1 Name of the first player (black)
+     * @param player2 Name of the second player (white)
      */
-    public ReversiGame(MenuManager menuManager, String gameMode, String speler1, String speler2) {
+    public ReversiGame(MenuManager menuManager, String gameMode, String player1, String player2) {
         this.menuManager = menuManager;
         this.gameMode = gameMode;
-        this.speler1 = speler1;
-        this.speler2 = speler2;
+        this.player1 = player1;
+        this.player2 = player2;
     }
 
     /**
@@ -164,19 +164,19 @@ public class ReversiGame {
     int black = game.count('B');
     int white = game.count('W');
     scoreLabel.setText(String.format("<html>%s (●): %d<br>%s (○): %d</html>", 
-        speler1, black, speler2, white));
+        player1, black, player2, white));
 
     // Existing status updates
     if (gameDone) {
         if (black > white) {
-            statusLabel.setText(lang.get("reversi.game.win", speler1));
+            statusLabel.setText(lang.get("reversi.game.win", player1));
         } else if (white > black) {
-            statusLabel.setText(lang.get("reversi.game.win", speler2));
+            statusLabel.setText(lang.get("reversi.game.win", player2));
         } else {
             statusLabel.setText(lang.get("reversi.game.draw"));
         }
     } else {
-        String name = turnBlack ? speler1 : speler2;
+        String name = turnBlack ? player1 : player2;
         statusLabel.setText(lang.get("reversi.game.turn", name));
         }
     }   
@@ -284,7 +284,7 @@ public class ReversiGame {
             for (int row = 0; row < SIZE; row++) {
                 for (int col = 0; col < SIZE; col++) {
                     JButton btn = buttons[row][col];
-                    char val = game.getSymboolOp(row, col);
+                    char val = game.getSymbolAt(row, col);
 
                     // Only set icon for black or white discs
                     if (val == 'B') {

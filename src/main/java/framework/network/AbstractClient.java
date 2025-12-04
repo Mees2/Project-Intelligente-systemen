@@ -1,4 +1,4 @@
-package framework.netwerk;
+package framework.network;
 
 import java.io.*;
 import java.net.Socket;
@@ -12,34 +12,34 @@ public abstract class AbstractClient {
     protected Socket socket;
     protected BufferedReader input;
     protected PrintWriter output;
-    protected String serverAdres;
-    protected int serverPoort;
-    protected boolean verbonden = false;
+    protected String serverAddress;
+    protected int serverPort;
+    protected boolean connected = false;
     
     /**
      * Constructor voor een client
-     * @param serverAdres Het IP adres van de server
-     * @param serverPoort De poort van de server
+     * @param serverAddress Het IP adres van de server
+     * @param serverPort De poort van de server
      */
-    protected AbstractClient(String serverAdres, int serverPoort) {
-        this.serverAdres = serverAdres;
-        this.serverPoort = serverPoort;
+    protected AbstractClient(String serverAddress, int serverPort) {
+        this.serverAddress = serverAddress;
+        this.serverPort = serverPort;
     }
     
     /**
      * Verbind met de server
      * @return true als verbinding succesvol is
      */
-    public boolean verbind() {
+    public boolean connect() {
         try {
-            socket = new Socket(serverAdres, serverPoort);
+            socket = new Socket(serverAddress, serverPort);
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
-            verbonden = true;
-            onVerbonden();
+            connected = true;
+            onConnected();
             return true;
         } catch (IOException e) {
-            onVerbindingFout(e);
+            onConnectionError(e);
             return false;
         }
     }
@@ -47,8 +47,8 @@ public abstract class AbstractClient {
     /**
      * Verbreek de verbinding met de server
      */
-    public void verbreek() {
-        verbonden = false;
+    public void disconnect() {
+        connected = false;
         try {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
@@ -56,16 +56,16 @@ public abstract class AbstractClient {
         } catch (IOException e) {
             // Negeer fouten bij sluiten
         }
-        onVerbroken();
+        onDisconnected();
     }
     
     /**
      * Verstuur een bericht naar de server
-     * @param bericht Het bericht om te versturen
+     * @param message Het bericht om te versturen
      */
-    public void stuurBericht(String bericht) {
-        if (verbonden && output != null) {
-            output.println(bericht);
+    public void sendMessage(String message) {
+        if (connected && output != null) {
+            output.println(message);
         }
     }
     
@@ -73,29 +73,29 @@ public abstract class AbstractClient {
      * Controleert of de client verbonden is
      * @return true als verbonden
      */
-    public boolean isVerbonden() {
-        return verbonden && socket != null && !socket.isClosed();
+    public boolean isConnected() {
+        return connected && socket != null && !socket.isClosed();
     }
     
     /**
      * Callback wanneer verbinding is gemaakt
      */
-    protected abstract void onVerbonden();
+    protected abstract void onConnected();
     
     /**
      * Callback wanneer verbinding is verbroken
      */
-    protected abstract void onVerbroken();
+    protected abstract void onDisconnected();
     
     /**
      * Callback bij verbindingsfout
      * @param e De exceptie
      */
-    protected abstract void onVerbindingFout(IOException e);
+    protected abstract void onConnectionError(IOException e);
     
     /**
      * Callback bij ontvangen bericht
-     * @param bericht Het ontvangen bericht
+     * @param message Het ontvangen bericht
      */
-    protected abstract void onBerichtOntvangen(String bericht);
+    protected abstract void onMessageReceived(String message);
 }

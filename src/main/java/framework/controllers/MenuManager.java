@@ -128,8 +128,8 @@ public final class MenuManager {
         }*/
     }
 
-    public void startTicTacToeGame(String gameMode, String speler1Naam, String speler2Naam) {
-        TicTacToeGame game = new TicTacToeGame(this, gameMode, speler1Naam, speler2Naam);
+    public void startTicTacToeGame(String gameMode, String player1Name, String player2Name) {
+        TicTacToeGame game = new TicTacToeGame(this, gameMode, player1Name, player2Name);
         game.start();
     }
 
@@ -178,8 +178,8 @@ public final class MenuManager {
         reversiNamePvp.showMenu();
     }
 
-    public void startReversiGame(String mode, String speler1, String speler2) {
-        reversiGame = new ReversiGame(this, mode, speler1, speler2);
+    public void startReversiGame(String mode, String player1, String player2) {
+        reversiGame = new ReversiGame(this, mode, player1, player2);
         hideAllMenus();
         reversiGame.start();
     }

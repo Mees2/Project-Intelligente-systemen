@@ -1,23 +1,23 @@
-package framework.spelers;
+package framework.players;
 
 /**
  * Abstracte basis klasse voor een speler
  * Kan zowel een menselijke speler, AI of netwerk speler zijn
  */
-public abstract class AbstractSpeler {
-    protected final String naam;
-    protected final char symbool;
-    protected final SpelerType type;
+public abstract class AbstractPlayer {
+    protected final String name;
+    protected final char symbol;
+    protected final PlayerType type;
     
     /**
      * Constructor voor een speler
-     * @param naam De naam van de speler
-     * @param symbool Het symbool van de speler ('X' of 'O')
-     * @param type Het type speler (MENS, AI, NETWERK)
+     * @param name De naam van de speler
+     * @param symbol Het symbool van de speler ('X' of 'O')
+     * @param type Het type speler (HUMAN, AI, NETWORK)
      */
-    protected AbstractSpeler(String naam, char symbool, SpelerType type) {
-        this.naam = naam;
-        this.symbool = symbool;
+    protected AbstractPlayer(String name, char symbol, PlayerType type) {
+        this.name = name;
+        this.symbol = symbol;
         this.type = type;
     }
     
@@ -25,23 +25,23 @@ public abstract class AbstractSpeler {
      * Krijg de naam van de speler
      * @return De naam
      */
-    public String getNaam() {
-        return naam;
+    public String getName() {
+        return name;
     }
     
     /**
      * Krijg het symbool van de speler
      * @return Het symbool
      */
-    public char getSymbool() {
-        return symbool;
+    public char getSymbol() {
+        return symbol;
     }
     
     /**
      * Krijg het type van de speler
      * @return Het type
      */
-    public SpelerType getType() {
+    public PlayerType getType() {
         return type;
     }
     
@@ -50,27 +50,27 @@ public abstract class AbstractSpeler {
      * @return true als het een AI speler is
      */
     public boolean isAI() {
-        return type == SpelerType.AI;
+        return type == PlayerType.AI;
     }
     
     /**
      * Controleert of dit een menselijke speler is
      * @return true als het een menselijke speler is
      */
-    public boolean isMens() {
-        return type == SpelerType.MENS;
+    public boolean isHuman() {
+        return type == PlayerType.HUMAN;
     }
     
     /**
      * Controleert of dit een netwerk speler is
      * @return true als het een netwerk speler is
      */
-    public boolean isNetwerk() {
-        return type == SpelerType.NETWERK;
+    public boolean isNetwork() {
+        return type == PlayerType.NETWORK;
     }
     
     @Override
     public String toString() {
-        return String.format("%s (%c) - %s", naam, symbool, type);
+        return String.format("%s (%c) - %s", name, symbol, type);
     }
 }

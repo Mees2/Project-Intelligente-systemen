@@ -1,13 +1,13 @@
 package reversi;
 
-import framework.bordspel.AbstractBordSpel;
+import framework.boardgame.AbstractBoardGame;
 
 /**
  * Implements the game logic for Reversi (also known as Othello).
  * This class handles the rules, move validation, and state management for a Reversi game.
  * The game is played on an 8x8 board where players alternate placing black ('B') and white ('W') pieces.
  */
-public class Reversi extends AbstractBordSpel {
+public class Reversi extends AbstractBoardGame {
     
     /**
      * Creates a new Reversi game with an 8x8 board.
@@ -17,24 +17,24 @@ public class Reversi extends AbstractBordSpel {
     public Reversi() {
         super(8, 8, ' ');
         // Startpositie
-        bord[27] = 'W'; // (3,3)
-        bord[28] = 'B'; // (3,4)
-        bord[35] = 'B'; // (4,3)
-        bord[36] = 'W'; // (4,4)
+        board[27] = 'W'; // (3,3)
+        board[28] = 'B'; // (3,4)
+        board[35] = 'B'; // (4,3)
+        board[36] = 'W'; // (4,4)
     }
 
     /**
      * Determines if the specified player has won the game.
      * A player wins if they have more pieces than their opponent when no more moves are possible.
      *
-     * @param speler The player to check for winning ('B' or 'W')
+     * @param player The player to check for winning ('B' or 'W')
      * @return true if the specified player has won, false otherwise
      */
     @Override
-    public boolean isWin(char speler) {
+    public boolean isWin(char player) {
         if (!hasValidMove('B') && !hasValidMove('W')) {
             int b = count('B'), w = count('W');
-            return (speler == 'B' && b > w) || (speler == 'W' && w > b);
+            return (player == 'B' && b > w) || (player == 'W' && w > b);
         }
         return false;
     }
@@ -66,16 +66,16 @@ public class Reversi extends AbstractBordSpel {
      * @return true if the move is valid, false otherwise
      */
     public boolean isValidMove(int row, int col, char player) {
-        if (getSymboolOp(row, col) != leegSymbool) return false;
+        if (getSymbolAt(row, col) != emptySymbol) return false;
         char opponent = (player == 'B') ? 'W' : 'B';
         for (int dr = -1; dr <= 1; dr++) {
             for (int dc = -1; dc <= 1; dc++) {
                 if (dr == 0 && dc == 0) continue;
                 int r = row + dr, c = col + dc, count = 0;
-                while (r >= 0 && r < 8 && c >= 0 && c < 8 && getSymboolOp(r, c) == opponent) {
+                while (r >= 0 && r < 8 && c >= 0 && c < 8 && getSymbolAt(r, c) == opponent) {
                     r += dr; c += dc; count++;
                 }
-                if (count > 0 && r >= 0 && r < 8 && c >= 0 && c < 8 && getSymboolOp(r, c) == player)
+                if (count > 0 && r >= 0 && r < 8 && c >= 0 && c < 8 && getSymbolAt(r, c) == player)
                     return true;
             }
         }
@@ -93,19 +93,19 @@ public class Reversi extends AbstractBordSpel {
      */
     public void doMove(int row, int col, char player) {
         int pos = row * 8 + col;
-        bord[pos] = player;
+        board[pos] = player;
         char opponent = (player == 'B') ? 'W' : 'B';
         for (int dr = -1; dr <= 1; dr++) {
             for (int dc = -1; dc <= 1; dc++) {
                 if (dr == 0 && dc == 0) continue;
                 int r = row + dr, c = col + dc, count = 0;
-                while (r >= 0 && r < 8 && c >= 0 && c < 8 && getSymboolOp(r, c) == opponent) {
+                while (r >= 0 && r < 8 && c >= 0 && c < 8 && getSymbolAt(r, c) == opponent) {
                     r += dr; c += dc; count++;
                 }
-                if (count > 0 && r >= 0 && r < 8 && c >= 0 && c < 8 && getSymboolOp(r, c) == player) {
+                if (count > 0 && r >= 0 && r < 8 && c >= 0 && c < 8 && getSymbolAt(r, c) == player) {
                     int rr = row + dr, cc = col + dc;
                     while (rr != r || cc != c) {
-                        bord[rr * 8 + cc] = player;
+                        board[rr * 8 + cc] = player;
                         rr += dr; cc += dc;
                     }
                 }
@@ -135,7 +135,7 @@ public class Reversi extends AbstractBordSpel {
      */
     public int count(char player) {
         int cnt = 0;
-        for (char c : bord)
+        for (char c : board)
             if (c == player) cnt++;
         return cnt;
     }

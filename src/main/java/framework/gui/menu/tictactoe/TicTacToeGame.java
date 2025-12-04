@@ -18,8 +18,8 @@ public class TicTacToeGame {
     private final LanguageManager lang = LanguageManager.getInstance();
     private final ThemeManager theme = ThemeManager.getInstance();
     private boolean turnX = true;
-    private final String speler1;
-    private final String speler2;
+    private final String player1;
+    private final String player2;
     private volatile boolean aiTurnPending = false;
     private volatile boolean aiBusy = false;
 
@@ -29,8 +29,8 @@ public class TicTacToeGame {
     private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
     private JFrame gameFrame;
-    private char spelerRol;
-    private char aiRol;
+    private char playerRole;
+    private char aiRole;
     private ClientTicTacToe client;
     private volatile boolean loggedIn = false;
     private volatile boolean inGame = false;
@@ -150,22 +150,22 @@ public class TicTacToeGame {
         }
     }
 
-    public TicTacToeGame(MenuManager menuManager, String gameMode, String speler1, String speler2) {
+    public TicTacToeGame(MenuManager menuManager, String gameMode, String player1, String player2) {
         this.menuManager = menuManager;
         this.gameMode = gameMode;
-        this.speler1 = speler1;
-        this.speler2 = speler2;
+        this.player1 = player1;
+        this.player2 = player2;
 
         if (gameMode.equals("PVA")) {
-            if (speler1.equals("AI")) {
-                aiRol = 'X';
-                spelerRol = 'O';
+            if (player1.equals("AI")) {
+                aiRole = 'X';
+                playerRole = 'O';
             } else {
-                aiRol = 'O';
-                spelerRol = 'X';
+                aiRole = 'O';
+                playerRole = 'X';
             }
         } else if (gameMode.equals("SERVER") || gameMode.equals("TOURNAMENT")) {
-            aiRol = 'O'; // placeholder, will be set on MATCH
+            aiRole = 'O'; // placeholder, will be set on MATCH
         }
 
         ThemeManager.getInstance().addThemeChangeListener(this::updateTheme); // registers for theme notifs
@@ -219,15 +219,15 @@ public class TicTacToeGame {
                             opponentName = opponentFinal != null ? opponentFinal : "";
 
                             // Server bepaald wie welke rol krijgt op basis van wie er start.
-                            spelerRol = starterIsLocal ? 'X' : 'O';
-                            aiRol = spelerRol; // In TOURNAMENT gamemode, AI speelt met onze rol.
+                            playerRole = starterIsLocal ? 'X' : 'O';
+                            aiRole = playerRole; // In TOURNAMENT gamemode, AI speelt met onze rol.
 
                             // Zet de juiste beurt op basis van wie er start. (X gaat altijd eerst)
                             turnX = true;
                             updateStatusLabel();
 
                             // geplande AI zet als wij de starter zijn (onze symbool is X)
-                            if ("TOURNAMENT".equals(gameMode) && spelerRol == 'X') {
+                            if ("TOURNAMENT".equals(gameMode) && playerRole == 'X') {
                                 aiTurnPending = true;
                                 if (!aiBusy) doAiMoveServer();
                             }
@@ -237,7 +237,7 @@ public class TicTacToeGame {
                     if (serverMsg.contains("YOURTURN")) {
                         SwingUtilities.invokeLater(() -> {
                             // zorgt ervoor dat de beurt status overeenkomt met ons symbool
-                            turnX = (spelerRol == 'X');
+                            turnX = (playerRole == 'X');
                             updateStatusLabel();
 
                             if ("TOURNAMENT".equals(gameMode) && !aiBusy) {
@@ -251,12 +251,12 @@ public class TicTacToeGame {
                         String playerName = extractPlayerName(serverMsg);
                         int movePos = extractMovePosition(serverMsg);
 
-                        // Bepaalt onze basisnaam voor vergelijking (in PVP is dat speler1, in SERVER/TOURNAMENT is dat onze lokale naam, anders op basis van rol).
-                        String ourName = gameMode.equals("PVP") ? speler1 :
+                        // Bepaalt onze basisnaam voor vergelijking (in PVP is dat player1, in SERVER/TOURNAMENT is dat onze lokale naam, anders op basis van rol).
+                        String ourName = gameMode.equals("PVP") ? player1 :
                                 ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) ? localPlayerName :
-                                        (spelerRol == 'X' ? speler1 : speler2);
+                                        (playerRole == 'X' ? player1 : player2);
 
-                        System.out.println("[DEBUG] Move from player: '" + playerName + "', our name: '" + ourName + "', our role: " + spelerRol);
+                        System.out.println("[DEBUG] Move from player: '" + playerName + "', our name: '" + ourName + "', our role: " + playerRole);
 
                         if (movePos != -1) {
                             // checkt of de zet van onszelf is of van de tegenstander. is de zet van ons? negeer de zet anders pas de zet toe.
@@ -266,7 +266,7 @@ public class TicTacToeGame {
                                 aiTurnPending = false;
                             } else {
                                 System.out.println("[DEBUG] Recognized as OPPONENT move - applying");
-                                char opponentSymbol = (spelerRol == 'X') ? 'O' : 'X';
+                                char opponentSymbol = (playerRole == 'X') ? 'O' : 'X';
                                 System.out.println("[DEBUG] Applying opponent symbol: " + opponentSymbol + " at position: " + movePos);
                                 SwingUtilities.invokeLater(() -> applyOpponentMove(movePos, opponentSymbol));
                             }
@@ -286,11 +286,11 @@ public class TicTacToeGame {
         // Bepaalt de spelersnaam voor login op basis van gamemode.
         String playerName;
         if ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) {
-            playerName = speler1.equals("AI") ? speler2 : speler1;
+            playerName = player1.equals("AI") ? player2 : player1;
         } else if ("PVP".equals(gameMode)) {
-            playerName = speler1;
+            playerName = player1;
         } else {
-            playerName = (spelerRol == 'X' ? speler1 : speler2);
+            playerName = (playerRole == 'X' ? player1 : player2);
         }
 
         localPlayerName = playerName;
@@ -513,18 +513,18 @@ public class TicTacToeGame {
                 Thread.currentThread().interrupt();
             }
 
-            char opponentSymbol = (aiRol == 'X') ? 'O' : 'X';
-            int move = MinimaxAI.bestMove(game, aiRol, opponentSymbol);
+            char opponentSymbol = (aiRole == 'X') ? 'O' : 'X';
+            int move = MinimaxAI.bestMove(game, aiRole, opponentSymbol);
 
             if (move != -1) {
-                game.doMove(move, aiRol);
-                boardPanel.getButtons()[move].setText(String.valueOf(aiRol));
+                game.doMove(move, aiRole);
+                boardPanel.getButtons()[move].setText(String.valueOf(aiRole));
             }
 
-            if (checkEnd(aiRol)) return;
+            if (checkEnd(aiRole)) return;
 
             // After AI plays, toggle turn: if AI played X, next is O; if AI played O, next is X
-            turnX = (aiRol == 'O');
+            turnX = (aiRole == 'O');
             updateStatusLabel();
         });
     }
@@ -552,8 +552,8 @@ public class TicTacToeGame {
                 return;
             }
             // Bepaal de beste zet voor de AI
-            char opponentSymbol = (aiRol == 'X') ? 'O' : 'X';
-            int move = MinimaxAI.bestMove(game, aiRol, opponentSymbol);
+            char opponentSymbol = (aiRole == 'X') ? 'O' : 'X';
+            int move = MinimaxAI.bestMove(game, aiRole, opponentSymbol);
 
             if (move == -1) {
                 aiBusy = false;
@@ -568,16 +568,16 @@ public class TicTacToeGame {
                     return;
                 }
                 // Voer de zet van de AI uit op het bord
-                game.doMove(move, aiRol);
-                boardPanel.getButtons()[move].setText(String.valueOf(aiRol));
+                game.doMove(move, aiRole);
+                boardPanel.getButtons()[move].setText(String.valueOf(aiRole));
 
-                if (checkEnd(aiRol)) {
+                if (checkEnd(aiRole)) {
                     aiBusy = false;
                     return;
                 }
 
                 // Nadat AI zijn zet doet, wissel de beurt op basis van het symbool van de AI. (als AI X speelde, is volgende O en andersom).
-                turnX = (aiRol == 'O');
+                turnX = (aiRole == 'O');
                 updateStatusLabel();
                 aiBusy = false;
             });
@@ -586,8 +586,8 @@ public class TicTacToeGame {
 
     private boolean checkEnd(char player) {
         if (game.isWin(player)) {
-            String winnaar = getNameBySymbol(player);
-            statusLabel.setText(lang.get("tictactoe.game.win", winnaar + " (" + player + ")"));
+            String winner = getNameBySymbol(player);
+            statusLabel.setText(lang.get("tictactoe.game.win", winner + " (" + player + ")"));
             gameDone = true;
             return true;
         } else if (game.isDraw()) {
@@ -620,11 +620,11 @@ public class TicTacToeGame {
     /**
      * Checked of het de beurt is van de speler.
      * als turnX true is, is het de beurt van X anders O.
-     * == spelerRol vergelijkt dit met het symbool van de speler.
+     * == playerRole vergelijkt dit met het symbool van de speler.
      * Returns true als het symbool van de speler overeenkomt met de huidige beurt.
      */
     private boolean isPlayersTurn() {
-        return (turnX ? 'X' : 'O') == spelerRol;
+        return (turnX ? 'X' : 'O') == playerRole;
     }
 
     /**
@@ -635,12 +635,12 @@ public class TicTacToeGame {
      */
     private String getNameBySymbol(char symbol) {
         if (gameMode.equals("PVP")) {
-            return (symbol == 'X') ? speler1 : speler2;
+            return (symbol == 'X') ? player1 : player2;
         } else if (gameMode.equals("PVA")) {
-            if (symbol == spelerRol) return (spelerRol == 'X') ? speler1 : speler2;
+            if (symbol == playerRole) return (playerRole == 'X') ? player1 : player2;
             else return "AI";
         } else if ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) {
-            if (symbol == spelerRol) return localPlayerName != null ? localPlayerName : "";
+            if (symbol == playerRole) return localPlayerName != null ? localPlayerName : "";
             else return opponentName != null ? opponentName : "";
         }
         return "";
@@ -682,10 +682,10 @@ public class TicTacToeGame {
     private boolean isWinPossibleRecursive(boolean xTurn) {
         if (game.isWin('X') || game.isWin('O')) return true;
         if (game.isDraw()) return false;
-        char speler = xTurn ? 'X' : 'O';
+        char player = xTurn ? 'X' : 'O';
         for (int i = 0; i < 9; i++) {
             if (game.isFree(i)) {
-                game.doMove(i, speler);
+                game.doMove(i, player);
                 boolean possible = isWinPossibleRecursive(!xTurn);
                 game.undoMove(i);
                 if (possible) return true;
