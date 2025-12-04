@@ -40,10 +40,10 @@ public final class LanguageManager {
         addTranslation("main.reversi", "Reversi", "Reversi", "Cờ Lật", "黑白棋");
         addTranslation("main.settings", "Instellingen", "Settings","Cai đặt","设置");
         addTranslation("main.exit", "Afsluiten", "Exit", "Ra","推出");
-        addTranslation("main.exit.confirm", "Weet je zeker dat je het programma wilt afsluiten?", 
-                      "Are you sure you want to exit the program?",
-                            "Có chắc chắn muốn thoát khỏi chương trình không?",
-                                "是否确定退出程序?");
+        addTranslation("main.exit.confirm", "Weet je zeker dat je terug wilt gaan naar het hoofdmenu?",
+                      "Are you sure you want to go back to the main menu?",
+                            "Muốn quay lại menu chính không?",
+                                "您確定要返回主選單嗎?");
         addTranslation("main.exit.title", "Bevestig afsluiten", "Confirm Exit",
                 "xác nhận thoát","退出程序");
         

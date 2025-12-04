@@ -16,19 +16,19 @@ import framework.players.AbstractPlayer;
  * Bevat gemeenschappelijke functionaliteit voor TicTacToeGame en toekomstige Reversi GUI
  * Gebruikt de structuur uit de originele TicTacToeGame implementatie
  */
-public abstract class AbstractSpelGUI {
+public abstract class AbstractGameGUI {
     protected final MenuManager menuManager;
     protected final LanguageManager lang = LanguageManager.getInstance();
     protected final AbstractBoardGame game;
     protected final AbstractPlayer player1;
     protected final AbstractPlayer player2;
     protected AbstractPlayer currentPlayer;
-    
+
     protected JFrame gameFrame;
     protected JLabel statusLabel;
     protected JButton menuButton;
     protected boolean gameDone = false;
-    
+
     /**
      * Constructor voor een spel GUI
      * @param menuManager De menu manager voor navigatie
@@ -36,21 +36,21 @@ public abstract class AbstractSpelGUI {
      * @param player1 De eerste speler
      * @param player2 De tweede speler
      */
-    protected AbstractSpelGUI(MenuManager menuManager, AbstractBoardGame game, AbstractPlayer player1, AbstractPlayer player2) {
+    protected AbstractGameGUI(MenuManager menuManager, AbstractBoardGame game, AbstractPlayer player1, AbstractPlayer player2) {
         this.menuManager = menuManager;
         this.game = game;
         this.player1 = player1;
         this.player2 = player2;
         this.currentPlayer = player1; // Speler 1 begint altijd
     }
-    
+
     /**
      * Start het spel en toont de GUI
      */
     public void start() {
         initializeGUI();
     }
-    
+
     /**
      * Initialiseert de GUI componenten
      * Subklassen kunnen dit overschrijven voor spel-specifieke UI
@@ -67,44 +67,44 @@ public abstract class AbstractSpelGUI {
         gameFrame.setSize(getFrameWidth(), getFrameHeight());
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setLayout(new BorderLayout());
-        
+
         // Status label bovenaan
         statusLabel = new JLabel("", JLabel.CENTER);
         statusLabel.setFont(statusLabel.getFont().deriveFont(18f));
         gameFrame.add(statusLabel, BorderLayout.NORTH);
-        
+
         // Spelbord in het midden
         JPanel boardPanel = createBoardPanel();
         gameFrame.add(boardPanel, BorderLayout.CENTER);
-        
+
         // Menu knop onderaan
         menuButton = new JButton(lang.get("tictactoe.game.menu"));
         menuButton.addActionListener(e -> returnToMenu());
         gameFrame.add(menuButton, BorderLayout.SOUTH);
-        
+
         gameFrame.setVisible(true);
-        
+
         updateStatusLabel();
-        
+
         // Als AI begint, doe de eerste zet
         if (currentPlayer.isAI()) {
             doAIMove();
         }
     }
-    
+
     /**
      * Maak het spelbord panel
      * Subklassen moeten dit implementeren voor spel-specifieke borden
      * @return Het panel met het spelbord
      */
     protected abstract JPanel createBoardPanel();
-    
+
     /**
      * Krijg de titel van het spel venster
      * @return De titel
      */
     protected abstract String getGameTitle();
-    
+
     /**
      * Krijg de breedte van het game frame
      * @return De breedte in pixels
@@ -112,7 +112,7 @@ public abstract class AbstractSpelGUI {
     protected int getFrameWidth() {
         return 400;
     }
-    
+
     /**
      * Krijg de hoogte van het game frame
      * @return De hoogte in pixels
@@ -120,7 +120,7 @@ public abstract class AbstractSpelGUI {
     protected int getFrameHeight() {
         return 450;
     }
-    
+
     /**
      * Update het status label met de huidige speler
      */
@@ -128,7 +128,7 @@ public abstract class AbstractSpelGUI {
         if (gameDone) {
             return;
         }
-        
+
         GameStatus status = game.getStatus();
         switch (status) {
             case IN_PROGRESS:
@@ -156,20 +156,20 @@ public abstract class AbstractSpelGUI {
                 break;
         }
     }
-    
+
     /**
      * Wissel van huidige speler
      */
     protected void switchPlayer() {
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
     }
-    
+
     /**
      * Doe een AI zet
      * Subklassen kunnen dit overschrijven voor spel-specifieke AI logica
      */
     protected abstract void doAIMove();
-    
+
     /**
      * Keer terug naar het menu
      */
@@ -179,7 +179,7 @@ public abstract class AbstractSpelGUI {
         }
         menuManager.returnToMainMenu();
     }
-    
+
     /**
      * Update de GUI teksten (voor taal wijzigingen)
      */
