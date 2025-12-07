@@ -56,6 +56,8 @@ public class ReversiGame {
      */
     public void start() {
         game = new Reversi();
+        ai = new ReversiAi();  // Make sure this line exists!
+        System.out.println("DEBUG: Game started, ai initialized: " + (ai != null));
         initializeGame();
     }
 
@@ -128,32 +130,46 @@ public class ReversiGame {
      * @param col The column of the clicked cell
      */
     private void handleButtonClick(int row, int col) {
-        if (gameDone || !turnBlack) return; // Only allow moves during player's turn
+        System.out.println("DEBUG: handleButtonClick called at " + row + "," + col);
+        System.out.println("DEBUG: gameDone=" + gameDone + ", turnBlack=" + turnBlack);
+        
+        if (gameDone || !turnBlack) {
+            System.out.println("DEBUG: Ignoring click - gameDone=" + gameDone + ", turnBlack=" + turnBlack);
+            return;
+        }
         
         char current = 'B'; // Player is always black
         
-        if (!game.isValidMove(row, col, current)) return;
+        if (!game.isValidMove(row, col, current)) {
+            System.out.println("DEBUG: Invalid move at " + row + "," + col);
+            return;
+        }
         
+        System.out.println("DEBUG: Player making move at " + row + "," + col);
         game.doMove(row, col, current);
         boardPanel.updateBoard();
         consecutivePass = false;
 
-        if (checkGameEnd()) return;
+        if (checkGameEnd()) {
+            System.out.println("DEBUG: Game ended after player move");
+            return;
+        }
 
         turnBlack = false;
         updateStatusLabel();
+        boardPanel.updateBoard();
 
-        // If PVA mode, make AI move after a short delay
-        if ("PVA".equals(gameMode)) {
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    Thread.sleep(500); // Delay for better UX
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+        // Make AI move after a short delay on the main thread
+        System.out.println("DEBUG: Scheduling AI move");
+        SwingUtilities.invokeLater(() -> {
+            try {
+                Thread.sleep(1000);
+                System.out.println("DEBUG: About to call makeAIMove()");
                 makeAIMove();
-            });
-        }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
     }
 
     /**
@@ -165,15 +181,18 @@ public class ReversiGame {
         if (gameDone) return;
 
         char aiPlayer = 'W'; // AI is always white
+        
+        System.out.println("DEBUG: makeAIMove() called");
+        System.out.println("DEBUG: AI has valid move? " + game.hasValidMove(aiPlayer));
 
         // Check if AI has valid moves
         if (!game.hasValidMove(aiPlayer)) {
-            // AI must pass
+            System.out.println("DEBUG: AI has no valid moves");
             consecutivePass = true;
             
             // Check if player can move
             if (!game.hasValidMove('B')) {
-                // Both players can't move - game ends
+                System.out.println("DEBUG: Neither player can move - game ends");
                 gameDone = true;
                 updateStatusLabel();
                 boardPanel.updateBoard();
@@ -183,20 +202,53 @@ public class ReversiGame {
             // Pass to player
             turnBlack = true;
             updateStatusLabel();
+            boardPanel.updateBoard();
             return;
         }
 
         // AI makes its best move
+        System.out.println("DEBUG: Finding best move for AI");
         Positie bestMove = ai.findBestMove(game, aiPlayer);
+        System.out.println("DEBUG: Best move found: " + bestMove);
+        
         if (bestMove != null) {
+            System.out.println("DEBUG: AI making move at row=" + bestMove.getRij() + ", col=" + bestMove.getKolom());
             game.doMove(bestMove.getRij(), bestMove.getKolom(), aiPlayer);
-            boardPanel.updateBoard();
             consecutivePass = false;
 
             if (checkGameEnd()) return;
 
+            // Check if player has any valid moves
+            if (!game.hasValidMove('B')) {
+                System.out.println("DEBUG: Player has no valid moves");
+                // Player can't move, AI gets another turn
+                if (!game.hasValidMove(aiPlayer)) {
+                    System.out.println("DEBUG: Neither can move - game ends");
+                    gameDone = true;
+                    updateStatusLabel();
+                    boardPanel.updateBoard();
+                    return;
+                }
+                // AI moves again after a delay
+                boardPanel.updateBoard();
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        Thread.sleep(800);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    makeAIMove();
+                });
+                return;
+            }
+
+            // Player can move, switch turn
+            System.out.println("DEBUG: Switching to player turn");
             turnBlack = true;
             updateStatusLabel();
+            boardPanel.updateBoard();
+        } else {
+            System.out.println("DEBUG: bestMove is null!");
         }
     }
 
