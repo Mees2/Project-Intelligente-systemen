@@ -1,9 +1,11 @@
 package framework.gui.menu.tictactoe;
 
 import framework.controllers.MenuManager;
+import framework.gui.AbstractNameSelection;
+
 import javax.swing.*;
 
-public class TicTacToeNameSelection extends NameSelection {
+public class TicTacToeNameSelection extends AbstractNameSelection {
 
     public enum GameMode {
         PVP, PVA, SERVER, TOURNAMENT
@@ -21,17 +23,14 @@ public class TicTacToeNameSelection extends NameSelection {
         initializeFrame();
         createTopPanel();
         createCenterPanel();
-
         createPlayer1Field(getPlayer1LabelKey());
 
         if (gameMode == GameMode.PVP) {
             createPlayer2Field();
         }
-
         if (gameMode == GameMode.PVA) {
             createRoleSelection();
         }
-
         createButtons();
     }
 
@@ -109,11 +108,9 @@ public class TicTacToeNameSelection extends NameSelection {
         if (gameMode == GameMode.PVP && player2Label != null) {
             player2Label.setText(lang.get("tictactoe.name.player2name"));
         }
-
         if (gameMode == GameMode.PVA && roleLabel != null) {
             roleLabel.setText(lang.get("tictactoe.name.selectrole"));
         }
-
         startButton.setText(lang.get("tictactoe.name.startgame"));
         backButton.setText(lang.get("tictactoe.name.back"));
     }
@@ -131,27 +128,22 @@ public class TicTacToeNameSelection extends NameSelection {
             xButton.setForeground(theme.getFontColor2());
             roleLabel.setForeground(theme.getFontColor2());
         }
-
         startButton.putClientProperty("baseColor", theme.getMainButtonColor());
         startButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         startButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
-
         backButton.putClientProperty("baseColor", theme.getMainButtonColor());
         backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
-
         titleLabel.setForeground(theme.getFontColor1());
         player1Label.setForeground(theme.getFontColor2());
 
         if (gameMode == GameMode.PVP && player2Label != null) {
             player2Label.setForeground(theme.getFontColor2());
         }
-
         textField1.setBackground(theme.getTextFieldColor());
         if (textField2 != null) {
             textField2.setBackground(theme.getTextFieldColor());
         }
-
         frame.repaint();
     }
 }

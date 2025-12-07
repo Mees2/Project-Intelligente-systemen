@@ -1,4 +1,4 @@
-package framework.gui.menu.tictactoe;
+package framework.gui;
 
 import framework.controllers.LanguageManager;
 import framework.controllers.MenuManager;
@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-public abstract class NameSelection extends RoundedButton {
+public abstract class AbstractNameSelection extends AbstractRoundedButton {
     protected final MenuManager menuManager;
     protected final LanguageManager lang = LanguageManager.getInstance();
     protected final ThemeManager theme = ThemeManager.getInstance();
@@ -28,7 +28,7 @@ public abstract class NameSelection extends RoundedButton {
     protected JButton startButton;
     protected JButton backButton;
 
-    protected NameSelection(MenuManager menuManager) {
+    protected AbstractNameSelection(MenuManager menuManager) {
         this.menuManager = menuManager;
     }
 

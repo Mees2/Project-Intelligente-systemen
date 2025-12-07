@@ -126,6 +126,7 @@ public final class LanguageManager {
         addTranslation("common.ok", "OK", "OK","Đồng ý","确定");
         addTranslation("common.cancel", "Annuleren", "Cancel","Xoá bỏ","取消");
         addTranslation("common.error", "Fout", "Error","Lỗi","错误");
+        //addTranslation("common.exit","");
     }
     
     /**

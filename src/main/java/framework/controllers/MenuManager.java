@@ -4,11 +4,9 @@ import javax.swing.JOptionPane;
 
 import framework.gui.menu.*;
 import framework.gui.menu.reversi.ReversiGame;
-import framework.gui.menu.reversi.ReversiMenu;
-import framework.gui.menu.reversi.ReversiNamePvp;
+import framework.gui.menu.reversi.ReversiNameSelection;
 import framework.gui.menu.tictactoe.*;
 import server.ClientTicTacToe;
-
 
 /**
  * MenuManager beheert de navigatie tussen verschillende menu's en spellen.
@@ -20,14 +18,14 @@ public final class MenuManager {
     private static final String MODE_TOURNAMENT = "TOURNAMENT";
 
     private final MainMenu mainMenu;
-    private final TicTacToeMenu ticTacToeMenu;
     private final SettingsMenu settingsMenu;
+    private final GameMenu ticTacToeMenu;
+    private final GameMenu reversiMenu;
     private TicTacToeNameSelection ticTacToeNameSelection;
-    private ReversiMenu reversiMenu;
-    private ReversiNamePvp reversiNamePvp;
+    private ReversiNameSelection reversiNamePvp;
     private ReversiGame reversiGame;
     private final LanguageManager lang = LanguageManager.getInstance();
-    
+
     private ClientTicTacToe serverClient;
 
     /**
@@ -36,12 +34,9 @@ public final class MenuManager {
      */
     public MenuManager() {
         mainMenu = new MainMenu(this);
-        ticTacToeMenu = new TicTacToeMenu(this);
+        ticTacToeMenu = new GameMenu(this, GameMenu.GameType.TICTACTOE);
+        reversiMenu = new GameMenu(this, GameMenu.GameType.REVERSI);
         settingsMenu = new SettingsMenu(this);
-        //ticTacToeNameSelection = new TicTacToeNameSelection(this)
-        // reversi
-        reversiMenu = new ReversiMenu(this);           
-        reversiNamePvp = new ReversiNamePvp(this);     
     }
 
     /**
@@ -53,7 +48,6 @@ public final class MenuManager {
 
     /**
      * Opent het TicTacToe submenu
-     * Verbergt het hoofdmenu en toont het TicTacToe menu
      */
     public void openTicTacToeMenu() {
         mainMenu.hideMenu();
@@ -65,21 +59,22 @@ public final class MenuManager {
      */
     public void returnToMainMenu() {
         ticTacToeMenu.hideMenu();
+        reversiMenu.hideMenu();
         mainMenu.showMenu();
     }
-    // van naam PVP terug naar TTT menu
+
+    /**
+     * Keert terug van naam selectie naar TTT menu
+     */
     public void closeNameSelection() {
-        ticTacToeNameSelection.hideMenu();
+        if (ticTacToeNameSelection != null) {
+            ticTacToeNameSelection.hideMenu();
+        }
         ticTacToeMenu.showMenu();
     }
-    // van naam PVA terug naar TTT menu
-    /*public void closeNameSelectionPVA() {
-        ticTacToeNameSelection.hideMenu();
-        ticTacToeMenu.showMenu();
-    }*/
+
     /**
      * Opent het instellingen menu
-     * Verbergt het hoofdmenu en toont het instellingen-menu
      */
     public void openSettingsMenu() {
         mainMenu.hideMenu();
@@ -95,11 +90,8 @@ public final class MenuManager {
     }
 
     /**
-     * Start een TicTacToe spel met de opgegeven mode
-     * @param gameMode De spelmode: "PVP" voor Player vs Player, "PVA" voor Player vs AI
+     * Opent naam selectie voor TicTacToe
      */
-
-    // Was startTicTacToe, misschien wijzigen als reversi wordt geinplementeerd?
     public void openNameSelection(String gameMode) {
         ticTacToeMenu.hideMenu();
 
@@ -108,123 +100,125 @@ public final class MenuManager {
             case MODE_PVA -> TicTacToeNameSelection.GameMode.PVA;
             case MODE_SERVER -> TicTacToeNameSelection.GameMode.SERVER;
             case MODE_TOURNAMENT -> TicTacToeNameSelection.GameMode.TOURNAMENT;
-            default -> throw new IllegalArgumentException("Unknown gameMode: " + gameMode);
+            default -> throw new IllegalArgumentException("Unknown game mode: " + gameMode);
         };
 
-        // Dispose old instance if it exists
         if (ticTacToeNameSelection != null) {
             ticTacToeNameSelection.dispose();
         }
-
         ticTacToeNameSelection = new TicTacToeNameSelection(this, mode);
         ticTacToeNameSelection.showMenu();
-
-/*        switch (gameMode) {
-            case MODE_PVP -> ticTacToeNameSelection.showMenu();
-            case MODE_PVA -> ticTacToeNamePva.showMenu();
-            //case MODE_SERVER -> ticTacToeNameServer.showMenu();
-            case MODE_TOURNAMENT -> ticTacToeNameTournament.showMenu();
-            default -> throw new IllegalArgumentException("Onbekende gameMode: " + gameMode);
-        }*/
     }
 
+    /**
+     * Start een TicTacToe spel
+     */
     public void startTicTacToeGame(String gameMode, String player1Name, String player2Name) {
         TicTacToeGame game = new TicTacToeGame(this, gameMode, player1Name, player2Name);
         game.start();
     }
 
+    /**
+     * Verbergt alle menu's
+     */
     private void hideAllMenus() {
         mainMenu.hideMenu();
         ticTacToeMenu.hideMenu();
-        settingsMenu.hideMenu();
-        ticTacToeNameSelection.hideMenu();
         reversiMenu.hideMenu();
-        reversiNamePvp.hideMenu();
-    }
-    
-    /**
-     * Start TicTacToe in Speler vs Speler mode
+        settingsMenu.hideMenu();
 
-    private void startTicTacToePlayerVsPlayer() {
-        var game = new TicTacToeGame(this, MODE_PVP);
-        game.start();
-    }
-
-    /**
-     * Start TicTacToe in Speler vs AI mode
-
-    private void startTicTacToePlayerVsAI() {
-        var game = new TicTacToeGame(this, MODE_PVA);
-        game.start();
+        if (ticTacToeNameSelection != null) {
+            ticTacToeNameSelection.hideMenu();
+        }
+        if (reversiNamePvp != null) {
+            reversiNamePvp.hideMenu();
+        }
     }
 
     /**
-     * Wordt aangeroepen wanneer een spel beëindigd wordt
-     * Keert terug naar het TicTacToe menu
+     * Wordt aangeroepen wanneer een spel is afgelopen
      */
     public void onGameFinished() {
         ticTacToeMenu.showMenu();
     }
 
+    /**
+     * Opent het Reversi menu
+     */
     public void openReversiMenu() {
-        if (reversiMenu == null) reversiMenu = new ReversiMenu(this);
         hideAllMenus();
         reversiMenu.showMenu();
     }
 
+    /**
+     * Opent naam selectie voor Reversi PvP
+     */
     public void openReversiNamePvp() {
-        if (reversiNamePvp == null) reversiNamePvp = new ReversiNamePvp(this);
-        hideAllMenus();
+        reversiMenu.hideMenu();
+        if (reversiNamePvp != null) {
+            reversiNamePvp.dispose();
+        }
+        reversiNamePvp = new ReversiNameSelection(this);
         reversiNamePvp.showMenu();
     }
 
+    /**
+     * Sluit Reversi naam selectie
+     */
+    public void closeReversiNameSelectionPVP() {
+        if (reversiNamePvp != null) {
+            reversiNamePvp.hideMenu();
+        }
+        reversiMenu.showMenu();
+    }
+
+    /**
+     * Start een Reversi spel
+     */
     public void startReversiGame(String mode, String player1, String player2) {
         reversiGame = new ReversiGame(this, mode, player1, player2);
         hideAllMenus();
         reversiGame.start();
     }
 
-    public void closeReversiNameSelectionPVP() {
-        if (reversiNamePvp != null) reversiNamePvp.hideMenu();
-        openReversiMenu();
-    }
-
-    public void onReversiGameFinished() {
-        if (reversiGame != null) reversiGame.close();
-        openReversiMenu();
-    }
-
     /**
-     * Update de taal in alle menu's
+     * Update de taal van alle menu's
      */
     public void updateLanguage() {
         mainMenu.updateLanguage();
         ticTacToeMenu.updateLanguage();
-        settingsMenu.updateLanguage();
-        ticTacToeNameSelection.updateLanguage();
-        ticTacToeNameSelection.updateLanguage();
-        //ticTacToeNameServer.updateLanguage();
         reversiMenu.updateLanguage();
-        reversiNamePvp.updateLanguage();
+        settingsMenu.updateLanguage();
 
+        if (ticTacToeNameSelection != null) {
+            ticTacToeNameSelection.updateLanguage();
+        }
+        if (reversiNamePvp != null) {
+            reversiNamePvp.updateLanguage();
+        }
     }
-
-
+    /**
+     * Wordt aangeroepen wanneer een Reversi spel is afgelopen
+     */
+    public void onReversiGameFinished() {
+        reversiMenu.showMenu();
+    }
+    /**
+     * Toont een bevestigingsdialoog en sluit de applicatie af bij bevestiging
+     */
     public void confirmExit() {
-        LanguageManager lang = LanguageManager.getInstance();
-        var option = JOptionPane.showConfirmDialog(
+        int result = JOptionPane.showConfirmDialog(
                 null,
                 lang.get("main.exit.confirm"),
                 lang.get("main.exit.title"),
-                JOptionPane.YES_NO_OPTION
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
         );
-        if (option == JOptionPane.YES_OPTION) {
+
+        if (result == JOptionPane.YES_OPTION) {
             System.exit(0);
         }
     }
 
 
-    public Object getTicTacToeMenu() {
-        return ticTacToeMenu;
-    }
 }

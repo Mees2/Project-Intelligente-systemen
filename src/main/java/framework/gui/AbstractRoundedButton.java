@@ -1,9 +1,9 @@
-package framework.gui.menu.tictactoe;
+package framework.gui;
 
 import javax.swing.*;
 import java.awt.*;
 
-public abstract class RoundedButton {
+public abstract class AbstractRoundedButton {
 
     protected JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
         var btn = new JButton(text) {
