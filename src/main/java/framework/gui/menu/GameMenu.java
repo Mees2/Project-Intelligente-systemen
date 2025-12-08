@@ -206,8 +206,6 @@ public class GameMenu extends AbstractRoundedButton {
             }
         }
     }
-
-
     public void updateLanguage() {
         frame.setTitle(lang.get(getTitleKey()));
         titleLabel.setText(lang.get(getHeaderKey()));
@@ -257,13 +255,9 @@ public class GameMenu extends AbstractRoundedButton {
 
         frame.repaint();
     }
-
-
     public void showMenu() {
         frame.setVisible(true);
     }
-
-
     public void hideMenu() {
         frame.setVisible(false);
     }

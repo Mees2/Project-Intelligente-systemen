@@ -38,6 +38,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
         createPlayer1Field("reversi.name.playername1");
         createPlayer2Field();
         createButtons();
+        theme.addThemeChangeListener(this::updateTheme);
     }
 
     @Override

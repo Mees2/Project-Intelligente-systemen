@@ -126,7 +126,11 @@ public final class LanguageManager {
         addTranslation("common.ok", "OK", "OK","Đồng ý","确定");
         addTranslation("common.cancel", "Annuleren", "Cancel","Xoá bỏ","取消");
         addTranslation("common.error", "Fout", "Error","Lỗi","错误");
-        //addTranslation("common.exit","");
+        addTranslation("common.exit.confirm",
+                "Weet je zeker dat je het programma wilt afsluiten?",
+                "Are you sure you want to exit the program?",
+                "Có chắc chắn muốn thoát khỏi chương trình không?",
+                "是否确定退出程序?");
     }
     
     /**

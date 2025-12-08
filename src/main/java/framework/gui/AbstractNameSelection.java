@@ -41,8 +41,6 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
         frame.setLayout(new BorderLayout());
         frame.getContentPane().setBackground(new Color(247, 247, 255));
 
-        theme.addThemeChangeListener(this::updateTheme);
-
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -54,12 +52,12 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
     protected void createTopPanel() {
         topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setBackground(new Color(247, 247, 255));
+        topPanel.setBackground(theme.getBackgroundColor()); // <- Use theme
 
         titleLabel = new JLabel(lang.get("tictactoe.name.title"), JLabel.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setForeground(new Color(5, 5, 169));
+        titleLabel.setForeground(theme.getFontColor1()); // <- Use theme
 
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(titleLabel);
@@ -67,25 +65,23 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
 
         frame.add(topPanel, BorderLayout.NORTH);
     }
-
     protected void createCenterPanel() {
         centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-        centerPanel.setBackground(new Color(247, 247, 255));
+        centerPanel.setBackground(theme.getBackgroundColor());
     }
 
     protected void createPlayer1Field(String labelKey) {
-        Color bodyTextColor = new Color(0x2B6F6E);
-
         player1Label = new JLabel(lang.get(labelKey));
-        player1Label.setForeground(bodyTextColor);
+        player1Label.setForeground(theme.getFontColor2());
         player1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         textField1 = new JTextField();
         textField1.setFont(new Font("SansSerif", Font.PLAIN, 14));
         textField1.setMaximumSize(new Dimension(500, 40));
         textField1.setAlignmentX(Component.CENTER_ALIGNMENT);
+        textField1.setBackground(theme.getTextFieldColor());
 
         centerPanel.add(player1Label);
         centerPanel.add(Box.createVerticalStrut(3));
@@ -94,16 +90,15 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
     }
 
     protected void createPlayer2Field() {
-        Color bodyTextColor = new Color(0x2B6F6E);
-
-        player2Label = new JLabel(lang.get("tictactoe.name.player2name"));
-        player2Label.setForeground(bodyTextColor);
+        player2Label = new JLabel(lang.get("tictactoe.name.playername2"));
+        player2Label.setForeground(theme.getFontColor2());
         player2Label.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         textField2 = new JTextField();
         textField2.setFont(new Font("SansSerif", Font.PLAIN, 14));
         textField2.setMaximumSize(new Dimension(500, 40));
         textField2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        textField2.setBackground(theme.getTextFieldColor());
 
         centerPanel.add(player2Label);
         centerPanel.add(Box.createVerticalStrut(3));
@@ -133,6 +128,8 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
         oButton.setOpaque(true);
         xButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         oButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        xButton.setBackground(theme.getBackgroundColor());
+        oButton.setBackground(theme.getBackgroundColor());
 
         centerPanel.add(roleLabel);
         centerPanel.add(Box.createVerticalStrut(3));
@@ -195,16 +192,13 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
             }
         }
     }
-
     public abstract void updateLanguage();
     public abstract void updateTheme();
     protected abstract void handleStartGame();
     protected abstract void handleBack();
-
     public void showMenu() {
         frame.setVisible(true);
     }
-
     public void hideMenu() {
         frame.setVisible(false);
     }

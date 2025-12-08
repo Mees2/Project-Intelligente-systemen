@@ -209,7 +209,7 @@ public final class MenuManager {
     public void confirmExit() {
         int result = JOptionPane.showConfirmDialog(
                 null,
-                lang.get("main.exit.confirm"),
+                lang.get("common.exit.confirm"),
                 lang.get("main.exit.title"),
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE

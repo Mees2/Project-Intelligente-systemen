@@ -32,11 +32,12 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
             createRoleSelection();
         }
         createButtons();
+        theme.addThemeChangeListener(this::updateTheme);
     }
 
     private String getPlayer1LabelKey() {
         return switch (gameMode) {
-            case PVP -> "tictactoe.name.player1name";
+            case PVP -> "tictactoe.name.playername1";
             case PVA, SERVER, TOURNAMENT -> "tictactoe.name.playername";
         };
     }
