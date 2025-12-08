@@ -3,7 +3,7 @@ package framework.gui;
 import javax.swing.*;
 import java.awt.*;
 
-public abstract class AbstractRoundedButton {
+public abstract class AbstractRoundedButton extends JPanel{
 
     protected JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
         var btn = new JButton(text) {

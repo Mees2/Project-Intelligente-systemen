@@ -1,224 +1,164 @@
 package framework.controllers;
 
-import javax.swing.JOptionPane;
+import framework.gui.ApplicationFrame;
+import java.util.Map;
+import java.util.HashMap;
+import javax.swing.JPanel;
 
-import framework.gui.menu.*;
-import framework.gui.menu.reversi.ReversiGame;
-import framework.gui.menu.reversi.ReversiNameSelection;
-import framework.gui.menu.tictactoe.*;
-import server.ClientTicTacToe;
-
-/**
- * MenuManager beheert de navigatie tussen verschillende menu's en spellen.
- */
 public final class MenuManager {
-    private static final String MODE_PVP = "PVP";
-    private static final String MODE_PVA = "PVA";
-    private static final String MODE_SERVER = "SERVER";
-    private static final String MODE_TOURNAMENT = "TOURNAMENT";
+    private final ApplicationFrame mainFrame;
+    private final Map<String, JPanel> panels = new HashMap<>();
 
-    private final MainMenu mainMenu;
-    private final SettingsMenu settingsMenu;
-    private final GameMenu ticTacToeMenu;
-    private final GameMenu reversiMenu;
-    private TicTacToeNameSelection ticTacToeNameSelection;
-    private ReversiNameSelection reversiNamePvp;
-    private ReversiGame reversiGame;
-    private final LanguageManager lang = LanguageManager.getInstance();
+    // Panel name constants
+    private static final String MAIN_MENU = "MAIN_MENU";
+    private static final String TICTACTOE_MENU = "TICTACTOE_MENU";
+    private static final String REVERSI_MENU = "REVERSI_MENU";
+    private static final String SETTINGS_MENU = "SETTINGS_MENU";
+    private static final String REVERSI_NAME_PVP = "REVERSI_NAME_PVP";
+    private static final String TICTACTOE_NAME_PVP = "TICTACTOE_NAME_PVP";
+    private static final String TICTACTOE_NAME_PVA = "TICTACTOE_NAME_PVA";
+    private static final String TICTACTOE_NAME_SERVER = "TICTACTOE_NAME_SERVER";
+    private static final String TICTACTOE_NAME_TOURNAMENT = "TICTACTOE_NAME_TOURNAMENT";
 
-    private ClientTicTacToe serverClient;
-
-    /**
-     * Constructor voor de MenuManager
-     * Initialiseert alle menu's
-     */
     public MenuManager() {
-        mainMenu = new MainMenu(this);
-        ticTacToeMenu = new GameMenu(this, GameMenu.GameType.TICTACTOE);
-        reversiMenu = new GameMenu(this, GameMenu.GameType.REVERSI);
-        settingsMenu = new SettingsMenu(this);
+        mainFrame = new ApplicationFrame(this);
+
+        // Create and register panels in the main window
+        panels.put(MAIN_MENU, new framework.gui.menu.MainMenuPanel(this));
+        panels.put(TICTACTOE_MENU, new framework.gui.menu.GameMenu(this, framework.gui.menu.GameMenu.GameType.TICTACTOE));
+        panels.put(REVERSI_MENU, new framework.gui.menu.GameMenu(this, framework.gui.menu.GameMenu.GameType.REVERSI));
+        panels.put(SETTINGS_MENU, new SettingsMenu(this));
+
+        // Add panels to frame
+        panels.forEach(mainFrame::addPanel);
     }
 
-    /**
-     * Start de applicatie door het hoofdmenu te tonen
-     */
     public void startApplication() {
-        mainMenu.showMenu();
+        mainFrame.setVisible(true);
+        mainFrame.showPanel(MAIN_MENU);
     }
 
-    /**
-     * Opent het TicTacToe submenu
-     */
-    public void openTicTacToeMenu() {
-        mainMenu.hideMenu();
-        ticTacToeMenu.showMenu();
-    }
-
-    /**
-     * Keert terug naar het hoofdmenu vanaf een submenu
-     */
-    public void returnToMainMenu() {
-        ticTacToeMenu.hideMenu();
-        reversiMenu.hideMenu();
-        mainMenu.showMenu();
-    }
-
-    /**
-     * Keert terug van naam selectie naar TTT menu
-     */
-    public void closeNameSelection() {
-        if (ticTacToeNameSelection != null) {
-            ticTacToeNameSelection.hideMenu();
-        }
-        ticTacToeMenu.showMenu();
-    }
-
-    /**
-     * Opent het instellingen menu
-     */
-    public void openSettingsMenu() {
-        mainMenu.hideMenu();
-        settingsMenu.showMenu();
-    }
-
-    /**
-     * Keert terug naar het hoofdmenu vanaf het instellingen-menu
-     */
-    public void returnToMainMenuFromSettings() {
-        settingsMenu.hideMenu();
-        mainMenu.showMenu();
-    }
-
-    /**
-     * Opent naam selectie voor TicTacToe
-     */
-    public void openNameSelection(String gameMode) {
-        ticTacToeMenu.hideMenu();
-
-        TicTacToeNameSelection.GameMode mode = switch (gameMode) {
-            case MODE_PVP -> TicTacToeNameSelection.GameMode.PVP;
-            case MODE_PVA -> TicTacToeNameSelection.GameMode.PVA;
-            case MODE_SERVER -> TicTacToeNameSelection.GameMode.SERVER;
-            case MODE_TOURNAMENT -> TicTacToeNameSelection.GameMode.TOURNAMENT;
-            default -> throw new IllegalArgumentException("Unknown game mode: " + gameMode);
-        };
-
-        if (ticTacToeNameSelection != null) {
-            ticTacToeNameSelection.dispose();
-        }
-        ticTacToeNameSelection = new TicTacToeNameSelection(this, mode);
-        ticTacToeNameSelection.showMenu();
-    }
-
-    /**
-     * Start een TicTacToe spel
-     */
-    public void startTicTacToeGame(String gameMode, String player1Name, String player2Name) {
-        TicTacToeGame game = new TicTacToeGame(this, gameMode, player1Name, player2Name);
-        game.start();
-    }
-
-    /**
-     * Verbergt alle menu's
-     */
-    private void hideAllMenus() {
-        mainMenu.hideMenu();
-        ticTacToeMenu.hideMenu();
-        reversiMenu.hideMenu();
-        settingsMenu.hideMenu();
-
-        if (ticTacToeNameSelection != null) {
-            ticTacToeNameSelection.hideMenu();
-        }
-        if (reversiNamePvp != null) {
-            reversiNamePvp.hideMenu();
-        }
-    }
-
-    /**
-     * Wordt aangeroepen wanneer een spel is afgelopen
-     */
-    public void onGameFinished() {
-        ticTacToeMenu.showMenu();
-    }
-
-    /**
-     * Opent het Reversi menu
-     */
     public void openReversiMenu() {
-        hideAllMenus();
-        reversiMenu.showMenu();
+        mainFrame.showPanel(REVERSI_MENU);
     }
 
-    /**
-     * Opent naam selectie voor Reversi PvP
-     */
     public void openReversiNamePvp() {
-        reversiMenu.hideMenu();
-        if (reversiNamePvp != null) {
-            reversiNamePvp.dispose();
+        // Create panel if it doesn't exist
+        if (!panels.containsKey(REVERSI_NAME_PVP)) {
+            framework.gui.menu.reversi.ReversiNameSelection namePanel =
+                new framework.gui.menu.reversi.ReversiNameSelection(this);
+            panels.put(REVERSI_NAME_PVP, namePanel);
+            mainFrame.addPanel(REVERSI_NAME_PVP, namePanel);
         }
-        reversiNamePvp = new ReversiNameSelection(this);
-        reversiNamePvp.showMenu();
+        mainFrame.showPanel(REVERSI_NAME_PVP);
     }
 
-    /**
-     * Sluit Reversi naam selectie
-     */
-    public void closeReversiNameSelectionPVP() {
-        if (reversiNamePvp != null) {
-            reversiNamePvp.hideMenu();
-        }
-        reversiMenu.showMenu();
+    public void returnToMainMenu() {
+        mainFrame.showPanel(MAIN_MENU);
     }
 
-    /**
-     * Start een Reversi spel
-     */
-    public void startReversiGame(String mode, String player1, String player2) {
-        reversiGame = new ReversiGame(this, mode, player1, player2);
-        hideAllMenus();
-        reversiGame.start();
+    public void openTicTacToeMenu() {
+        mainFrame.showPanel(TICTACTOE_MENU);
     }
 
-    /**
-     * Update de taal van alle menu's
-     */
-    public void updateLanguage() {
-        mainMenu.updateLanguage();
-        ticTacToeMenu.updateLanguage();
-        reversiMenu.updateLanguage();
-        settingsMenu.updateLanguage();
+    public void openSettingsMenu() {
+        mainFrame.showPanel(SETTINGS_MENU);
+    }
 
-        if (ticTacToeNameSelection != null) {
-            ticTacToeNameSelection.updateLanguage();
-        }
-        if (reversiNamePvp != null) {
-            reversiNamePvp.updateLanguage();
-        }
-    }
-    /**
-     * Wordt aangeroepen wanneer een Reversi spel is afgelopen
-     */
-    public void onReversiGameFinished() {
-        reversiMenu.showMenu();
-    }
-    /**
-     * Toont een bevestigingsdialoog en sluit de applicatie af bij bevestiging
-     */
     public void confirmExit() {
-        int result = JOptionPane.showConfirmDialog(
+        int option = javax.swing.JOptionPane.showConfirmDialog(
                 null,
-                lang.get("common.exit.confirm"),
-                lang.get("main.exit.title"),
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
+                "Are you sure you want to exit?",
+                "Confirm Exit",
+                javax.swing.JOptionPane.YES_NO_OPTION
         );
-
-        if (result == JOptionPane.YES_OPTION) {
+        if (option == javax.swing.JOptionPane.YES_OPTION) {
             System.exit(0);
         }
     }
 
+    public void openNameSelection(String mode) {
+        // Convert mode string to GameMode enum and panel key
+        framework.gui.menu.tictactoe.TicTacToeNameSelection.GameMode gameMode;
+        String panelKey;
+
+        switch (mode) {
+            case "PVP" -> {
+                gameMode = framework.gui.menu.tictactoe.TicTacToeNameSelection.GameMode.PVP;
+                panelKey = TICTACTOE_NAME_PVP;
+            }
+            case "PVA" -> {
+                gameMode = framework.gui.menu.tictactoe.TicTacToeNameSelection.GameMode.PVA;
+                panelKey = TICTACTOE_NAME_PVA;
+            }
+            case "SERVER" -> {
+                gameMode = framework.gui.menu.tictactoe.TicTacToeNameSelection.GameMode.SERVER;
+                panelKey = TICTACTOE_NAME_SERVER;
+            }
+            case "TOURNAMENT" -> {
+                gameMode = framework.gui.menu.tictactoe.TicTacToeNameSelection.GameMode.TOURNAMENT;
+                panelKey = TICTACTOE_NAME_TOURNAMENT;
+            }
+            default -> {
+                System.err.println("Unknown game mode: " + mode);
+                return;
+            }
+        }
+
+        // Create panel if it doesn't exist
+        if (!panels.containsKey(panelKey)) {
+            framework.gui.menu.tictactoe.TicTacToeNameSelection namePanel =
+                new framework.gui.menu.tictactoe.TicTacToeNameSelection(this, gameMode);
+            panels.put(panelKey, namePanel);
+            mainFrame.addPanel(panelKey, namePanel);
+        }
+        mainFrame.showPanel(panelKey);
+    }
+
+    public void startTicTacToeGame(String mode, String player1, String player2) {
+        // TODO: Implement game start logic
+        javax.swing.JOptionPane.showMessageDialog(null,
+            "Starting TicTacToe game: " + mode + "\nPlayer 1: " + player1 + "\nPlayer 2: " + player2);
+        returnToTicTacToeMenu();
+    }
+
+    public void returnToTicTacToeMenu() {
+        mainFrame.showPanel(TICTACTOE_MENU);
+    }
+
+    public void onReversiGameFinished() {
+        mainFrame.showPanel(REVERSI_MENU);
+    }
+
+    public void onTicTacToeGameFinished() {
+        mainFrame.showPanel(TICTACTOE_MENU);
+    }
+
+    public void startReversiGame(String mode, String player1, String player2) {
+        framework.gui.menu.reversi.ReversiGame game =
+            new framework.gui.menu.reversi.ReversiGame(this, mode, player1, player2);
+        game.start();
+    }
+
+    public void returnToMainMenuFromSettings() {
+        mainFrame.showPanel(MAIN_MENU);
+    }
+
+    public void updateLanguage() {
+        for (JPanel panel : panels.values()) {
+            try {
+                java.lang.reflect.Method method = panel.getClass().getMethod("updateLanguage");
+                method.invoke(panel);
+            } catch (Exception e) {
+                // Panel doesn't have updateLanguage method, skip it
+            }
+        }
+        mainFrame.setTitle(LanguageManager.getInstance().get("main.title"));
+    }
+
+    public void closeNameSelection() {
+        mainFrame.showPanel(TICTACTOE_MENU);
+    }
 
 }
+

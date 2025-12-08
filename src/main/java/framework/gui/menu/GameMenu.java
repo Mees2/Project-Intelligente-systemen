@@ -20,7 +20,6 @@ public class GameMenu extends AbstractRoundedButton {
         TICTACTOE, REVERSI
     }
 
-    private final JFrame frame;
     private final MenuManager menuManager;
     private final LanguageManager lang = LanguageManager.getInstance();
     private final ThemeManager theme = ThemeManager.getInstance();
@@ -42,12 +41,11 @@ public class GameMenu extends AbstractRoundedButton {
     public GameMenu(MenuManager menuManager, GameType gameType) {
         this.menuManager = menuManager;
         this.gameType = gameType;
-        this.frame = new JFrame();
         initializeMenu();
 
         theme.addThemeChangeListener(this::updateTheme);
 
-        frame.addComponentListener(new ComponentAdapter() {
+        addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 resizeComponents();
@@ -59,18 +57,14 @@ public class GameMenu extends AbstractRoundedButton {
      * Initializes the game menu interface
      */
     private void initializeMenu() {
-        frame.setTitle(lang.get(getTitleKey()));
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.setSize(500, 350);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout());
-        frame.getContentPane().setBackground(theme.getBackgroundColor());
+        setLayout(new BorderLayout());
+        setBackground(theme.getBackgroundColor());
 
         // Title label
         titleLabel = new JLabel(lang.get(getHeaderKey()), JLabel.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 25));
         titleLabel.setForeground(theme.getFontColor1());
-        frame.add(titleLabel, BorderLayout.NORTH);
+        add(titleLabel, BorderLayout.NORTH);
 
         // Button panel
         buttonPanel = new JPanel();
@@ -80,7 +74,7 @@ public class GameMenu extends AbstractRoundedButton {
 
         createGameButtons();
 
-        frame.add(buttonPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.CENTER);
     }
 
     /**
@@ -154,13 +148,10 @@ public class GameMenu extends AbstractRoundedButton {
         buttonPanel.add(Box.createVerticalStrut(40));
 
         // Back button
-        backButton = createRoundedButton(lang.get("reversi.menu.back"),
+        backButton = createRoundedButton(lang.get("tictactoe.menu.back"),
                 theme.getMainButtonColor(), theme.getMainButtonColorHover(),
                 theme.getMainButtonColor().darker(), true);
-        backButton.addActionListener(e -> {
-            hideMenu();
-            menuManager.returnToMainMenu();
-        });
+        backButton.addActionListener(e -> menuManager.returnToMainMenu());
         buttonPanel.add(backButton);
     }
 
@@ -179,11 +170,11 @@ public class GameMenu extends AbstractRoundedButton {
     }
 
     private void resizeComponents() {
-        double scale = Math.min(frame.getWidth() / 500.0, frame.getHeight() / 350.0);
+        double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
         scale = Math.max(0.7, Math.min(scale, 2.0));
-        resizeAllComponents(frame, scale);
-        frame.revalidate();
-        frame.repaint();
+        resizeAllComponents(this, scale);
+        revalidate();
+        repaint();
     }
     private void resizeAllComponents(Container container, double scale) {
         for (Component comp : container.getComponents()) {
@@ -207,7 +198,6 @@ public class GameMenu extends AbstractRoundedButton {
         }
     }
     public void updateLanguage() {
-        frame.setTitle(lang.get(getTitleKey()));
         titleLabel.setText(lang.get(getHeaderKey()));
 
         switch (gameType) {
@@ -227,7 +217,7 @@ public class GameMenu extends AbstractRoundedButton {
     }
 
     public void updateTheme() {
-        frame.getContentPane().setBackground(theme.getBackgroundColor());
+        setBackground(theme.getBackgroundColor());
         titleLabel.setForeground(theme.getFontColor1());
 
         // Update button colors
@@ -253,12 +243,6 @@ public class GameMenu extends AbstractRoundedButton {
         backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
         backButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
 
-        frame.repaint();
-    }
-    public void showMenu() {
-        frame.setVisible(true);
-    }
-    public void hideMenu() {
-        frame.setVisible(false);
+        repaint();
     }
 }

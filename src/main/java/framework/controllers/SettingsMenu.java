@@ -9,7 +9,7 @@ import java.io.Serial;
 /** Het TicTacToeSettings submenu waar gebruikers de taal kunnen veranderen,
  *  kunnen kiezen tussen Dark en lightmode en terug kunnen gaan naar het hoofdmenu */
 
-public class SettingsMenu extends JFrame {
+public class SettingsMenu extends JPanel{
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -36,12 +36,12 @@ public class SettingsMenu extends JFrame {
     }
     /** Initialiseert de tictactoenamepvp interface test*** */
     private void initializeMenu() {
-        setTitle(lang.get("settings.title"));
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setSize(500, 350);
-        setLocationRelativeTo(null);
+        //setTitle(lang.get("settings.title"));
+        //setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        //setSize(500, 350);
+        //setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(new Color(247, 247, 255));
+        setBackground(new Color(247, 247, 255));
 
         // titelgedeelte
         topPanel = new JPanel();
@@ -278,7 +278,7 @@ public class SettingsMenu extends JFrame {
 
     /** Update alle UI teksten naar de huidige taal */
     public void updateLanguage() {
-        setTitle(lang.get("settings.title"));
+        //setTitle(lang.get("settings.title"));
         titleLabel.setText(lang.get("settings.title"));
         languageLabel.setText(lang.get("settings.language"));
         backButton.setText(lang.get("settings.back"));
@@ -317,7 +317,7 @@ public class SettingsMenu extends JFrame {
 // Updates themes similarily to UpdateLang...
     private void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
-        getContentPane().setBackground(theme.getBackgroundColor());
+        setBackground(theme.getBackgroundColor());
         centerPanel.setBackground(theme.getBackgroundColor());
         topPanel.setBackground(theme.getBackgroundColor());
 

@@ -14,7 +14,6 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
     protected final LanguageManager lang = LanguageManager.getInstance();
     protected final ThemeManager theme = ThemeManager.getInstance();
 
-    protected JFrame frame;
     protected JLabel titleLabel;
     protected JLabel player1Label;
     protected JLabel player2Label;
@@ -33,15 +32,10 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
     }
 
     protected void initializeFrame() {
-        frame = new JFrame();
-        frame.setTitle(lang.get("tictactoe.name.title"));
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.setSize(500, 350);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout());
-        frame.getContentPane().setBackground(new Color(247, 247, 255));
+        setLayout(new BorderLayout());
+        setBackground(new Color(247, 247, 255));
 
-        frame.addComponentListener(new ComponentAdapter() {
+        addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 resizeComponents();
@@ -52,19 +46,20 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
     protected void createTopPanel() {
         topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setBackground(theme.getBackgroundColor()); // <- Use theme
+        topPanel.setBackground(theme.getBackgroundColor());
 
         titleLabel = new JLabel(lang.get("tictactoe.name.title"), JLabel.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setForeground(theme.getFontColor1()); // <- Use theme
+        titleLabel.setForeground(theme.getFontColor1());
 
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(titleLabel);
         topPanel.add(Box.createVerticalStrut(5));
 
-        frame.add(topPanel, BorderLayout.NORTH);
+        add(topPanel, BorderLayout.NORTH);
     }
+
     protected void createCenterPanel() {
         centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
@@ -152,54 +147,21 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
         centerPanel.add(Box.createVerticalStrut(10));
         centerPanel.add(backButton);
 
-        frame.add(centerPanel, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
     }
 
     protected void resizeComponents() {
-        double scale = Math.min(frame.getWidth() / 500.0, frame.getHeight() / 350.0);
+        double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
         scale = Math.max(0.7, Math.min(scale, 2.0));
-        resizeAllComponents(frame, scale);
-        frame.revalidate();
-        frame.repaint();
+        //resizeAllComponents(this, scale);
+        revalidate();
+        repaint();
     }
 
-    protected void resizeAllComponents(Container container, double scale) {
-        for (Component comp : container.getComponents()) {
-            if (comp instanceof JButton btn) {
-                int newFontSize = (int)(12 * scale);
-                btn.setFont(btn.getFont().deriveFont(Font.PLAIN, newFontSize));
-                Dimension newSize = new Dimension((int)(200 * scale), (int)(35 * scale));
-                btn.setPreferredSize(newSize);
-                btn.setMinimumSize(newSize);
-                btn.setMaximumSize(newSize);
-            } else if (comp instanceof JLabel label) {
-                if (label == titleLabel) {
-                    int newTitleSize = (int)(25 * scale);
-                    label.setFont(label.getFont().deriveFont(Font.BOLD, Math.max(18, Math.min(newTitleSize, 40))));
-                } else {
-                    int newLabelSize = (int)(18 * scale);
-                    label.setFont(label.getFont().deriveFont(Font.PLAIN, Math.max(14, Math.min(newLabelSize, 30))));
-                }
-            } else if (comp instanceof JTextField field) {
-                int newFontSize = (int)(14 * scale);
-                field.setFont(field.getFont().deriveFont(Font.PLAIN, newFontSize));
-                field.setMaximumSize(new Dimension(500, (int)(40 * scale)));
-            } else if (comp instanceof JRadioButton radio) {
-                int newFontSize = (int)(14 * scale);
-                radio.setFont(radio.getFont().deriveFont(Font.PLAIN, newFontSize));
-            } else if (comp instanceof Container child) {
-                resizeAllComponents(child, scale);
-            }
-        }
-    }
+    // ...existing code...
+
     public abstract void updateLanguage();
     public abstract void updateTheme();
     protected abstract void handleStartGame();
     protected abstract void handleBack();
-    public void showMenu() {
-        frame.setVisible(true);
-    }
-    public void hideMenu() {
-        frame.setVisible(false);
-    }
 }

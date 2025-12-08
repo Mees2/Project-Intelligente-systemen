@@ -49,7 +49,7 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
         String player1Name = textField1.getText().trim();
 
         if (player1Name.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, lang.get("tictactoe.name.error.emptyname"),
+            JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyname"),
                     lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -58,20 +58,18 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
             case PVP -> {
                 String player2Name = textField2.getText().trim();
                 if (player2Name.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, lang.get("tictactoe.name.error.emptyname"),
+                    JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyname"),
                             lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                hideMenu();
                 menuManager.startTicTacToeGame("PVP", player1Name, player2Name);
             }
             case PVA -> {
                 if (!xButton.isSelected() && !oButton.isSelected()) {
-                    JOptionPane.showMessageDialog(frame, lang.get("tictactoe.name.error.emptyrole"),
+                    JOptionPane.showMessageDialog(this, lang.get("tictactoe.name.error.emptyrole"),
                             lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                hideMenu();
                 if (xButton.isSelected()) {
                     menuManager.startTicTacToeGame("PVA", player1Name, "AI");
                 } else {
@@ -79,11 +77,9 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
                 }
             }
             case SERVER -> {
-                hideMenu();
                 menuManager.startTicTacToeGame("SERVER", player1Name, "");
             }
             case TOURNAMENT -> {
-                hideMenu();
                 menuManager.startTicTacToeGame("TOURNAMENT", player1Name, "");
             }
         }
@@ -91,18 +87,11 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
 
     @Override
     protected void handleBack() {
-        hideMenu();
-        switch (gameMode) {
-            case PVP -> menuManager.closeNameSelection();
-            case PVA -> menuManager.closeNameSelection();
-            case SERVER -> menuManager.closeNameSelection();
-            case TOURNAMENT -> menuManager.closeNameSelection();
-        }
+        menuManager.closeNameSelection();
     }
 
     @Override
     public void updateLanguage() {
-        frame.setTitle(lang.get("tictactoe.name.title"));
         titleLabel.setText(lang.get("tictactoe.name.title"));
         player1Label.setText(lang.get(getPlayer1LabelKey()));
 
@@ -118,7 +107,7 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
 
     @Override
     public void updateTheme() {
-        frame.getContentPane().setBackground(theme.getBackgroundColor());
+        setBackground(theme.getBackgroundColor());
         centerPanel.setBackground(theme.getBackgroundColor());
         topPanel.setBackground(theme.getBackgroundColor());
 
@@ -145,6 +134,6 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
         if (textField2 != null) {
             textField2.setBackground(theme.getTextFieldColor());
         }
-        frame.repaint();
+        repaint();
     }
 }

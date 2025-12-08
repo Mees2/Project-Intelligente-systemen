@@ -186,7 +186,7 @@ public class TicTacToeGame {
                     "Failed to connect to server",
                     "Connection Error",
                     JOptionPane.ERROR_MESSAGE);
-            menuManager.onGameFinished();
+            menuManager.onTicTacToeGameFinished();
             return;
         }
         // Luistert naar berichten van de server in een aparte thread en checked de inhoud, zodat wij accuraat kunnen blijven reageren op de UI.
@@ -309,7 +309,7 @@ public class TicTacToeGame {
         if (!loggedIn) {
             JOptionPane.showMessageDialog(null, "Login failed", "Error", JOptionPane.ERROR_MESSAGE);
             client.shutdown();
-            menuManager.onGameFinished();
+            menuManager.onTicTacToeGameFinished();
             return;
         }
 
@@ -739,7 +739,7 @@ public class TicTacToeGame {
                 }
             }
             gameFrame.dispose();
-            menuManager.onGameFinished();
+            menuManager.onTicTacToeGameFinished();
         }
     }
 }

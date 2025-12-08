@@ -47,24 +47,21 @@ public class ReversiNameSelection extends AbstractNameSelection {
         String player2Name = textField2.getText().trim();
 
         if (player1Name.isEmpty() || player2Name.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, lang.get("reversi.name.error.emptyname"),
+            JOptionPane.showMessageDialog(this, lang.get("reversi.name.error.emptyname"),
                     lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        hideMenu();
         menuManager.startReversiGame("PVP", player1Name, player2Name);
     }
 
     @Override
     protected void handleBack() {
-        hideMenu();
-        menuManager.closeReversiNameSelectionPVP();
+        menuManager.openReversiMenu();
     }
 
     @Override
     public void updateLanguage() {
-        frame.setTitle(lang.get("reversi.name.title"));
         titleLabel.setText(lang.get("reversi.name.title"));
         player1Label.setText(lang.get("reversi.name.playername1"));
 
@@ -78,7 +75,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
 
     @Override
     public void updateTheme() {
-        frame.getContentPane().setBackground(theme.getBackgroundColor());
+        setBackground(theme.getBackgroundColor());
         centerPanel.setBackground(theme.getBackgroundColor());
         topPanel.setBackground(theme.getBackgroundColor());
 
@@ -103,13 +100,6 @@ public class ReversiNameSelection extends AbstractNameSelection {
             textField2.setBackground(theme.getTextFieldColor());
         }
 
-        frame.repaint();
+        repaint();
     }
-
-    public void dispose() {
-        if (frame != null) {
-            frame.dispose();
-        }
-    }
-
 }
