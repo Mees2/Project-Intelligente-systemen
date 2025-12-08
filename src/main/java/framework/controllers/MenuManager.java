@@ -22,14 +22,10 @@ public final class MenuManager {
 
     public MenuManager() {
         mainFrame = new ApplicationFrame(this);
-
-        // Create and register panels in the main window
         panels.put(MAIN_MENU, new framework.gui.menu.MainMenuPanel(this));
         panels.put(TICTACTOE_MENU, new framework.gui.menu.GameMenu(this, framework.gui.menu.GameMenu.GameType.TICTACTOE));
         panels.put(REVERSI_MENU, new framework.gui.menu.GameMenu(this, framework.gui.menu.GameMenu.GameType.REVERSI));
         panels.put(SETTINGS_MENU, new SettingsMenu(this));
-
-        // Add panels to frame
         panels.forEach(mainFrame::addPanel);
     }
 
@@ -43,7 +39,6 @@ public final class MenuManager {
     }
 
     public void openReversiNamePvp() {
-        // Create panel if it doesn't exist
         if (!panels.containsKey(REVERSI_NAME_PVP)) {
             framework.gui.menu.reversi.ReversiNameSelection namePanel =
                 new framework.gui.menu.reversi.ReversiNameSelection(this);
@@ -78,7 +73,6 @@ public final class MenuManager {
     }
 
     public void openNameSelection(String mode) {
-        // Convert mode string to GameMode enum and panel key
         framework.gui.menu.tictactoe.TicTacToeNameSelection.GameMode gameMode;
         String panelKey;
 
@@ -116,11 +110,23 @@ public final class MenuManager {
     }
 
     public void startTicTacToeGame(String mode, String player1, String player2) {
-        // TODO: Implement game start logic
-        javax.swing.JOptionPane.showMessageDialog(null,
-            "Starting TicTacToe game: " + mode + "\nPlayer 1: " + player1 + "\nPlayer 2: " + player2);
-        returnToTicTacToeMenu();
+        String panelKey = "TICTACTOE_GAME_" + mode;
+
+        framework.gui.menu.tictactoe.TicTacToeGame gamePanel =
+            new framework.gui.menu.tictactoe.TicTacToeGame(this, mode, player1, player2);
+
+        gamePanel.start();
+
+        panels.put(panelKey, gamePanel);
+        mainFrame.addPanel(panelKey, gamePanel);
+        mainFrame.showPanel(panelKey);
+
+        gamePanel.revalidate();
+        gamePanel.repaint();
+        mainFrame.revalidate();
+        mainFrame.repaint();
     }
+
 
     public void returnToTicTacToeMenu() {
         mainFrame.showPanel(TICTACTOE_MENU);
@@ -150,7 +156,6 @@ public final class MenuManager {
                 java.lang.reflect.Method method = panel.getClass().getMethod("updateLanguage");
                 method.invoke(panel);
             } catch (Exception e) {
-                // Panel doesn't have updateLanguage method, skip it
             }
         }
         mainFrame.setTitle(LanguageManager.getInstance().get("main.title"));
@@ -161,4 +166,3 @@ public final class MenuManager {
     }
 
 }
-

@@ -12,9 +12,9 @@ import tictactoe.TicTacToe;
 import tictactoe.MinimaxAI;
 import server.ClientTicTacToe;
 
-public class TicTacToeGame {
+public class TicTacToeGame extends JPanel {
     private final MenuManager menuManager;
-    private final String gameMode; // "PVP" or "PVA" or "SERVER" or "TOURNAMENT"
+    private final String gameMode;
     private final LanguageManager lang = LanguageManager.getInstance();
     private final ThemeManager theme = ThemeManager.getInstance();
     private boolean turnX = true;
@@ -28,7 +28,7 @@ public class TicTacToeGame {
     private SquareBoardPanel boardPanel;
     private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
-    private JFrame gameFrame;
+    //private JFrame gameFrame;
     private char playerRole;
     private char aiRole;
     private ClientTicTacToe client;
@@ -120,7 +120,7 @@ public class TicTacToeGame {
      * Checks if a move was made by the local player.
      *
      * @param movePlayerName The name of the player who made the move
-     * @param ourBaseName Our player's base name for comparison
+     * @param ourBaseName    Our player's base name for comparison
      * @return true if the move was made by the local player, false otherwise
      */
     private boolean isOurMove(String movePlayerName, String ourBaseName) {
@@ -164,11 +164,11 @@ public class TicTacToeGame {
                 aiRole = 'O';
                 playerRole = 'X';
             }
-        } else if (gameMode.equals("SERVER") || gameMode.equals("TOURNAMENT")) {
-            aiRole = 'O'; // placeholder, will be set on MATCH
         }
 
-        ThemeManager.getInstance().addThemeChangeListener(this::updateTheme); // registers for theme notifs
+        theme.addThemeChangeListener(this::updateTheme);
+
+        setPreferredSize(new Dimension(500, 600));
 
     }
 
@@ -178,6 +178,7 @@ public class TicTacToeGame {
         if (!"SERVER".equals(gameMode) && !"TOURNAMENT".equals(gameMode)) {
             initializeGame();
             return;
+
         }
 
         client = new ClientTicTacToe();
@@ -321,26 +322,19 @@ public class TicTacToeGame {
         turnX = true;
         gameDone = false;
 
-        gameFrame = new JFrame(getTitleForMode());
-        gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        gameFrame.setSize(500, 600);
-        gameFrame.setMinimumSize(new Dimension(400, 500));
-        gameFrame.setLocationRelativeTo(null);
-        gameFrame.setLayout(new BorderLayout());
-        gameFrame.getContentPane().setBackground(ThemeManager.getInstance().getBackgroundColor());
-
+        setLayout(new BorderLayout());
+        setBackground(ThemeManager.getInstance().getBackgroundColor());
 
         statusLabel = new JLabel("", JLabel.CENTER);
         statusLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
         statusLabel.setForeground(ThemeManager.getInstance().getFontColor1());
         statusLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-        gameFrame.add(statusLabel, BorderLayout.NORTH);
+        add(statusLabel, BorderLayout.NORTH);
 
         boardPanel = new SquareBoardPanel();
         boardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
-        gameFrame.add(boardPanel, BorderLayout.CENTER);
+        add(boardPanel, BorderLayout.CENTER);
 
-        // In gamemode TOURNAMENT, disable alle knoppen zodat de speler geen zetten kan doen.
         if ("TOURNAMENT".equals(gameMode)) {
             for (JButton b : boardPanel.getButtons()) {
                 b.setEnabled(false);
@@ -357,17 +351,15 @@ public class TicTacToeGame {
         southPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         southPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 20));
         southPanel.add(menuButton);
-        gameFrame.add(southPanel, BorderLayout.SOUTH);
+        add(southPanel, BorderLayout.SOUTH); // CHANGE: gameFrame.add → add
 
-        gameFrame.addComponentListener(new ComponentAdapter() {
+        addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 boardPanel.resizeFont();
-                statusLabel.setFont(statusLabel.getFont().deriveFont((float) Math.max(18, gameFrame.getHeight() / 25)));
+                statusLabel.setFont(statusLabel.getFont().deriveFont((float) Math.max(18, getHeight() / 25))); // CHANGE: gameFrame.getHeight() → getHeight()
             }
         });
-
-        gameFrame.setVisible(true);
         updateStatusLabel();
 
         if (gameMode.equals("PVA") && !isPlayersTurn()) {
@@ -495,7 +487,6 @@ public class TicTacToeGame {
 
         if (checkEnd(currentPlayer)) return;
 
-        // Toggle turn: if X just played, next is O; if O just played, next is X
         turnX = (currentPlayer == 'O');
         updateStatusLabel();
 
@@ -523,7 +514,6 @@ public class TicTacToeGame {
 
             if (checkEnd(aiRole)) return;
 
-            // After AI plays, toggle turn: if AI played X, next is O; if AI played O, next is X
             turnX = (aiRole == 'O');
             updateStatusLabel();
         });
@@ -604,6 +594,7 @@ public class TicTacToeGame {
 
     /**
      * Haalt de titel op voor de huidige spelmodus.
+     *
      * @return de correcte titel voor het huidige spelmodus gebaseerd op gameMode en taalinstellingen
      */
     private String getTitleForMode() {
@@ -699,34 +690,31 @@ public class TicTacToeGame {
      * Called when the theme changes to update colors and styling.
      */
     private void updateTheme() {
-        if (gameFrame != null) { //checks if gameframe exists
-            gameFrame.getContentPane().setBackground(theme.getBackgroundColor()); //Changes background color
-            statusLabel.setForeground(theme.getFontColor1()); //Changes font color
-            boardPanel.setBackground(theme.getBackgroundColor()); //Changes board background color
+        setBackground(theme.getBackgroundColor());
+        statusLabel.setForeground(theme.getFontColor1());
+        boardPanel.setBackground(theme.getBackgroundColor());
 
-            // Update menu button colors and save to client properties
-            menuButton.putClientProperty("baseColor", theme.getMainButtonColor());
-            menuButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
-            menuButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
-            menuButton.repaint();
+        menuButton.putClientProperty("baseColor", theme.getMainButtonColor());
+        menuButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
+        menuButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
+        menuButton.repaint();
 
-            // Update board buttons colors and save to client properties
-            for (JButton btn : boardPanel.getButtons()) {
-                btn.putClientProperty("baseColor", theme.getTitleColor());
-                btn.putClientProperty("hoverColor", theme.getTitleColor());
-                btn.putClientProperty("borderColor", new Color(120, 60, 150));
-                btn.repaint();
-            }
-
-            //Redraws the game frame to apply changes
-            gameFrame.repaint();
+        for (JButton btn : boardPanel.getButtons()) {
+            btn.putClientProperty("baseColor", theme.getTitleColor());
+            btn.putClientProperty("hoverColor", theme.getTitleColor());
+            btn.putClientProperty("borderColor", new Color(120, 60, 150));
+            btn.repaint();
         }
-    }
 
+        repaint();
+    }
     private void returnToMenu() {
-        int option = JOptionPane.showConfirmDialog(gameFrame, lang.get("main.exit.confirm"), lang.get("main.exit.title"), JOptionPane.YES_NO_OPTION);
+        int option = JOptionPane.showConfirmDialog(this,
+                lang.get("main.exit.confirm"),
+                lang.get("main.exit.title"),
+                JOptionPane.YES_NO_OPTION);
+
         if (option == JOptionPane.YES_OPTION) {
-            //check of we verbonden zijn met de server (alleen in gamemode SERVER en TOURNAMENT) en zo ja, verbreek de verbinding met de server.
             if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && client != null) {
                 try {
                     client.quit();
@@ -738,7 +726,6 @@ public class TicTacToeGame {
                     }
                 }
             }
-            gameFrame.dispose();
             menuManager.onTicTacToeGameFinished();
         }
     }

@@ -28,8 +28,6 @@ public class Main {
             // Als Windows look & feel niet beschikbaar is, gebruik default
             System.out.println("Kon Windows look & feel niet instellen, gebruik default.");
         }
-
-        // Start server connection in background
         ClientTicTacToe client = new ClientTicTacToe();
         Thread clientThread = new Thread(client);
         clientThread.start();

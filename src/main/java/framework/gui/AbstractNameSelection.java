@@ -151,15 +151,56 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
     }
 
     protected void resizeComponents() {
-        double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
+        int frameWidth = getWidth();
+        int frameHeight = getHeight();
+
+        double scale = Math.min(frameWidth / 500.0, frameHeight / 350.0);
         scale = Math.max(0.7, Math.min(scale, 2.0));
-        //resizeAllComponents(this, scale);
+        // Scale fonts proportionally
+        float titleSize = (float) (16 * scale);
+        float labelSize = (float) (12 * scale);
+        float textFieldSize = (float) (14 * scale);
+        float buttonSize = (float) (14 * scale);
+
+        if (titleLabel != null) {
+            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.PLAIN, titleSize));
+        }
+
+        if (player1Label != null) {
+            player1Label.setFont(player1Label.getFont().deriveFont(Font.PLAIN, labelSize));
+        }
+        if (player2Label != null) {
+            player2Label.setFont(player2Label.getFont().deriveFont(Font.PLAIN, labelSize));
+        }
+        if (roleLabel != null) {
+            roleLabel.setFont(roleLabel.getFont().deriveFont(Font.PLAIN, labelSize));
+        }
+
+        if (textField1 != null) {
+            textField1.setFont(textField1.getFont().deriveFont(Font.PLAIN, textFieldSize));
+            textField1.setMaximumSize(new Dimension((int)(500 * scale), (int)(40 * scale)));
+        }
+        if (textField2 != null) {
+            textField2.setFont(textField2.getFont().deriveFont(Font.PLAIN, textFieldSize));
+            textField2.setMaximumSize(new Dimension((int)(500 * scale), (int)(40 * scale)));
+        }
+        if (xButton != null) {
+            xButton.setFont(xButton.getFont().deriveFont(Font.PLAIN, labelSize));
+        }
+        if (oButton != null) {
+            oButton.setFont(oButton.getFont().deriveFont(Font.PLAIN, labelSize));
+        }
+
+        if (startButton != null) {
+            startButton.setFont(startButton.getFont().deriveFont(Font.PLAIN, buttonSize));
+        }
+        if (backButton != null) {
+            backButton.setFont(backButton.getFont().deriveFont(Font.PLAIN, buttonSize));
+        }
+
         revalidate();
         repaint();
     }
-
-    // ...existing code...
-
     public abstract void updateLanguage();
     public abstract void updateTheme();
     protected abstract void handleStartGame();

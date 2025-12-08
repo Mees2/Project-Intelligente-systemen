@@ -41,8 +41,6 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
             case PVA, SERVER, TOURNAMENT -> "tictactoe.name.playername";
         };
     }
-    public void dispose() {
-    }
 
     @Override
     protected void handleStartGame() {
@@ -96,7 +94,7 @@ public class TicTacToeNameSelection extends AbstractNameSelection {
         player1Label.setText(lang.get(getPlayer1LabelKey()));
 
         if (gameMode == GameMode.PVP && player2Label != null) {
-            player2Label.setText(lang.get("tictactoe.name.player2name"));
+            player2Label.setText(lang.get("tictactoe.name.playername2"));
         }
         if (gameMode == GameMode.PVA && roleLabel != null) {
             roleLabel.setText(lang.get("tictactoe.name.selectrole"));

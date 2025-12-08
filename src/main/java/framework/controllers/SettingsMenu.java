@@ -238,42 +238,43 @@ public class SettingsMenu extends JPanel{
     }
     /** past de groote van de componenten aan afhankelijk van de grote van het venster */
     private void resizeComponents() {
-        double scale = Math.min(getWidth() / 500.0, getHeight() / 350.0);
+        int frameWidth = getWidth();
+        int frameHeight = getHeight();
+
+        double scale = Math.min(frameWidth / 500.0, frameHeight / 350.0);
         scale = Math.max(0.7, Math.min(scale, 2.0));
-        resizeAllComponents(this, scale);
+
+        float titleSize = (float) (16 * scale);
+        float labelSize = (float) (12 * scale);
+        float comboBoxSize = (float) (14 * scale);
+        float buttonSize = (float) (14 * scale);
+
+        if (titleLabel != null) {
+            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, titleSize));
+        }
+
+        if (languageLabel != null) {
+            languageLabel.setFont(languageLabel.getFont().deriveFont(Font.PLAIN, labelSize));
+        }
+        if (darkmodeLabel != null) {
+            darkmodeLabel.setFont(darkmodeLabel.getFont().deriveFont(Font.PLAIN, labelSize));
+        }
+
+
+        if (languageComboBox != null) {
+            languageComboBox.setFont(languageComboBox.getFont().deriveFont(Font.PLAIN, comboBoxSize));
+            languageComboBox.setMaximumSize(new Dimension((int)(200 * scale), (int)(30 * scale)));
+        }
+
+        if (darkModeButton != null) {
+            darkModeButton.setFont(darkModeButton.getFont().deriveFont(Font.PLAIN, buttonSize));
+        }
+        if (backButton != null) {
+            backButton.setFont(backButton.getFont().deriveFont(Font.PLAIN, buttonSize));
+        }
+
         revalidate();
         repaint();
-    }
-    /** schaalt de knoppen */
-    private void resizeAllComponents(Container container, double scale) {
-        for (Component comp : container.getComponents()) {
-            if (comp instanceof JButton) {
-                JButton btn = (JButton) comp;
-                int newFontSize = (int)(12 * scale);
-                btn.setFont(btn.getFont().deriveFont(Font.PLAIN, newFontSize));
-                Dimension newSize = new Dimension((int)(200 * scale), (int)(35 * scale));
-                btn.setPreferredSize(newSize);
-                btn.setMinimumSize(newSize);
-                btn.setMaximumSize(newSize);
-            } else if (comp instanceof JLabel label) {
-                if (label == titleLabel) {
-                    int newTitleSize = (int)(25 * scale);
-                    label.setFont(label.getFont().deriveFont(Font.BOLD, Math.max(18, Math.min(newTitleSize, 40))));
-                } else {
-                    int newLabelSize = (int)(18 * scale);
-                    label.setFont(label.getFont().deriveFont(Font.PLAIN, Math.max(14, Math.min(newLabelSize, 30))));
-                }
-            } else if (comp instanceof JTextField field) {
-                int newFontSize = (int)(14 * scale);
-                field.setFont(field.getFont().deriveFont(Font.PLAIN, newFontSize));
-                field.setMaximumSize(new Dimension(500, (int)(40 * scale)));
-            } else if (comp instanceof JRadioButton radio) {
-                int newFontSize = (int)(14 * scale);
-                radio.setFont(radio.getFont().deriveFont(Font.PLAIN, newFontSize));
-            } else if (comp instanceof Container child) {
-                resizeAllComponents(child, scale);
-            }
-        }
     }
 
     /** Update alle UI teksten naar de huidige taal */
@@ -314,7 +315,6 @@ public class SettingsMenu extends JPanel{
         }
     }
 
-// Updates themes similarily to UpdateLang...
     private void updateTheme() {
         ThemeManager theme = ThemeManager.getInstance();
         setBackground(theme.getBackgroundColor());
