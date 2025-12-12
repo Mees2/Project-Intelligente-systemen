@@ -15,6 +15,7 @@ public final class MenuManager {
     private static final String REVERSI_MENU = "REVERSI_MENU";
     private static final String SETTINGS_MENU = "SETTINGS_MENU";
     private static final String REVERSI_NAME_PVP = "REVERSI_NAME_PVP";
+    private static final String REVERSI_NAME_MCTS = "REVERSI_NAME_MCTS";
     private static final String TICTACTOE_NAME_PVP = "TICTACTOE_NAME_PVP";
     private static final String TICTACTOE_NAME_PVA = "TICTACTOE_NAME_PVA";
     private static final String TICTACTOE_NAME_SERVER = "TICTACTOE_NAME_SERVER";
@@ -41,11 +42,37 @@ public final class MenuManager {
     public void openReversiNamePvp() {
         if (!panels.containsKey(REVERSI_NAME_PVP)) {
             framework.gui.menu.reversi.ReversiNameSelection namePanel =
-                new framework.gui.menu.reversi.ReversiNameSelection(this);
+                new framework.gui.menu.reversi.ReversiNameSelection(this, 
+                    framework.gui.menu.reversi.ReversiNameSelection.GameMode.PVP);
             panels.put(REVERSI_NAME_PVP, namePanel);
             mainFrame.addPanel(REVERSI_NAME_PVP, namePanel);
         }
         mainFrame.showPanel(REVERSI_NAME_PVP);
+    }
+
+    public void openReversiNameMCTS() {
+        if (!panels.containsKey(REVERSI_NAME_MCTS)) {
+            framework.gui.menu.reversi.ReversiNameSelection namePanel =
+                new framework.gui.menu.reversi.ReversiNameSelection(this,
+                    framework.gui.menu.reversi.ReversiNameSelection.GameMode.AI,
+                    framework.gui.menu.reversi.ReversiNameSelection.AIType.MCTS);
+            panels.put(REVERSI_NAME_MCTS, namePanel);
+            mainFrame.addPanel(REVERSI_NAME_MCTS, namePanel);
+        }
+        mainFrame.showPanel(REVERSI_NAME_MCTS);
+    }
+
+    public void openReversiNameMINIMAX() {
+        final String key = "REVERSI_NAME_MINIMAX";
+        if (!panels.containsKey(key)) {
+            framework.gui.menu.reversi.ReversiNameSelection namePanel =
+                new framework.gui.menu.reversi.ReversiNameSelection(this,
+                    framework.gui.menu.reversi.ReversiNameSelection.GameMode.AI,
+                    framework.gui.menu.reversi.ReversiNameSelection.AIType.MINIMAX);
+            panels.put(key, namePanel);
+            mainFrame.addPanel(key, namePanel);
+        }
+        mainFrame.showPanel(key);
     }
 
     public void returnToMainMenu() {

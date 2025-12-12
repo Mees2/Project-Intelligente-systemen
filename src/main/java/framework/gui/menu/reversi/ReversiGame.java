@@ -3,6 +3,7 @@ package framework.gui.menu.reversi;
 import framework.controllers.LanguageManager;
 import framework.controllers.MenuManager;
 import reversi.Reversi;
+import reversi.MonteCarloTreeSearchAI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -16,12 +17,13 @@ import java.awt.image.BufferedImage;
  * - Score tracking for both players
  * - Turn indicators
  * - Game state management (win/draw conditions)
+ * - AI opponent support using Monte Carlo Tree Search
  */
 public class ReversiGame {
     /** MenuManager instance for handling navigation between different menus */
     private final MenuManager menuManager;
     
-    /** Current game mode (e.g., "PVP") */
+    /** Current game mode (e.g., "PVP", "PVA") */
     private final String gameMode;
     
     /** Language manager for handling multilingual support */
@@ -54,11 +56,20 @@ public class ReversiGame {
     /** Label showing the current score */
     private JLabel scoreLabel;
 
+    /** Indicates if AI is currently thinking (for PVA mode) */
+    private volatile boolean aiThinking = false;
+
+    /** The role of the human player ('B' for black, 'W' for white) - only used in PVA mode */
+    private char humanRole = ' ';
+
+    /** The role of the AI player ('B' for black, 'W' for white) - only used in PVA mode */
+    private char aiRole = ' ';
+
     /**
      * Creates a new Reversi game instance.
      *
      * @param menuManager The menu manager for handling navigation
-     * @param gameMode The game mode (e.g., "PVP")
+     * @param gameMode The game mode (e.g., "PVP", "MCTS")
      * @param player1 Name of the first player (black)
      * @param player2 Name of the second player (white)
      */
@@ -67,6 +78,17 @@ public class ReversiGame {
         this.gameMode = gameMode;
         this.player1 = player1;
         this.player2 = player2;
+
+        // Setup AI roles if in MCTS mode
+        if ("MCTS".equals(gameMode)) {
+            if (player1.equals("MCTS AI")) {
+                aiRole = 'B';
+                humanRole = 'W';
+            } else {
+                humanRole = 'B';
+                aiRole = 'W';
+            }
+        }
     }
 
     /**
@@ -86,7 +108,8 @@ public class ReversiGame {
         gameDone = false;
         turnBlack = true;
 
-        gameFrame = new JFrame(lang.get("reversi.game.title.pvp"));
+        String titleKey = "MCTS".equals(gameMode) ? "reversi.game.title.mcts" : "reversi.game.title.pvp";
+        gameFrame = new JFrame(lang.get(titleKey));
         gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         gameFrame.setSize(700, 800);
         gameFrame.setMinimumSize(new Dimension(500, 600));
@@ -127,6 +150,11 @@ public class ReversiGame {
         gameFrame.setVisible(true);
 
         updateStatusLabel();
+
+        // If AI plays first (black) in MCTS mode, trigger AI move
+        if ("MCTS".equals(gameMode) && aiRole == 'B') {
+            doAIMove();
+        }
     }
 
     /**
@@ -137,22 +165,146 @@ public class ReversiGame {
      * @param col The column of the clicked cell
      */
     private void handleButtonClick(int row, int col) {
-        if (gameDone) return;
+        if (gameDone || aiThinking) return;
+        
         char current = turnBlack ? 'B' : 'W';
+        
+        // In MCTS mode, only allow human player to make moves on their turn
+        if ("MCTS".equals(gameMode) && current != humanRole) return;
+        
         if (!game.isValidMove(row, col, current)) return;
+        
         game.doMove(row, col, current);
         boardPanel.updateBoard();
 
-        if (game.isWin('B') || game.isWin('W') || game.isDraw()) {
-            gameDone = true;
-            updateStatusLabel();
-            boardPanel.updateBoard();
+        if (checkGameEnd()) {
             return;
         }
 
         turnBlack = !turnBlack;
         updateStatusLabel();
         boardPanel.updateBoard();
+
+        // Handle turn switching (including pass scenarios) for MCTS mode
+        if ("MCTS".equals(gameMode)) {
+            handleTurnSwitch();
+        }
+    }
+
+    /**
+     * Handles turn switching logic including pass scenarios (MCTS mode).
+     */
+    private void handleTurnSwitch() {
+        char current = turnBlack ? 'B' : 'W';
+        
+        // Check if current player has valid moves
+        if (!game.hasValidMove(current)) {
+            // Current player must pass
+            if (game.hasValidMove(current == 'B' ? 'W' : 'B')) {
+                // Other player can play
+                turnBlack = !turnBlack;
+                updateStatusLabel();
+                boardPanel.updateBoard();
+            } else {
+                // No one can play - game over
+                checkGameEnd();
+                return;
+            }
+        }
+
+        // If it's now AI's turn, trigger AI move
+        current = turnBlack ? 'B' : 'W';
+        if (current == aiRole && !gameDone) {
+            doAIMove();
+        }
+    }
+
+    /**
+     * Executes the AI's move using Monte Carlo Tree Search (MCTS mode only).
+     */
+    private void doAIMove() {
+        if (gameDone || aiThinking) return;
+        
+        aiThinking = true;
+        updateStatusLabel();
+        boardPanel.updateBoard();
+
+        // Run AI in background thread to prevent UI freeze
+        SwingWorker<int[], Void> worker = new SwingWorker<>() {
+            @Override
+            protected int[] doInBackground() {
+                return MonteCarloTreeSearchAI.bestMove(game, aiRole);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    int[] move = get();
+                    aiThinking = false;
+                    
+                    if (move != null && !gameDone) {
+                        game.doMove(move[0], move[1], aiRole);
+                        boardPanel.updateBoard();
+
+                        if (checkGameEnd()) {
+                            return;
+                        }
+
+                        turnBlack = !turnBlack;
+                        updateStatusLabel();
+                        boardPanel.updateBoard();
+
+                        // Handle pass scenario after AI move
+                        handleTurnSwitchAfterAI();
+                    } else if (move == null && !gameDone) {
+                        // AI has no valid moves, pass to human
+                        turnBlack = !turnBlack;
+                        updateStatusLabel();
+                        boardPanel.updateBoard();
+                    }
+                } catch (Exception e) {
+                    aiThinking = false;
+                    e.printStackTrace();
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    /**
+     * Handles turn switching after AI move.
+     */
+    private void handleTurnSwitchAfterAI() {
+        char current = turnBlack ? 'B' : 'W';
+        
+        // Check if human player has valid moves
+        if (!game.hasValidMove(current)) {
+            // Human must pass
+            if (game.hasValidMove(current == 'B' ? 'W' : 'B')) {
+                // AI can play again
+                turnBlack = !turnBlack;
+                updateStatusLabel();
+                boardPanel.updateBoard();
+                doAIMove();
+            } else {
+                // No one can play - game over
+                checkGameEnd();
+            }
+        }
+    }
+
+    /**
+     * Checks if the game has ended (win or draw).
+     * @return true if game has ended, false otherwise
+     */
+    private boolean checkGameEnd() {
+        if (game.isWin('B') || game.isWin('W') || game.isDraw()) {
+            gameDone = true;
+            updateStatusLabel();
+            boardPanel.updateBoard();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -160,24 +312,26 @@ public class ReversiGame {
      * Shows current player's turn or game result, and updates the score display.
      */
     private void updateStatusLabel() {
-    // Update score first
-    int black = game.count('B');
-    int white = game.count('W');
-    scoreLabel.setText(String.format("<html>%s (●): %d<br>%s (○): %d</html>", 
-        player1, black, player2, white));
+        // Update score first
+        int black = game.count('B');
+        int white = game.count('W');
+        scoreLabel.setText(String.format("<html>%s (●): %d<br>%s (○): %d</html>", 
+            player1, black, player2, white));
 
-    // Existing status updates
-    if (gameDone) {
-        if (black > white) {
-            statusLabel.setText(lang.get("reversi.game.win", player1));
-        } else if (white > black) {
-            statusLabel.setText(lang.get("reversi.game.win", player2));
+        // Status updates
+        if (gameDone) {
+            if (black > white) {
+                statusLabel.setText(lang.get("reversi.game.win", player1));
+            } else if (white > black) {
+                statusLabel.setText(lang.get("reversi.game.win", player2));
+            } else {
+                statusLabel.setText(lang.get("reversi.game.draw"));
+            }
+        } else if (aiThinking) {
+            statusLabel.setText(lang.get("reversi.game.ai.thinking"));
         } else {
-            statusLabel.setText(lang.get("reversi.game.draw"));
-        }
-    } else {
-        String name = turnBlack ? player1 : player2;
-        statusLabel.setText(lang.get("reversi.game.turn", name));
+            String name = turnBlack ? player1 : player2;
+            statusLabel.setText(lang.get("reversi.game.turn", name));
         }
     }   
 
@@ -297,8 +451,13 @@ public class ReversiGame {
 
                     btn.setBackground(new Color(61, 169, 166)); // Default board color
                     btn.setBorder(BorderFactory.createLineBorder(new Color(40, 120, 120), 2));
-                    // Highlight legal moves
-                    if (!gameDone && game.isValidMove(row, col, current)) {
+                    
+                    // Highlight legal moves (only for human player in MCTS mode, or always in PVP mode)
+                    boolean shouldHighlight = !gameDone && !aiThinking && game.isValidMove(row, col, current);
+                    if ("MCTS".equals(gameMode)) {
+                        shouldHighlight = shouldHighlight && current == humanRole;
+                    }
+                    if (shouldHighlight) {
                         btn.setBackground(new Color(184, 107, 214, 180)); // Highlight color
                         btn.setBorder(BorderFactory.createLineBorder(new Color(120, 60, 150), 3));
                     }

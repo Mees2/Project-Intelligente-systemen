@@ -141,14 +141,24 @@ public class GameMenu extends AbstractRoundedButton {
         buttonPanel.add(Box.createVerticalStrut(20));
 
         // Player vs AI button
-        pvaButton = createRoundedButton(lang.get("reversi.menu.pva.soon"),
-                new Color(200, 200, 200), new Color(200, 200, 200),
-                new Color(150, 150, 150), false);
+        // First AI button (MCTS)
+        pvaButton = createRoundedButton(lang.get("reversi.menu.mcts"),
+            theme.getButtonColor(), theme.getButtonColorHover(),
+            theme.getButtonColor().darker(), true);
+        pvaButton.addActionListener(e -> menuManager.openReversiNameMCTS());
         buttonPanel.add(pvaButton);
+        buttonPanel.add(Box.createVerticalStrut(10));
+
+        // Second AI button (Minimax) - uses same PVA label but opens MINIMAX name selection
+        JButton aiButtonMinimax = createRoundedButton(lang.get("reversi.menu.pva"),
+            theme.getButtonColor(), theme.getButtonColorHover(),
+            theme.getButtonColor().darker(), true);
+        aiButtonMinimax.addActionListener(e -> menuManager.openReversiNameMINIMAX());
+        buttonPanel.add(aiButtonMinimax);
         buttonPanel.add(Box.createVerticalStrut(40));
 
         // Back button
-        backButton = createRoundedButton(lang.get("tictactoe.menu.back"),
+        backButton = createRoundedButton(lang.get("reversi.menu.back"),
                 theme.getMainButtonColor(), theme.getMainButtonColorHover(),
                 theme.getMainButtonColor().darker(), true);
         backButton.addActionListener(e -> menuManager.returnToMainMenu());
@@ -210,7 +220,7 @@ public class GameMenu extends AbstractRoundedButton {
             }
             case REVERSI -> {
                 pvpButton.setText(lang.get("reversi.menu.pvp"));
-                pvaButton.setText(lang.get("reversi.menu.pva.soon"));
+                pvaButton.setText(lang.get("reversi.menu.pva"));
                 backButton.setText(lang.get("reversi.menu.back"));
             }
         }
@@ -225,11 +235,11 @@ public class GameMenu extends AbstractRoundedButton {
         pvpButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         pvpButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
-        if (gameType == GameType.TICTACTOE) {
-            pvaButton.putClientProperty("baseColor", theme.getButtonColor());
-            pvaButton.putClientProperty("hoverColor", theme.getButtonColorHover());
-            pvaButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+        pvaButton.putClientProperty("baseColor", theme.getButtonColor());
+        pvaButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+        pvaButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
+        if (gameType == GameType.TICTACTOE) {
             serverButton.putClientProperty("baseColor", theme.getButtonColor());
             serverButton.putClientProperty("hoverColor", theme.getButtonColorHover());
             serverButton.putClientProperty("borderColor", theme.getButtonColor().darker());

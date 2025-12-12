@@ -103,22 +103,33 @@ public final class LanguageManager {
         addTranslation("reversi.menu.title", "Reversi - Kies Spelmode", "Reversi - Choose Game Mode", "Cờ Lật - Chọn chế độ", "黑白棋 - 选择模式");
         addTranslation("reversi.menu.header", "Kies je spelmode", "Choose your game mode", "Chọn chế độ game", "选择模式");
         addTranslation("reversi.menu.pvp", "Speler vs Speler", "Player vs Player", "Người chơi đấu với người chơi", "玩家对战");
-        addTranslation("reversi.menu.pva.soon", "Speler vs AI (binnenkort)", "Player vs AI (coming soon)", "Người chơi vs AI (sắp ra)", "玩家对战AI（即将推出）");
+        addTranslation("reversi.menu.pva", "Speler vs AI", "Player vs AI", "Người chơi vs AI", "玩家对战 AI");
+        addTranslation("reversi.menu.mcts", "Speler vs AI (MCTS)", "Player vs AI (MCTS)", "Người chơi vs AI (MCTS)", "玩家对战AI（MCTS）");
         addTranslation("reversi.menu.back", "Terug", "Back", "Quay lại", "返回");
 
         // Reversi name input
         addTranslation("reversi.name.title", "Reversi - Kies Namen", "Reversi - Choose Names", "Cờ Lật - Chọn tên", "黑白棋 - 选择名称");
+        addTranslation("reversi.name.title.mcts", "Reversi - Speler vs MCTS AI", "Reversi - Player vs MCTS AI", "Cờ Lật - Người chơi vs MCTS AI", "黑白棋 - 玩家对战MCTS AI");
+        addTranslation("reversi.name.title.minimax", "Reversi - Speler vs Minimax AI", "Reversi - Player vs Minimax AI", "Cờ Lật - Người chơi vs Minimax AI", "黑白棋 - 玩家对战Minimax AI");
+        addTranslation("reversi.name.playername", "Naam Speler:", "Player Name:", "Tên người chơi:", "玩家名称:");
         addTranslation("reversi.name.playername1", "Naam Speler 1 (Zwart):", "Player Name 1 (Black):", "Tên người chơi 1 (Đen):", "玩家名称 1（黑）:");
         addTranslation("reversi.name.playername2", "Naam Speler 2 (Wit):", "Player Name 2 (White):", "Tên người chơi 2 (Trắng):", "玩家名称 2（白）:");
+        addTranslation("reversi.name.selectrole", "Selecteer Kleur:", "Select Color:", "Chọn màu:", "选择颜色:");
+        addTranslation("reversi.name.black", "Zwart (speelt eerst)", "Black (plays first)", "Đen (đi trước)", "黑子（先手）");
+        addTranslation("reversi.name.white", "Wit", "White", "Trắng", "白子");
         addTranslation("reversi.name.startgame", "Start Spel", "Start Game", "Bắt đầu chơi Game", "开始游戏");
         addTranslation("reversi.name.back", "Terug", "Back", "Quay lại", "返回");
         addTranslation("reversi.name.error.emptyname", "Naam mag niet leeg zijn.", "Name cannot be empty.", "Tên không được để trống", "名称不能为空");
+        addTranslation("reversi.name.error.emptyrole", "Kleur mag niet leeg zijn.", "Color cannot be empty.", "Màu không được để trống", "颜色不能为空");
 
         // Reversi game
         addTranslation("reversi.game.title.pvp", "Reversi - Speler vs Speler", "Reversi - Player vs Player", "Cờ Lật - Người chơi đấu với người chơi", "黑白棋 - 玩家对战");
+        addTranslation("reversi.game.title.mcts", "Reversi - Speler vs MCTS AI", "Reversi - Player vs MCTS AI", "Cờ Lật - Người chơi vs MCTS AI", "黑白棋 - 玩家对战MCTS AI");
+        addTranslation("reversi.game.title.minimax", "Reversi - Speler vs Minimax AI", "Reversi - Player vs Minimax AI", "Cờ Lật - Người chơi vs Minimax AI", "黑白棋 - 玩家对战Minimax AI");
         addTranslation("reversi.game.turn", "Beurt van speler: {0}", "Player {0}'s turn", "Lượt của người chơi {0}", "玩家 {0} 的回合");
         addTranslation("reversi.game.win", "Speler {0} wint!", "Player {0} wins!", "Người chơi {0} thắng", "玩家 {0} 获胜");
         addTranslation("reversi.game.draw", "Gelijkspel!", "It's a draw!", "Vẽ tranh!", "平局!");
+        addTranslation("reversi.game.ai.thinking", "AI is aan het nadenken...", "AI is thinking...", "AI đang suy nghĩ...", "AI正在思考...");
 
         // Algemene vertalingen
         addTranslation("common.yes", "Ja", "Yes","Đúng","是");
