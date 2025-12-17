@@ -15,7 +15,7 @@ import java.util.*;
  */
 public class ReversiAi {
     private static final int BOARD_SIZE = 8;
-    private static final int SEARCH_DEPTH = 10; // 4926auo testcode
+    private static final int SEARCH_DEPTH = 5; // 4926auo testcode
     
     // Positional weight matrix for board evaluation
     private static final int[][] POSITION_WEIGHTS = {
@@ -41,7 +41,7 @@ public class ReversiAi {
         {true, false, false, false, false, false, false, true}
     };
     
-    // Adjacent to corners (usually bad)
+    // Adjacent to corners 
     private static final boolean[][] ADJACENT_TO_CORNERS = {
         {false, true, false, false, false, false, true, false},
         {true, true, false, false, false, false, true, true},
