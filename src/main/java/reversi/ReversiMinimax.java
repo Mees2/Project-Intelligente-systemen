@@ -1,8 +1,8 @@
 //a simple ia for reversi that just looks at what move gets the most pieces
-package framework.gui.menu.reversi;
+package reversi;
 
-import framework.bordspel.Positie;
-import reversi.Reversi;
+import framework.boardgame.AbstractBoardGame;
+import framework.boardgame.Position; 
 import java.util.*;
 
 /**
@@ -13,7 +13,7 @@ import java.util.*;
  * - Heuristic evaluation function (mobility, corners, stability, frontier discs)
  * - Iterative deepening for flexible search depth
  */
-public class ReversiAi {
+public class ReversiMinimax {
     private static final int BOARD_SIZE = 8;
     private static final int SEARCH_DEPTH = 5; // 4926auo testcode
     
@@ -58,17 +58,17 @@ public class ReversiAi {
      *
      * @param game The current Reversi game state
      * @param player The AI player's symbol ('B' or 'W')
-     * @return A Positie object representing the best move, or null if no valid moves
+     * @return A Position object representing the best move, or null if no valid moves
      */
-    public Positie findBestMove(Reversi game, char player) {
+    public Position findBestMove(Reversi game, char player) {
         System.out.println("DEBUG ReversiAi: Finding best move for player " + player);
         
         char opponent = (player == 'B') ? 'W' : 'B';
-        Positie bestMove = null;
+        Position bestMove = null;
         int bestScore = Integer.MIN_VALUE;
         
         // Get all valid moves
-        List<Positie> validMoves = getValidMoves(game, player);
+        List<Position> validMoves = getValidMoves(game, player);
         
         if (validMoves.isEmpty()) {
             System.out.println("DEBUG ReversiAi: No valid moves available");
@@ -76,17 +76,17 @@ public class ReversiAi {
         }
         
         // Sort moves for better alpha-beta pruning
-        validMoves.sort((a, b) -> getMoveScore(game, a.getRij(), a.getKolom(), player, opponent) -
-                                   getMoveScore(game, b.getRij(), b.getKolom(), player, opponent));
+        validMoves.sort((a, b) -> getMoveScore(game, a.getRow(), a.getColumn(), player, opponent) -
+                                   getMoveScore(game, b.getRow(), b.getColumn(), player, opponent));
         Collections.reverse(validMoves); // Descending order
         
         // Minimax search with alpha-beta pruning
-        for (Positie move : validMoves) {
+        for (Position move : validMoves) {
             Reversi tempGame = copyGame(game);
-            tempGame.doMove(move.getRij(), move.getKolom(), player);
-            
-            int score = minimax(tempGame, SEARCH_DEPTH - 1, true, player, opponent, 
-                               Integer.MIN_VALUE, Integer.MAX_VALUE);
+            tempGame.doMove(move.getRow(), move.getColumn(), player);
+
+            int score = minimax(tempGame, SEARCH_DEPTH - 1, true, player, opponent,
+                    Integer.MIN_VALUE, Integer.MAX_VALUE);
             
             if (score > bestScore) {
                 bestScore = score;
@@ -118,7 +118,7 @@ public class ReversiAi {
         }
         
         char currentPlayer = isMaximizing ? aiPlayer : opponent;
-        List<Positie> validMoves = getValidMoves(game, currentPlayer);
+        List<Position> validMoves = getValidMoves(game, currentPlayer);
         
         // If no moves available, check if opponent can move
         if (validMoves.isEmpty()) {
@@ -132,18 +132,18 @@ public class ReversiAi {
         }
         
         // Sort moves for better pruning
-        validMoves.sort((a, b) -> getMoveScore(game, a.getRij(), a.getKolom(), currentPlayer, 
+        validMoves.sort((a, b) -> getMoveScore(game, a.getRow(), a.getColumn(), currentPlayer,
                                                isMaximizing ? opponent : aiPlayer) -
-                                   getMoveScore(game, b.getRij(), b.getKolom(), currentPlayer,
+                                   getMoveScore(game, b.getRow(), b.getColumn(), currentPlayer,
                                                isMaximizing ? opponent : aiPlayer));
         Collections.reverse(validMoves);
         
         if (isMaximizing) {
             int maxEval = Integer.MIN_VALUE;
-            for (Positie move : validMoves) {
+            for (Position move : validMoves) {
                 Reversi tempGame = copyGame(game);
-                tempGame.doMove(move.getRij(), move.getKolom(), currentPlayer);
-                
+                tempGame.doMove(move.getRow(), move.getColumn(), currentPlayer);
+
                 int eval = minimax(tempGame, depth - 1, false, aiPlayer, opponent, alpha, beta);
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
@@ -153,10 +153,10 @@ public class ReversiAi {
             return maxEval;
         } else {
             int minEval = Integer.MAX_VALUE;
-            for (Positie move : validMoves) {
+            for (Position move : validMoves) {
                 Reversi tempGame = copyGame(game);
-                tempGame.doMove(move.getRij(), move.getKolom(), currentPlayer);
-                
+                tempGame.doMove(move.getRow(), move.getColumn(), currentPlayer);
+
                 int eval = minimax(tempGame, depth - 1, true, aiPlayer, opponent, alpha, beta);
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
@@ -227,7 +227,7 @@ public class ReversiAi {
         int score = 0;
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
-                char cell = game.getSymboolOp(row, col);
+                char cell = game.getSymbolAt(row, col);
                 if (cell == aiPlayer) {
                     score += POSITION_WEIGHTS[row][col];
                 } else if (cell == opponent) {
@@ -246,7 +246,7 @@ public class ReversiAi {
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 if (CORNERS[row][col]) {
-                    char cell = game.getSymboolOp(row, col);
+                    char cell = game.getSymbolAt(row, col);
                     if (cell == aiPlayer) score++;
                     else if (cell == opponent) score--;
                 }
@@ -264,7 +264,7 @@ public class ReversiAi {
         
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
-                char cell = game.getSymboolOp(row, col);
+                char cell = game.getSymbolAt(row, col);
                 if (cell != ' ' && isStable(game, row, col)) {
                     if (cell == aiPlayer) aiStable++;
                     else opponentStable++;
@@ -279,7 +279,7 @@ public class ReversiAi {
      * Checks if a disc is stable (can't be flipped).
      */
     private boolean isStable(Reversi game, int row, int col) {
-        char piece = game.getSymboolOp(row, col);
+        char piece = game.getSymbolAt(row, col);
         if (piece == ' ') return false;
         
         // A piece is stable if all directions lead to an edge of same color
@@ -290,7 +290,7 @@ public class ReversiAi {
             int c = col + dir[1];
             
             while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
-                char cell = game.getSymboolOp(r, c);
+                char cell = game.getSymbolAt(r, c);
                 if (cell != piece) return false;
                 r += dir[0];
                 c += dir[1];
@@ -309,7 +309,7 @@ public class ReversiAi {
         
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
-                char cell = game.getSymboolOp(row, col);
+                char cell = game.getSymbolAt(row, col);
                 if (cell != ' ' && hasEmptyNeighbor(game, row, col)) {
                     if (cell == aiPlayer) aiF++;
                     else opponentF++;
@@ -326,7 +326,7 @@ public class ReversiAi {
     private boolean hasEmptyNeighbor(Reversi game, int row, int col) {
         for (int r = Math.max(0, row - 1); r <= Math.min(BOARD_SIZE - 1, row + 1); r++) {
             for (int c = Math.max(0, col - 1); c <= Math.min(BOARD_SIZE - 1, col + 1); c++) {
-                if (game.getSymboolOp(r, c) == ' ') return true;
+                if (game.getSymbolAt(r, c) == ' ') return true;
             }
         }
         return false;
@@ -359,12 +359,12 @@ public class ReversiAi {
     /**
      * Gets all valid moves for a player.
      */
-    private List<Positie> getValidMoves(Reversi game, char player) {
-        List<Positie> moves = new ArrayList<>();
+    private List<Position> getValidMoves(Reversi game, char player) {
+        List<Position> moves = new ArrayList<>();
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 if (game.isValidMove(row, col, player)) {
-                    moves.add(new Positie(row, col, BOARD_SIZE));
+                    moves.add(new Position(row, col, BOARD_SIZE));
                 }
             }
         }

@@ -220,6 +220,6 @@ public abstract class AbstractBoardGame {
      * @return Het bord array
      */
     public char[] getBord() {
-        return bord;
+        return board;
     }
 }
