@@ -214,4 +214,12 @@ public abstract class AbstractBoardGame {
     public boolean isGameOver() {
         return status != GameStatus.IN_PROGRESS && status != GameStatus.NOT_STARTED;
     }
+
+    /**
+     * Krijg het bord array
+     * @return Het bord array
+     */
+    public char[] getBord() {
+        return bord;
+    }
 }

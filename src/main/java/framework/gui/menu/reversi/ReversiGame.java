@@ -1,9 +1,11 @@
 package framework.gui.menu.reversi;
 
+import framework.bordspel.Positie;  
 import framework.controllers.LanguageManager;
 import framework.controllers.MenuManager;
 import reversi.Reversi;
 import reversi.MonteCarloTreeSearchAI;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -18,9 +20,10 @@ import java.awt.image.BufferedImage;
  * - Turn indicators
  * - Game state management (win/draw conditions)
  * - AI opponent support using Monte Carlo Tree Search
+ * Supports both Player vs Player (PVP) and Player vs AI (PVA) modes.
+ * Features include board display, move validation, score tracking, and turn management.
  */
 public class ReversiGame {
-    /** MenuManager instance for handling navigation between different menus */
     private final MenuManager menuManager;
     
     /** Current game mode (e.g., "PVP", "PVA") */
@@ -28,6 +31,8 @@ public class ReversiGame {
     
     /** Language manager for handling multilingual support */
     private final LanguageManager lang = LanguageManager.getInstance();
+    private final String speler1; // Human player (always black)
+    private final String speler2; // Opponent (AI or human player)
     
     /** Name of the first player (black pieces) */
     private final String player1;
@@ -37,24 +42,15 @@ public class ReversiGame {
     
     /** Main game window */
     private JFrame gameFrame;
-    
-    /** Label showing current game status (turn, win, draw) */
     private JLabel statusLabel;
-    
-    /** Panel containing the game board */
-    private BoardPanel boardPanel;
-    
-    /** The Reversi game logic instance */
-    private Reversi game;
-    
-    /** Indicates if the game has ended */
-    private boolean gameDone = false;
-    
-    /** Indicates whose turn it is (true for black, false for white) */
-    private boolean turnBlack = true;
-    
-    /** Label showing the current score */
     private JLabel scoreLabel;
+    private BoardPanel boardPanel;
+    private Reversi game;
+    private boolean gameDone = false;
+    private boolean turnBlack = true; // Black always starts
+    
+    private ReversiAi ai; // AI player (only used in PVA mode)
+    private boolean consecutivePass = false; // Track if last turn was a pass
 
     /** Indicates if AI is currently thinking (for PVA mode) */
     private volatile boolean aiThinking = false;
@@ -69,9 +65,9 @@ public class ReversiGame {
      * Creates a new Reversi game instance.
      *
      * @param menuManager The menu manager for handling navigation
-     * @param gameMode The game mode (e.g., "PVP", "MCTS")
-     * @param player1 Name of the first player (black)
-     * @param player2 Name of the second player (white)
+     * @param gameMode The game mode ("PVP" or "PVA")
+     * @param speler1 Name of the human player (black pieces)
+     * @param speler2 Name of the opponent (AI or human player)
      */
     public ReversiGame(MenuManager menuManager, String gameMode, String player1, String player2) {
         this.menuManager = menuManager;
@@ -97,16 +93,19 @@ public class ReversiGame {
      */
     public void start() {
         game = new Reversi();
+        ai = new ReversiAi();  // Make sure this line exists!
+        System.out.println("DEBUG: Game started, ai initialized: " + (ai != null));
         initializeGame();
     }
 
     /**
      * Initializes the game window and all UI components.
-     * Sets up the board, status displays, and control buttons.
+     * Sets up the board, status displays, score tracking, and control buttons.
      */
     private void initializeGame() {
         gameDone = false;
         turnBlack = true;
+        consecutivePass = false;
 
         String titleKey = "MCTS".equals(gameMode) ? "reversi.game.title.mcts" : "reversi.game.title.pvp";
         gameFrame = new JFrame(lang.get(titleKey));
@@ -123,6 +122,16 @@ public class ReversiGame {
         statusLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
         gameFrame.add(statusLabel, BorderLayout.NORTH);
 
+        // Add score panel
+        JPanel scorePanel = new JPanel();
+        scorePanel.setBackground(new Color(247, 247, 255));
+        scorePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        scoreLabel = new JLabel();
+        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        scoreLabel.setForeground(new Color(5, 5, 169));
+        scorePanel.add(scoreLabel);
+        gameFrame.add(scorePanel, BorderLayout.EAST);
+
         boardPanel = new BoardPanel();
         boardPanel.setBackground(new Color(247, 247, 255));
         gameFrame.add(boardPanel, BorderLayout.CENTER);
@@ -138,17 +147,7 @@ public class ReversiGame {
         southPanel.add(menuButton);
         gameFrame.add(southPanel, BorderLayout.SOUTH);
 
-        JPanel scorePanel = new JPanel();
-        scorePanel.setBackground(new Color(247, 247, 255));
-        scorePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
-        scoreLabel = new JLabel();
-        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        scoreLabel.setForeground(new Color(5, 5, 169));
-        scorePanel.add(scoreLabel);
-        gameFrame.add(scorePanel, BorderLayout.EAST);
-
         gameFrame.setVisible(true);
-
         updateStatusLabel();
 
         // If AI plays first (black) in MCTS mode, trigger AI move
@@ -159,7 +158,7 @@ public class ReversiGame {
 
     /**
      * Handles a player's move when they click a cell on the board.
-     * Validates the move, updates the game state, and checks for win/draw conditions.
+     * Validates the move, updates the game state, and triggers AI move if applicable.
      *
      * @param row The row of the clicked cell
      * @param col The column of the clicked cell
@@ -174,8 +173,25 @@ public class ReversiGame {
         
         if (!game.isValidMove(row, col, current)) return;
         
+        System.out.println("DEBUG: handleButtonClick called at " + row + "," + col);
+        System.out.println("DEBUG: gameDone=" + gameDone + ", turnBlack=" + turnBlack);
+        
+        if (gameDone || !turnBlack) {
+            System.out.println("DEBUG: Ignoring click - gameDone=" + gameDone + ", turnBlack=" + turnBlack);
+            return;
+        }
+        
+        char current = 'B'; // Player is always black
+        
+        if (!game.isValidMove(row, col, current)) {
+            System.out.println("DEBUG: Invalid move at " + row + "," + col);
+            return;
+        }
+        
+        System.out.println("DEBUG: Player making move at " + row + "," + col);
         game.doMove(row, col, current);
         boardPanel.updateBoard();
+        consecutivePass = false;
 
         if (checkGameEnd()) {
             return;
@@ -297,8 +313,9 @@ public class ReversiGame {
      * Checks if the game has ended (win or draw).
      * @return true if game has ended, false otherwise
      */
+    
     private boolean checkGameEnd() {
-        if (game.isWin('B') || game.isWin('W') || game.isDraw()) {
+        if (!game.hasValidMove('B') && !game.hasValidMove('W')) {
             gameDone = true;
             updateStatusLabel();
             boardPanel.updateBoard();
@@ -364,10 +381,7 @@ public class ReversiGame {
      * Manages the visual representation of the Reversi board and handles cell interactions.
      */
     private class BoardPanel extends JPanel {
-        /** Size of the board (8x8) */
         private final int SIZE = 8;
-        
-        /** 2D array of buttons representing board cells */
         private final JButton[][] buttons = new JButton[SIZE][SIZE];
 
         /**
@@ -382,7 +396,7 @@ public class ReversiGame {
                     JButton btn = new JButton();
                     btn.setFocusPainted(false);
                     btn.setFont(new Font("SansSerif", Font.BOLD, 24));
-                    btn.setBackground(new Color(61, 169, 166)); // Board color
+                    btn.setBackground(new Color(61, 169, 166));
                     btn.setForeground(Color.BLACK);
                     final int r = row, c = col;
                     btn.addActionListener(e -> handleButtonClick(r, c));
@@ -393,12 +407,6 @@ public class ReversiGame {
             updateBoard();
         }
 
-        /**
-         * Custom painting for the board panel.
-         * Ensures proper layout of all board cells.
-         *
-         * @param g The Graphics context to paint with
-         */
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -415,7 +423,6 @@ public class ReversiGame {
             int marginY = (getHeight() - size) / 2;
             int cell = size / SIZE;
             int gap = Math.max(4, cell / 20);
-            
 
             for (int row = 0; row < SIZE; row++) {
                 for (int col = 0; col < SIZE; col++) {
@@ -438,15 +445,22 @@ public class ReversiGame {
             for (int row = 0; row < SIZE; row++) {
                 for (int col = 0; col < SIZE; col++) {
                     JButton btn = buttons[row][col];
-                    char val = game.getSymbolAt(row, col);
+                    char val = game.getSymboolOp(row, col);
+                    btn.setText("");
+                    btn.setBackground(new Color(61, 169, 166));
+                    btn.setBorder(BorderFactory.createLineBorder(new Color(40, 120, 120), 2));
+                    btn.setIcon(null);
 
-                    // Only set icon for black or white discs
                     if (val == 'B') {
                         btn.setIcon(createDiscIcon(Color.BLACK));
                     } else if (val == 'W') {
                         btn.setIcon(createDiscIcon(Color.WHITE));
                     } else {
-                        btn.setIcon(null); // No disc for empty cell!
+                        // Highlight legal moves (only for player in PVA mode)
+                        if (!gameDone && turnBlack && game.isValidMove(row, col, current)) {
+                            btn.setBackground(new Color(184, 107, 214, 180));
+                            btn.setBorder(BorderFactory.createLineBorder(new Color(120, 60, 150), 3));
+                        }
                     }
 
                     btn.setBackground(new Color(61, 169, 166)); // Default board color
@@ -477,11 +491,18 @@ public class ReversiGame {
             BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2 = image.createGraphics();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
             g2.setColor(color);
             g2.fillOval(2, 2, size - 4, size - 4);
-            g2.setColor(color.equals(Color.BLACK) ? Color.WHITE : Color.BLACK);
-            g2.setStroke(new BasicStroke(2));
+
+            if (color.equals(Color.WHITE)) {
+                g2.setColor(Color.BLACK);
+            } else {
+                g2.setColor(Color.WHITE);
+            }
+            g2.setStroke(new BasicStroke(3));
             g2.drawOval(2, 2, size - 4, size - 4);
+
             g2.dispose();
             return new ImageIcon(image);
         }
