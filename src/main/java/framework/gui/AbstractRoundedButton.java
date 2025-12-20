@@ -69,4 +69,47 @@ public abstract class AbstractRoundedButton extends JPanel{
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
+
+    protected JButton createTicTacToeButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                Color base = (Color) getClientProperty("baseColor");
+                Color hover = (Color) getClientProperty("hoverColor");
+                Color border = (Color) getClientProperty("borderColor");
+                if (base == null) base = baseColor;
+                if (hover == null) hover = hoverColor;
+                if (border == null) border = borderColor;
+
+                int arc = 20;
+                g2.setColor(isEnabled() ? baseColor : Color.LIGHT_GRAY);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+                g2.setColor(borderColor);
+                g2.setStroke(new BasicStroke(2));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, arc, arc);
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(false);
+        button.setForeground(new Color(5, 5, 169));
+        button.setEnabled(enabled);
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) button.setBackground(hoverColor);
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) button.setBackground(baseColor);
+            }
+        });
+        return button;
+    }
 }

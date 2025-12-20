@@ -4,16 +4,18 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.List;
 
 import framework.controllers.GameMode;
 import framework.controllers.LanguageManager;
 import framework.controllers.MenuManager;
 import framework.controllers.ThemeManager;
+import framework.gui.AbstractRoundedButton;
 import tictactoe.TicTacToe;
 import tictactoe.MinimaxAI;
 import server.ClientTicTacToe;
 
-public class TicTacToeGame extends JPanel {
+public class TicTacToeGame extends AbstractRoundedButton {
     private final MenuManager menuManager;
     private final GameMode gameMode;
     private final LanguageManager lang = LanguageManager.getInstance();
@@ -29,22 +31,15 @@ public class TicTacToeGame extends JPanel {
     private SquareBoardPanel boardPanel;
     private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
+
     private char playerRole;
     private char aiRole;
     private ClientTicTacToe client;
     private volatile boolean loggedIn = false;
     private volatile boolean inGame = false;
-
     private String localPlayerName = "";
     private String opponentName = "";
 
-    /**
-     * Extracts the move position from a server message.
-     * Parses messages containing "MOVE:" and returns the position number.
-     *
-     * @param serverMsg The message received from the server
-     * @return The position of the move, or -1 if no valid move position found
-     */
     private int extractMovePosition(String serverMsg) {
         try {
             int moveIndex = serverMsg.indexOf("MOVE:");
@@ -64,13 +59,6 @@ public class TicTacToeGame extends JPanel {
         return -1;
     }
 
-    /**
-     * Extracts a player name from a server message.
-     * Parses messages containing "PLAYER:" and returns the player's name.
-     *
-     * @param serverMsg The message received from the server
-     * @return The extracted player name, or empty string if not found
-     */
     private String extractPlayerName(String serverMsg) {
         try {
             int playerIndex = serverMsg.indexOf("PLAYER:");
@@ -89,14 +77,6 @@ public class TicTacToeGame extends JPanel {
         return "";
     }
 
-    /**
-     * Extracts a specific field value from a server message.
-     * Looks for fields in format "fieldName:" or "FIELDNAME:" and returns the quoted value.
-     *
-     * @param serverMsg The message received from the server
-     * @param fieldName The name of the field to extract
-     * @return The extracted field value, or empty string if not found
-     */
     private String extractFieldValue(String serverMsg, String fieldName) {
         try {
             int idx = serverMsg.indexOf(fieldName + ":");
@@ -116,34 +96,24 @@ public class TicTacToeGame extends JPanel {
         return "";
     }
 
-    /**
-     * Checks if a move was made by the local player.
-     *
-     * @param movePlayerName The name of the player who made the move
-     * @param ourBaseName    Our player's base name for comparison
-     * @return true if the move was made by the local player, false otherwise
-     */
     private boolean isOurMove(String movePlayerName, String ourBaseName) {
         return movePlayerName.startsWith(ourBaseName);
     }
 
-    /**
-     * Apply opponent's move and update turn tracking consistently.
-     * After opponent plays a symbol, toggle turn based on that symbol.
-     */
     private void applyOpponentMove(int pos, char symbol) {
-        if (gameDone || !game.isFree(pos)) return;
+        if (game.isGameOver() || !game.isFree(pos)) return;
 
         game.doMove(pos, symbol);
-        boardPanel.getButtons()[pos].setText(String.valueOf(symbol));
+        boardPanel.getButtons()[pos].setText(String.valueOf(game.getSymbolAt(pos)));
 
-        if (checkEnd(symbol)) return;
+        if (game.isGameOver()) {
+            updateGameEndStatus();
+            return;
+        }
 
-        // After opponent plays, toggle turn: if they played X, next is O; if they played O, next is X
         turnX = (symbol == 'O');
         updateStatusLabel();
 
-        // Trigger AI move if it's now the AI's turn in TOURNAMENT mode
         if (gameMode == GameMode.TOURNAMENT && isPlayersTurn() && !aiBusy) {
             aiTurnPending = true;
             doAiMoveServer();
@@ -321,6 +291,7 @@ public class TicTacToeGame extends JPanel {
     private void initializeGame() {
         turnX = true;
         gameDone = false;
+        game.reset();
 
         setLayout(new BorderLayout());
         setBackground(ThemeManager.getInstance().getBackgroundColor());
@@ -368,13 +339,14 @@ public class TicTacToeGame extends JPanel {
     }
 
     private class SquareBoardPanel extends JPanel {
-        private final JButton[] buttons = new JButton[9];
+        private final JButton[] buttons;
 
         public SquareBoardPanel() {
+            buttons = new JButton[game.getBoardSize()];
             setLayout(null);
             setBackground(ThemeManager.getInstance().getBackgroundColor());
-            for (int i = 0; i < 9; i++) {
-                JButton btn = createRoundedButton("", ThemeManager.getInstance().getTitleColor(), ThemeManager.getInstance().getFontColor1(), new Color(120, 60, 150), true);
+            for (int i = 0; i < game.getBoardSize(); i++) {
+                JButton btn = createTicTacToeButton("", ThemeManager.getInstance().getTitleColor(), ThemeManager.getInstance().getFontColor1(), new Color(120, 60, 150), true);
                 btn.setFocusPainted(false);
                 btn.setFont(new Font("SansSerif", Font.BOLD, 40));
                 final int pos = i;
@@ -396,12 +368,12 @@ public class TicTacToeGame extends JPanel {
             int size = Math.min(getWidth(), getHeight());
             int marginX = (getWidth() - size) / 2;
             int marginY = (getHeight() - size) / 2;
-            int cell = size / 3;
+            int cell = size / game.getBoardWidth();
             int gap = Math.max(6, cell / 15);
 
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 3; col++) {
-                    int idx = row * 3 + col;
+            for (int row = 0; row < game.getBoardHeight(); row++) {
+                for (int col = 0; col < game.getBoardWidth(); col++) {
+                    int idx = row * game.getBoardWidth() + col;
                     JButton btn = buttons[idx];
                     int x = marginX + col * cell + gap / 2;
                     int y = marginY + row * cell + gap / 2;
@@ -425,55 +397,8 @@ public class TicTacToeGame extends JPanel {
         }
     }
 
-    private JButton createRoundedButton(String text, Color baseColor, Color hoverColor, Color borderColor, boolean enabled) {
-        JButton button = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                Color base = (Color) getClientProperty("baseColor");
-                Color hover = (Color) getClientProperty("hoverColor");
-                Color border = (Color) getClientProperty("borderColor");
-                if (base == null) base = baseColor;
-                if (hover == null) hover = hoverColor;
-                if (border == null) border = borderColor;
-
-                int arc = 20;
-                g2.setColor(isEnabled() ? baseColor : Color.LIGHT_GRAY);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
-                g2.setColor(borderColor);
-                g2.setStroke(new BasicStroke(2));
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, arc, arc);
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
-        button.setContentAreaFilled(false);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setOpaque(false);
-        button.setForeground(new Color(5, 5, 169));
-        button.setEnabled(enabled);
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (button.isEnabled()) button.setBackground(hoverColor);
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (button.isEnabled()) button.setBackground(baseColor);
-            }
-        });
-        return button;
-    }
-
-    /**
-     * Zorgt ervoor dat je zet word verwerkt en het bord wordt bijgewerkt zodra je op het bord klikt bij gamemodes: PVP, PVA en SERVER.
-     * After a move, toggle turn based on the symbol that just played.
-     */
     private void handleButtonClick(int pos) {
-        if (gameDone || !game.isFree(pos)) return;
+        if (game.isGameOver() || !game.isFree(pos)) return;
         if (gameMode == GameMode.PVA && !isPlayersTurn()) return;
         if (gameMode == GameMode.TOURNAMENT) return;
 
@@ -483,14 +408,17 @@ public class TicTacToeGame extends JPanel {
 
         char currentPlayer = turnX ? 'X' : 'O';
         game.doMove(pos, currentPlayer);
-        boardPanel.getButtons()[pos].setText(String.valueOf(currentPlayer));
+        boardPanel.getButtons()[pos].setText(String.valueOf(game.getSymbolAt(pos)));
 
-        if (checkEnd(currentPlayer)) return;
+        if (game.isGameOver()) {
+            updateGameEndStatus();
+            return;
+        }
 
         turnX = (currentPlayer == 'O');
         updateStatusLabel();
 
-        if (gameMode == GameMode.PVA && !isPlayersTurn() && !gameDone) {
+        if (gameMode == GameMode.PVA && !isPlayersTurn() && !game.isGameOver()) {
             doAiMove();
         }
     }
@@ -504,35 +432,35 @@ public class TicTacToeGame extends JPanel {
                 Thread.currentThread().interrupt();
             }
 
+            List<Integer> availableMoves = game.getAvailableMoves();
+            if (availableMoves.isEmpty()) return;
+
             char opponentSymbol = (aiRole == 'X') ? 'O' : 'X';
             int move = MinimaxAI.bestMove(game, aiRole, opponentSymbol);
 
-            if (move != -1) {
+            if (move != -1 && game.isFree(move)) {
                 game.doMove(move, aiRole);
-                boardPanel.getButtons()[move].setText(String.valueOf(aiRole));
+                boardPanel.getButtons()[move].setText(String.valueOf(game.getSymbolAt(move)));
             }
 
-            if (checkEnd(aiRole)) return;
+            if (game.isGameOver()) {
+                updateGameEndStatus();
+                return;
+            }
 
             turnX = (aiRole == 'O');
             updateStatusLabel();
         });
     }
 
-    /**
-     * AI move in de gamemode TOURNAMENT.
-     * Nadat AI zijn zet doet, wissel de beurt op basis van het symbool van de AI.
-     */
     private void doAiMoveServer() {
         if (gameMode != GameMode.TOURNAMENT) return;
-        if (gameDone || client == null || !client.isConnected()) return;
+        if (game.isGameOver() || client == null || !client.isConnected()) return;
 
-        // Zorgt ervoor dat er niet meerdere AI zetten tegelijk worden gedaan door de aiTurnPending en aiBusy flags.
         if (!aiTurnPending || aiBusy) return;
         aiBusy = true;
         aiTurnPending = false;
 
-        // Voer de AI zet uit in een aparte thread om de UI update soepel te houden.
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
@@ -541,7 +469,13 @@ public class TicTacToeGame extends JPanel {
                 aiBusy = false;
                 return;
             }
-            // Bepaal de beste zet voor de AI
+
+            List<Integer> availableMoves = game.getAvailableMoves();
+            if (availableMoves.isEmpty()) {
+                aiBusy = false;
+                return;
+            }
+
             char opponentSymbol = (aiRole == 'X') ? 'O' : 'X';
             int move = MinimaxAI.bestMove(game, aiRole, opponentSymbol);
 
@@ -553,20 +487,20 @@ public class TicTacToeGame extends JPanel {
             client.sendMove(move);
 
             SwingUtilities.invokeLater(() -> {
-                if (gameDone || !game.isFree(move)) {
+                if (game.isGameOver() || !game.isFree(move)) {
                     aiBusy = false;
                     return;
                 }
-                // Voer de zet van de AI uit op het bord
+
                 game.doMove(move, aiRole);
-                boardPanel.getButtons()[move].setText(String.valueOf(aiRole));
+                boardPanel.getButtons()[move].setText(String.valueOf(game.getSymbolAt(move)));
 
-                if (checkEnd(aiRole)) {
+                if (game.isGameOver()) {
+                    updateGameEndStatus();
                     aiBusy = false;
                     return;
                 }
 
-                // Nadat AI zijn zet doet, wissel de beurt op basis van het symbool van de AI. (als AI X speelde, is volgende O en andersom).
                 turnX = (aiRole == 'O');
                 updateStatusLabel();
                 aiBusy = false;
@@ -574,36 +508,30 @@ public class TicTacToeGame extends JPanel {
         }, "tournament-ai").start();
     }
 
-    private boolean checkEnd(char player) {
-        if (game.isWin(player)) {
-            String winner = getNameBySymbol(player);
-            statusLabel.setText(lang.get("tictactoe.game.win", winner + " (" + player + ")"));
-            gameDone = true;
-            return true;
-        } else if (game.isDraw()) {
-            statusLabel.setText(lang.get("tictactoe.game.draw"));
-            gameDone = true;
-            return true;
+    private void updateGameEndStatus() {
+        gameDone = true;
+        switch (game.getStatus()) {
+            case X_WINS:
+                String xWinner = getNameBySymbol('X');
+                statusLabel.setText(lang.get("tictactoe.game.win", xWinner + " (X)"));
+                break;
+            case O_WINS:
+                String oWinner = getNameBySymbol('O');
+                statusLabel.setText(lang.get("tictactoe.game.win", oWinner + " (O)"));
+                break;
+            case DRAW:
+                statusLabel.setText(lang.get("tictactoe.game.draw"));
+                break;
+            default:
+                break;
         }
-        return false;
     }
 
-    /**
-     * Checked of het de beurt is van de speler.
-     * als turnX true is, is het de beurt van X anders O.
-     * == playerRole vergelijkt dit met het symbool van de speler.
-     * Returns true als het symbool van de speler overeenkomt met de huidige beurt.
-     */
     private boolean isPlayersTurn() {
         return (turnX ? 'X' : 'O') == playerRole;
     }
 
-    /**
-     * Gets the display name for a player based on their game symbol.
-     *
-     * @param symbol The player's symbol ('X' or 'O')
-     * @return The name to display for that player
-     */
+
     private String getNameBySymbol(char symbol) {
         if (gameMode == GameMode.PVP) {
             return (symbol == 'X') ? player1 : player2;
@@ -617,12 +545,8 @@ public class TicTacToeGame extends JPanel {
         return "";
     }
 
-    /**
-     * Updates het label om aan te geven wie er aan de beurt is.
-     * Laat een tijdelijk wacht bericht zien totdat we de naam van de tegenstander hebben ontvangen van de gameserver.
-     */
     private void updateStatusLabel() {
-        if (gameDone) return;
+        if (game.isGameOver()) return;
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
         // in gamemode Server of Tournament, laat een tijdelijk wacht bericht zien totdat we de naam van de tegenstander hebben ontvangen van de gameserver.
@@ -633,11 +557,6 @@ public class TicTacToeGame extends JPanel {
         statusLabel.setText(lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")"));
     }
 
-
-    /**
-     * Updates the visual theme of all game components.
-     * Called when the theme changes to update colors and styling.
-     */
     private void updateTheme() {
         setBackground(theme.getBackgroundColor());
         statusLabel.setForeground(theme.getFontColor1());
