@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
 
+import framework.controllers.GameMode;
 import framework.controllers.LanguageManager;
 import framework.controllers.MenuManager;
 import framework.controllers.ThemeManager;
@@ -14,7 +15,7 @@ import server.ClientTicTacToe;
 
 public class TicTacToeGame extends JPanel {
     private final MenuManager menuManager;
-    private final String gameMode;
+    private final GameMode gameMode;
     private final LanguageManager lang = LanguageManager.getInstance();
     private final ThemeManager theme = ThemeManager.getInstance();
     private boolean turnX = true;
@@ -28,7 +29,6 @@ public class TicTacToeGame extends JPanel {
     private SquareBoardPanel boardPanel;
     private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
-    //private JFrame gameFrame;
     private char playerRole;
     private char aiRole;
     private ClientTicTacToe client;
@@ -144,19 +144,19 @@ public class TicTacToeGame extends JPanel {
         updateStatusLabel();
 
         // Trigger AI move if it's now the AI's turn in TOURNAMENT mode
-        if ("TOURNAMENT".equals(gameMode) && isPlayersTurn() && !aiBusy) {
+        if (gameMode == GameMode.TOURNAMENT && isPlayersTurn() && !aiBusy) {
             aiTurnPending = true;
             doAiMoveServer();
         }
     }
 
-    public TicTacToeGame(MenuManager menuManager, String gameMode, String player1, String player2) {
+    public TicTacToeGame(MenuManager menuManager, String gameModeString, String player1, String player2) {
         this.menuManager = menuManager;
-        this.gameMode = gameMode;
+        this.gameMode = GameMode.fromCode(gameModeString);
         this.player1 = player1;
         this.player2 = player2;
 
-        if (gameMode.equals("PVA")) {
+        if (gameMode == GameMode.PVA) {
             if (player1.equals("AI")) {
                 aiRole = 'X';
                 playerRole = 'O';
@@ -175,7 +175,7 @@ public class TicTacToeGame extends JPanel {
     public void start() {
         // Checked of we in gamemode SERVER of TOURNAMENT zitten, zo ja, maak verbinding met de server en wacht op een tegenstander.
         // Zo niet? start het spel lokaal en skip alles server gerelateerd.
-        if (!"SERVER".equals(gameMode) && !"TOURNAMENT".equals(gameMode)) {
+        if (!gameMode.isServerMode()) {
             initializeGame();
             return;
 
@@ -228,7 +228,7 @@ public class TicTacToeGame extends JPanel {
                             updateStatusLabel();
 
                             // geplande AI zet als wij de starter zijn (onze symbool is X)
-                            if ("TOURNAMENT".equals(gameMode) && playerRole == 'X') {
+                            if (gameMode == GameMode.TOURNAMENT && playerRole == 'X') {
                                 aiTurnPending = true;
                                 if (!aiBusy) doAiMoveServer();
                             }
@@ -241,7 +241,7 @@ public class TicTacToeGame extends JPanel {
                             turnX = (playerRole == 'X');
                             updateStatusLabel();
 
-                            if ("TOURNAMENT".equals(gameMode) && !aiBusy) {
+                            if (gameMode == GameMode.TOURNAMENT && !aiBusy) {
                                 aiTurnPending = true;
                                 doAiMoveServer();
                             }
@@ -252,9 +252,9 @@ public class TicTacToeGame extends JPanel {
                         String playerName = extractPlayerName(serverMsg);
                         int movePos = extractMovePosition(serverMsg);
 
-                        // Bepaalt onze basisnaam voor vergelijking (in PVP is dat player1, in SERVER/TOURNAMENT is dat onze lokale naam, anders op basis van rol).
-                        String ourName = gameMode.equals("PVP") ? player1 :
-                                ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) ? localPlayerName :
+                        // Bepaalt onze basisnaam voor vergelijking
+                        String ourName = gameMode == GameMode.PVP ? player1 :
+                                gameMode.isServerMode() ? localPlayerName :
                                         (playerRole == 'X' ? player1 : player2);
 
                         System.out.println("[DEBUG] Move from player: '" + playerName + "', our name: '" + ourName + "', our role: " + playerRole);
@@ -286,9 +286,9 @@ public class TicTacToeGame extends JPanel {
 
         // Bepaalt de spelersnaam voor login op basis van gamemode.
         String playerName;
-        if ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) {
+        if (gameMode.isServerMode()) {
             playerName = player1.equals("AI") ? player2 : player1;
-        } else if ("PVP".equals(gameMode)) {
+        } else if (gameMode == GameMode.PVP) {
             playerName = player1;
         } else {
             playerName = (playerRole == 'X' ? player1 : player2);
@@ -335,7 +335,7 @@ public class TicTacToeGame extends JPanel {
         boardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         add(boardPanel, BorderLayout.CENTER);
 
-        if ("TOURNAMENT".equals(gameMode)) {
+        if (gameMode == GameMode.TOURNAMENT) {
             for (JButton b : boardPanel.getButtons()) {
                 b.setEnabled(false);
             }
@@ -351,18 +351,18 @@ public class TicTacToeGame extends JPanel {
         southPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         southPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 20));
         southPanel.add(menuButton);
-        add(southPanel, BorderLayout.SOUTH); // CHANGE: gameFrame.add → add
+        add(southPanel, BorderLayout.SOUTH);
 
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 boardPanel.resizeFont();
-                statusLabel.setFont(statusLabel.getFont().deriveFont((float) Math.max(18, getHeight() / 25))); // CHANGE: gameFrame.getHeight() → getHeight()
+                statusLabel.setFont(statusLabel.getFont().deriveFont((float) Math.max(18, getHeight() / 25)));
             }
         });
         updateStatusLabel();
 
-        if (gameMode.equals("PVA") && !isPlayersTurn()) {
+        if (gameMode == GameMode.PVA && !isPlayersTurn()) {
             doAiMove();
         }
     }
@@ -378,7 +378,7 @@ public class TicTacToeGame extends JPanel {
                 btn.setFocusPainted(false);
                 btn.setFont(new Font("SansSerif", Font.BOLD, 40));
                 final int pos = i;
-                if (!"TOURNAMENT".equals(gameMode)) {
+                if (gameMode != GameMode.TOURNAMENT) {
                     btn.addActionListener(e -> handleButtonClick(pos));
                 }
                 buttons[i] = btn;
@@ -474,8 +474,8 @@ public class TicTacToeGame extends JPanel {
      */
     private void handleButtonClick(int pos) {
         if (gameDone || !game.isFree(pos)) return;
-        if (gameMode.equals("PVA") && !isPlayersTurn()) return;
-        if ("TOURNAMENT".equals(gameMode)) return;
+        if (gameMode == GameMode.PVA && !isPlayersTurn()) return;
+        if (gameMode == GameMode.TOURNAMENT) return;
 
         if (client != null && client.isConnected()) {
             client.sendMove(pos);
@@ -490,7 +490,7 @@ public class TicTacToeGame extends JPanel {
         turnX = (currentPlayer == 'O');
         updateStatusLabel();
 
-        if (gameMode.equals("PVA") && !isPlayersTurn() && !gameDone) {
+        if (gameMode == GameMode.PVA && !isPlayersTurn() && !gameDone) {
             doAiMove();
         }
     }
@@ -524,7 +524,7 @@ public class TicTacToeGame extends JPanel {
      * Nadat AI zijn zet doet, wissel de beurt op basis van het symbool van de AI.
      */
     private void doAiMoveServer() {
-        if (!"TOURNAMENT".equals(gameMode)) return;
+        if (gameMode != GameMode.TOURNAMENT) return;
         if (gameDone || client == null || !client.isConnected()) return;
 
         // Zorgt ervoor dat er niet meerdere AI zetten tegelijk worden gedaan door de aiTurnPending en aiBusy flags.
@@ -584,28 +584,8 @@ public class TicTacToeGame extends JPanel {
             statusLabel.setText(lang.get("tictactoe.game.draw"));
             gameDone = true;
             return true;
-        } else if (!isWinPossible()) {
-            statusLabel.setText(lang.get("tictactoe.game.draw"));
-            gameDone = true;
-            return true;
         }
         return false;
-    }
-
-    /**
-     * Haalt de titel op voor de huidige spelmodus.
-     *
-     * @return de correcte titel voor het huidige spelmodus gebaseerd op gameMode en taalinstellingen
-     */
-    private String getTitleForMode() {
-        if (gameMode.equals("PVP")) {
-            return lang.get("tictactoe.game.title.pvp");
-        } else if (gameMode.equals("PVA")) {
-            return lang.get("tictactoe.game.title.pva");
-        } else if (gameMode.equals("SERVER") || gameMode.equals("TOURNAMENT")) {
-            return lang.get("tictactoe.game.title.server");
-        }
-        return lang.get("tictactoe.game.title");
     }
 
     /**
@@ -625,12 +605,12 @@ public class TicTacToeGame extends JPanel {
      * @return The name to display for that player
      */
     private String getNameBySymbol(char symbol) {
-        if (gameMode.equals("PVP")) {
+        if (gameMode == GameMode.PVP) {
             return (symbol == 'X') ? player1 : player2;
-        } else if (gameMode.equals("PVA")) {
+        } else if (gameMode == GameMode.PVA) {
             if (symbol == playerRole) return (playerRole == 'X') ? player1 : player2;
             else return "AI";
-        } else if ("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) {
+        } else if (gameMode.isServerMode()) {
             if (symbol == playerRole) return localPlayerName != null ? localPlayerName : "";
             else return opponentName != null ? opponentName : "";
         }
@@ -646,44 +626,13 @@ public class TicTacToeGame extends JPanel {
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
         // in gamemode Server of Tournament, laat een tijdelijk wacht bericht zien totdat we de naam van de tegenstander hebben ontvangen van de gameserver.
-        if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && (opponentName == null || opponentName.isEmpty())) {
+        if (gameMode.isServerMode() && (opponentName == null || opponentName.isEmpty())) {
             statusLabel.setText(lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails")));
             return;
         }
         statusLabel.setText(lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")"));
     }
 
-    /**
-     * Checks if it's still possible for either player to win the game.
-     * Used to determine if the game should end in a draw.
-     *
-     * @return true if a win is still possible, false if only a draw is possible
-     */
-    private boolean isWinPossible() {
-        return isWinPossibleRecursive(!turnX);
-    }
-
-    /**
-     * Recursive helper method for isWinPossible.
-     * Simulates all possible future moves to determine if a win is possible.
-     *
-     * @param xTurn true if it's X's turn in the simulation, false for O's turn
-     * @return true if a win is possible from this position, false otherwise
-     */
-    private boolean isWinPossibleRecursive(boolean xTurn) {
-        if (game.isWin('X') || game.isWin('O')) return true;
-        if (game.isDraw()) return false;
-        char player = xTurn ? 'X' : 'O';
-        for (int i = 0; i < 9; i++) {
-            if (game.isFree(i)) {
-                game.doMove(i, player);
-                boolean possible = isWinPossibleRecursive(!xTurn);
-                game.undoMove(i);
-                if (possible) return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Updates the visual theme of all game components.
@@ -715,7 +664,7 @@ public class TicTacToeGame extends JPanel {
                 JOptionPane.YES_NO_OPTION);
 
         if (option == JOptionPane.YES_OPTION) {
-            if (("SERVER".equals(gameMode) || "TOURNAMENT".equals(gameMode)) && client != null) {
+            if (gameMode.isServerMode() && client != null) {
                 try {
                     client.quit();
                 } catch (Exception e) {
