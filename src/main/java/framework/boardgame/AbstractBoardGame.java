@@ -9,7 +9,7 @@ import java.util.List;
  * Gebruikt de bestaande logica uit TicTacToe als basis
  */
 public abstract class AbstractBoardGame {
-    protected char[] board;
+    public char[] board;
     protected final int boardSize;        // Totaal aantal vakjes (9 voor TicTacToe, 64 voor Reversi)
     protected final int boardWidth;        // Breedte van het bord (3 voor TicTacToe, 8 voor Reversi)
     protected final int boardHeight;         // Hoogte van het bord (3 voor TicTacToe, 8 voor Reversi)
@@ -213,5 +213,13 @@ public abstract class AbstractBoardGame {
      */
     public boolean isGameOver() {
         return status != GameStatus.IN_PROGRESS && status != GameStatus.NOT_STARTED;
+    }
+
+    /**
+     * Krijg het bord array
+     * @return Het bord array
+     */
+    public char[] getBord() {
+        return board;
     }
 }
