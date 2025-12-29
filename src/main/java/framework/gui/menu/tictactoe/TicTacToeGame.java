@@ -3,7 +3,6 @@ package framework.gui.menu.tictactoe;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
-import java.io.IOException;
 import java.util.List;
 
 import framework.controllers.GameMode;
@@ -143,12 +142,9 @@ public class TicTacToeGame extends AbstractRoundedButton {
     }
 
     public void start() {
-        // Checked of we in gamemode SERVER of TOURNAMENT zitten, zo ja, maak verbinding met de server en wacht op een tegenstander.
-        // Zo niet? start het spel lokaal en skip alles server gerelateerd.
         if (!gameMode.isServerMode()) {
             initializeGame();
             return;
-
         }
 
         client = new ClientTicTacToe();
@@ -160,124 +156,20 @@ public class TicTacToeGame extends AbstractRoundedButton {
             menuManager.onTicTacToeGameFinished();
             return;
         }
-        // Luistert naar berichten van de server in een aparte thread en checked de inhoud, zodat wij accuraat kunnen blijven reageren op de UI.
-        new Thread(() -> {
-            try {
-                String serverMsg;
-                while (client.isConnected() && (serverMsg = client.getReader().readLine()) != null) {
-                    System.out.println("[Server] " + serverMsg);
 
-                    if (serverMsg.contains("OK")) {
-                        loggedIn = true;
-                    }
-
-                    if (serverMsg.contains("MATCH")) {
-                        inGame = true;
-                        String playerToMove = extractFieldValue(serverMsg, "PLAYERTOMOVE");
-                        String opponent = extractFieldValue(serverMsg, "OPPONENT");
-
-                        // bepaald of de speler die aan de beurt is onze lokale speler is.
-                        boolean playerToMoveIsLocal = false;
-                        if (!playerToMove.isEmpty() && !localPlayerName.isEmpty()) {
-                            if (playerToMove.startsWith(localPlayerName) || localPlayerName.startsWith(playerToMove))
-                                playerToMoveIsLocal = true;
-                        }
-
-                        final boolean starterIsLocal = playerToMoveIsLocal;
-                        final String opponentFinal = opponent;
-
-                        SwingUtilities.invokeLater(() -> {
-                            opponentName = opponentFinal != null ? opponentFinal : "";
-
-                            // Server bepaald wie welke rol krijgt op basis van wie er start.
-                            playerRole = starterIsLocal ? 'X' : 'O';
-                            aiRole = playerRole; // In TOURNAMENT gamemode, AI speelt met onze rol.
-
-                            // Zet de juiste beurt op basis van wie er start. (X gaat altijd eerst)
-                            turnX = true;
-                            updateStatusLabel();
-
-                            // geplande AI zet als wij de starter zijn (onze symbool is X)
-                            if (gameMode == GameMode.TOURNAMENT && playerRole == 'X') {
-                                aiTurnPending = true;
-                                if (!aiBusy) doAiMoveServer();
-                            }
-                        });
-                    }
-
-                    if (serverMsg.contains("YOURTURN")) {
-                        SwingUtilities.invokeLater(() -> {
-                            // zorgt ervoor dat de beurt status overeenkomt met ons symbool
-                            turnX = (playerRole == 'X');
-                            updateStatusLabel();
-
-                            if (gameMode == GameMode.TOURNAMENT && !aiBusy) {
-                                aiTurnPending = true;
-                                doAiMoveServer();
-                            }
-                        });
-                    }
-                    // Verwerkt zet (MOVE) berichten van de server
-                    if (serverMsg.contains("MOVE") && serverMsg.contains("PLAYER:")) {
-                        String playerName = extractPlayerName(serverMsg);
-                        int movePos = extractMovePosition(serverMsg);
-
-                        // Bepaalt onze basisnaam voor vergelijking
-                        String ourName = gameMode == GameMode.PVP ? player1 :
-                                gameMode.isServerMode() ? localPlayerName :
-                                        (playerRole == 'X' ? player1 : player2);
-
-                        System.out.println("[DEBUG] Move from player: '" + playerName + "', our name: '" + ourName + "', our role: " + playerRole);
-
-                        if (movePos != -1) {
-                            // checkt of de zet van onszelf is of van de tegenstander. is de zet van ons? negeer de zet anders pas de zet toe.
-                            if (isOurMove(playerName, ourName)) {
-                                System.out.println("[DEBUG] Recognized as OUR move - ignoring");
-                                aiBusy = false;
-                                aiTurnPending = false;
-                            } else {
-                                System.out.println("[DEBUG] Recognized as OPPONENT move - applying");
-                                char opponentSymbol = (playerRole == 'X') ? 'O' : 'X';
-                                System.out.println("[DEBUG] Applying opponent symbol: " + opponentSymbol + " at position: " + movePos);
-                                SwingUtilities.invokeLater(() -> applyOpponentMove(movePos, opponentSymbol));
-                            }
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                System.err.println("Connection lost: " + e.getMessage());
-            }
-        }, "server-listener").start();
-
+        // Wait for connection to stabilize
         try {
             Thread.sleep(100);
         } catch (InterruptedException ignored) {
         }
 
-        // Bepaalt de spelersnaam voor login op basis van gamemode.
-        String playerName;
-        if (gameMode.isServerMode()) {
-            playerName = player1.equals("AI") ? player2 : player1;
-        } else if (gameMode == GameMode.PVP) {
-            playerName = player1;
-        } else {
-            playerName = (playerRole == 'X' ? player1 : player2);
-        }
-
+        // Determine player name and login
+        String playerName = determinePlayerName();
         localPlayerName = playerName;
         client.login(playerName);
 
-        // Wacht tot we ingelogd zijn of timeout na 2 seconden
-        int attempts = 0;
-        while (!loggedIn && attempts < 20) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-            }
-            attempts++;
-        }
-        // Als inloggen mislukt, toon foutmelding en keer terug naar menu
-        if (!loggedIn) {
+        // Wait for login confirmation
+        if (!waitForLogin()) {
             JOptionPane.showMessageDialog(null, "Login failed", "Error", JOptionPane.ERROR_MESSAGE);
             client.shutdown();
             menuManager.onTicTacToeGameFinished();
@@ -286,6 +178,28 @@ public class TicTacToeGame extends AbstractRoundedButton {
 
         client.requestMatch();
         initializeGame();
+    }
+
+    private String determinePlayerName() {
+        if (gameMode.isServerMode()) {
+            return player1.equals("AI") ? player2 : player1;
+        } else if (gameMode == GameMode.PVP) {
+            return player1;
+        } else {
+            return (playerRole == 'X' ? player1 : player2);
+        }
+    }
+
+    private boolean waitForLogin() {
+        int attempts = 0;
+        while (!loggedIn && attempts < 20) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+            attempts++;
+        }
+        return loggedIn;
     }
 
     private void initializeGame() {
@@ -327,7 +241,6 @@ public class TicTacToeGame extends AbstractRoundedButton {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                boardPanel.resizeFont();
                 statusLabel.setFont(statusLabel.getFont().deriveFont((float) Math.max(18, getHeight() / 25)));
             }
         });
@@ -383,15 +296,6 @@ public class TicTacToeGame extends AbstractRoundedButton {
                 }
             }
         }
-
-        public void resizeFont() {
-            int size = Math.min(getWidth(), getHeight());
-            int fontSize = Math.max(24, size / 6);
-            for (JButton btn : buttons) {
-                btn.setFont(new Font("SansSerif", Font.BOLD, fontSize));
-            }
-        }
-
         public JButton[] getButtons() {
             return buttons;
         }
@@ -422,7 +326,6 @@ public class TicTacToeGame extends AbstractRoundedButton {
             doAiMove();
         }
     }
-
 
     private void doAiMove() {
         SwingUtilities.invokeLater(() -> {

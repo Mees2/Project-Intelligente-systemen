@@ -1,13 +1,9 @@
-package framework.network;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
-/**
- * Abstracte basis klasse voor een netwerk client
- * Voorbereid voor toekomstige multiplayer functionaliteit
- * Kan gebruikt worden voor TicTacToe en Reversi online spel
- */
 public abstract class AbstractClient {
     protected Socket socket;
     protected BufferedReader input;
@@ -15,21 +11,13 @@ public abstract class AbstractClient {
     protected String serverAddress;
     protected int serverPort;
     protected boolean connected = false;
-    
-    /**
-     * Constructor voor een client
-     * @param serverAddress Het IP adres van de server
-     * @param serverPort De poort van de server
-     */
+    private Thread listenerThread;
+
     protected AbstractClient(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }
-    
-    /**
-     * Verbind met de server
-     * @return true als verbinding succesvol is
-     */
+
     public boolean connect() {
         try {
             socket = new Socket(serverAddress, serverPort);
@@ -37,65 +25,62 @@ public abstract class AbstractClient {
             output = new PrintWriter(socket.getOutputStream(), true);
             connected = true;
             onConnected();
+            startMessageListener();
             return true;
         } catch (IOException e) {
             onConnectionError(e);
             return false;
         }
     }
-    
-    /**
-     * Verbreek de verbinding met de server
-     */
+
+    protected void startMessageListener() {
+        listenerThread = new Thread(() -> {
+            try {
+                String message;
+                while (connected && (message = input.readLine()) != null) {
+                    onMessageReceived(message);
+                }
+            } catch (IOException e) {
+                if (connected) {
+                    onConnectionLost(e);
+                }
+            }
+        }, "server-listener");
+        listenerThread.start();
+    }
+
     public void disconnect() {
         connected = false;
         try {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
+            if (listenerThread != null) {
+                listenerThread.interrupt();
+            }
         } catch (IOException e) {
-            // Negeer fouten bij sluiten
+            // Ignore
         }
         onDisconnected();
     }
-    
-    /**
-     * Verstuur een bericht naar de server
-     * @param message Het bericht om te versturen
-     */
+
     public void sendMessage(String message) {
         if (connected && output != null) {
             output.println(message);
         }
     }
-    
-    /**
-     * Controleert of de client verbonden is
-     * @return true als verbonden
-     */
+
     public boolean isConnected() {
         return connected && socket != null && !socket.isClosed();
     }
-    
-    /**
-     * Callback wanneer verbinding is gemaakt
-     */
+
+    public BufferedReader getReader() {
+        return input;
+    }
+
     protected abstract void onConnected();
-    
-    /**
-     * Callback wanneer verbinding is verbroken
-     */
     protected abstract void onDisconnected();
-    
-    /**
-     * Callback bij verbindingsfout
-     * @param e De exceptie
-     */
     protected abstract void onConnectionError(IOException e);
-    
-    /**
-     * Callback bij ontvangen bericht
-     * @param message Het ontvangen bericht
-     */
+    protected abstract void onConnectionLost(IOException e);
     protected abstract void onMessageReceived(String message);
 }
