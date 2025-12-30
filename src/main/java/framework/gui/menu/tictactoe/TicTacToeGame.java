@@ -3,6 +3,7 @@ package framework.gui.menu.tictactoe;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.List;
 
 import framework.controllers.GameMode;
@@ -39,83 +40,142 @@ public class TicTacToeGame extends AbstractRoundedButton {
     private String localPlayerName = "";
     private String opponentName = "";
 
-    private int extractMovePosition(String serverMsg) {
-        try {
-            int moveIndex = serverMsg.indexOf("MOVE:");
-            if (moveIndex == -1) return -1;
-
-            String afterMove = serverMsg.substring(moveIndex + 5).trim();
-            int start = afterMove.indexOf('"') + 1;
-            int end = afterMove.indexOf('"', start);
-
-            if (start > 0 && end > start) {
-                String posStr = afterMove.substring(start, end);
-                return Integer.parseInt(posStr);
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to parse move position: " + e.getMessage());
-        }
-        return -1;
-    }
-
-    private String extractPlayerName(String serverMsg) {
-        try {
-            int playerIndex = serverMsg.indexOf("PLAYER:");
-            if (playerIndex == -1) return "";
-
-            String afterPlayer = serverMsg.substring(playerIndex + 7).trim();
-            int start = afterPlayer.indexOf('"') + 1;
-            int end = afterPlayer.indexOf('"', start);
-
-            if (start > 0 && end > start) {
-                return afterPlayer.substring(start, end);
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to parse player name: " + e.getMessage());
-        }
-        return "";
-    }
-
-    private String extractFieldValue(String serverMsg, String fieldName) {
+    private String extractField(String serverMsg, String fieldName) {
         try {
             int idx = serverMsg.indexOf(fieldName + ":");
-            if (idx == -1) {
-                idx = serverMsg.indexOf(fieldName.toUpperCase() + ":");
-                if (idx == -1) return "";
-            }
+            if (idx == -1 && (idx = serverMsg.indexOf(fieldName.toUpperCase() + ":")) == -1) return "";
             String after = serverMsg.substring(idx + fieldName.length() + 1).trim();
-            int start = after.indexOf('"') + 1;
-            int end = after.indexOf('"', start);
-            if (start > 0 && end > start) {
-                return after.substring(start, end);
-            }
+            int start = after.indexOf('"') + 1, end = after.indexOf('"', start);
+            return (start > 0 && end > start) ? after.substring(start, end) : "";
         } catch (Exception e) {
-            System.err.println("Failed to parse field " + fieldName + ": " + e.getMessage());
+            System.err.println("Failed to parse " + fieldName + ": " + e.getMessage());
+            return "";
         }
-        return "";
     }
+
+    private int extractMovePosition(String msg) {
+        try { return Integer.parseInt(extractField(msg, "MOVE")); }
+        catch (NumberFormatException e) { return -1; }
+    }
+
+    private String extractPlayerName(String msg) { return extractField(msg, "PLAYER"); }
 
     private boolean isOurMove(String movePlayerName, String ourBaseName) {
         return movePlayerName.startsWith(ourBaseName);
     }
 
-    private void applyOpponentMove(int pos, char symbol) {
-        if (game.isGameOver() || !game.isFree(pos)) return;
-
-        game.doMove(pos, symbol);
-        boardPanel.getButtons()[pos].setText(String.valueOf(game.getSymbolAt(pos)));
-
-        if (game.isGameOver()) {
-            updateGameEndStatus();
+    private void updateButtonStates(boolean enable) {
+        if (boardPanel == null || boardPanel.getButtons() == null) {
+            System.err.println("[DEBUG] updateButtonStates called but boardPanel is null!");
             return;
         }
 
-        turnX = (symbol == 'O');
-        updateStatusLabel();
+        System.out.println("[DEBUG] updateButtonStates called with enable=" + enable);
+        for (JButton btn : boardPanel.getButtons()) {
+            int index = java.util.Arrays.asList(boardPanel.getButtons()).indexOf(btn);
+            boolean shouldEnable = enable && game.isFree(index) && !game.isGameOver();
+            btn.setEnabled(shouldEnable);
+            System.out.println("[DEBUG] Button " + index + " set to: " + shouldEnable + " (free=" + game.isFree(index) + ", gameOver=" + game.isGameOver() + ")");
+        }
+    }
 
-        if (gameMode == GameMode.TOURNAMENT && isPlayersTurn() && !aiBusy) {
-            aiTurnPending = true;
-            doAiMoveServer();
+    private int countMoves() {
+        int count = 0;
+        for (int i = 0; i < game.getBoardSize(); i++) if (!game.isFree(i)) count++;
+        return count;
+    }
+
+    // Consolidated message handler
+    private void handleServerMessage(String msg) {
+        String timestamp = java.time.LocalTime.now().toString();
+        System.out.println("\n[" + timestamp + "] [Server MSG] " + msg);
+
+        if (msg.contains("OK")) {
+            loggedIn = true;
+            System.out.println("[" + timestamp + "] [LOGIN] Successfully logged in");
+        }
+        else if (msg.contains("MATCH")) handleMatchMessage(msg);
+        else if (msg.contains("YOURTURN")) handleYourTurnMessage();
+        else if (msg.contains("MOVE") && msg.contains("PLAYER:")) handleMoveMessage(msg);
+    }
+
+    private void handleMatchMessage(String msg) {
+        inGame = true;
+        String playerToMove = extractField(msg, "PLAYERTOMOVE");
+        String opponent = extractField(msg, "OPPONENT");
+        boolean starterIsLocal = !playerToMove.isEmpty() && !localPlayerName.isEmpty() &&
+                                 (playerToMove.startsWith(localPlayerName) || localPlayerName.startsWith(playerToMove));
+
+        SwingUtilities.invokeLater(() -> {
+            opponentName = opponent;
+            playerRole = starterIsLocal ? 'X' : 'O';
+            aiRole = playerRole;
+            turnX = true;
+
+            System.out.println("[DEBUG MATCH] Match started! Role: " + playerRole + ", Start: " + starterIsLocal + ", Opponent: " + opponentName);
+            updateStatusLabel();
+            updateButtonStates(starterIsLocal);
+
+            if (gameMode == GameMode.TOURNAMENT && playerRole == 'X' && !aiBusy) {
+                aiTurnPending = true;
+                doAiMoveServer();
+            }
+        });
+    }
+
+    private void handleYourTurnMessage() {
+        SwingUtilities.invokeLater(() -> {
+            int moveCount = countMoves();
+            turnX = (moveCount % 2 == 0);
+            System.out.println("[DEBUG YOURTURN] Received. Moves: " + moveCount + ", turnX: " + turnX + ", role: " + playerRole);
+            updateStatusLabel();
+            updateButtonStates(true);
+
+            if (gameMode == GameMode.TOURNAMENT && !aiBusy) {
+                aiTurnPending = true;
+                doAiMoveServer();
+            }
+        });
+    }
+
+    private void handleMoveMessage(String msg) {
+        String playerName = extractPlayerName(msg);
+        int movePos = extractMovePosition(msg);
+        String ourName = gameMode.isServerMode() ? localPlayerName : (playerRole == 'X' ? player1 : player2);
+
+        System.out.println("[DEBUG MOVE] Position: " + movePos + ", Player: '" + playerName + "', Our: '" + ourName + "'");
+
+        if (movePos == -1) {
+            System.err.println("[DEBUG MOVE] Invalid position!");
+            return;
+        }
+
+        if (isOurMove(playerName, ourName)) {
+            System.out.println("[DEBUG MOVE] Our move - ignoring");
+            aiBusy = false;
+            aiTurnPending = false;
+        } else {
+            System.out.println("[DEBUG MOVE] Opponent move - applying");
+            char opponentSymbol = (playerRole == 'X') ? 'O' : 'X';
+
+            SwingUtilities.invokeLater(() -> {
+                if (!game.isFree(movePos)) {
+                    System.err.println("[DEBUG MOVE] Position not free!");
+                    return;
+                }
+
+                game.doMove(movePos, opponentSymbol);
+                JButton button = boardPanel.getButtons()[movePos];
+                button.setText(String.valueOf(opponentSymbol));
+                button.repaint();
+
+                turnX = (countMoves() % 2 == 0);
+                System.out.println("[DEBUG MOVE] Applied. Moves: " + countMoves() + ", turnX: " + turnX);
+                updateStatusLabel();
+
+                if (game.isGameOver()) updateGameEndStatus();
+                else updateButtonStates(true);
+            });
         }
     }
 
@@ -126,17 +186,12 @@ public class TicTacToeGame extends AbstractRoundedButton {
         this.player2 = player2;
 
         if (gameMode == GameMode.PVA) {
-            if (player1.equals("AI")) {
-                aiRole = 'X';
-                playerRole = 'O';
-            } else {
-                aiRole = 'O';
-                playerRole = 'X';
-            }
+            boolean aiIsX = player1.equals("AI");
+            aiRole = aiIsX ? 'X' : 'O';
+            playerRole = aiIsX ? 'O' : 'X';
         }
 
         theme.addThemeChangeListener(this::updateTheme);
-
         setPreferredSize(new Dimension(500, 600));
 
     }
@@ -157,18 +212,27 @@ public class TicTacToeGame extends AbstractRoundedButton {
             return;
         }
 
-        // Wait for connection to stabilize
+        // Start server listener thread
+        new Thread(() -> {
+            try {
+                String serverMsg;
+                while (client.isConnected() && (serverMsg = client.getReader().readLine()) != null) {
+                    handleServerMessage(serverMsg);
+                }
+            } catch (IOException e) {
+                System.err.println("Connection lost: " + e.getMessage());
+            }
+        }, "server-listener").start();
+
         try {
             Thread.sleep(100);
         } catch (InterruptedException ignored) {
         }
 
-        // Determine player name and login
         String playerName = determinePlayerName();
         localPlayerName = playerName;
         client.login(playerName);
 
-        // Wait for login confirmation
         if (!waitForLogin()) {
             JOptionPane.showMessageDialog(null, "Login failed", "Error", JOptionPane.ERROR_MESSAGE);
             client.shutdown();
@@ -180,24 +244,16 @@ public class TicTacToeGame extends AbstractRoundedButton {
         initializeGame();
     }
 
+
     private String determinePlayerName() {
-        if (gameMode.isServerMode()) {
-            return player1.equals("AI") ? player2 : player1;
-        } else if (gameMode == GameMode.PVP) {
-            return player1;
-        } else {
-            return (playerRole == 'X' ? player1 : player2);
-        }
+        if (gameMode.isServerMode()) return player1.equals("AI") ? player2 : player1;
+        if (gameMode == GameMode.PVP) return player1;
+        return playerRole == 'X' ? player1 : player2;
     }
 
     private boolean waitForLogin() {
-        int attempts = 0;
-        while (!loggedIn && attempts < 20) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-            }
-            attempts++;
+        for (int attempts = 0; !loggedIn && attempts < 20; attempts++) {
+            try { Thread.sleep(100); } catch (InterruptedException ignored) {}
         }
         return loggedIn;
     }
@@ -220,11 +276,7 @@ public class TicTacToeGame extends AbstractRoundedButton {
         boardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         add(boardPanel, BorderLayout.CENTER);
 
-        if (gameMode == GameMode.TOURNAMENT) {
-            for (JButton b : boardPanel.getButtons()) {
-                b.setEnabled(false);
-            }
-        }
+        if (gameMode == GameMode.TOURNAMENT) updateButtonStates(false);
 
         menuButton = createRoundedButton(lang.get("tictactoe.game.menu"),
                 new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
@@ -246,9 +298,7 @@ public class TicTacToeGame extends AbstractRoundedButton {
         });
         updateStatusLabel();
 
-        if (gameMode == GameMode.PVA && !isPlayersTurn()) {
-            doAiMove();
-        }
+        if (gameMode == GameMode.PVA && !isPlayersTurn()) doAiMove();
     }
 
     private class SquareBoardPanel extends JPanel {
@@ -306,13 +356,34 @@ public class TicTacToeGame extends AbstractRoundedButton {
         if (gameMode == GameMode.PVA && !isPlayersTurn()) return;
         if (gameMode == GameMode.TOURNAMENT) return;
 
-        if (client != null && client.isConnected()) {
-            client.sendMove(pos);
+        // Validate turn for server modes
+        if (gameMode.isServerMode()) {
+            if (!boardPanel.getButtons()[pos].isEnabled()) {
+                System.out.println("[DEBUG CLICK] Button not enabled!");
+                return;
+            }
+            int moveCount = countMoves();
+            char expectedTurn = (moveCount % 2 == 0) ? 'X' : 'O';
+            if (expectedTurn != playerRole) {
+                System.out.println("[DEBUG CLICK] Not our turn! Expected: " + expectedTurn + ", Role: " + playerRole);
+                return;
+            }
         }
 
         char currentPlayer = turnX ? 'X' : 'O';
+
+        if (client != null && client.isConnected()) {
+            System.out.println("[DEBUG CLICK] Sending move " + pos + " (" + currentPlayer + ")");
+            client.sendMove(pos);
+        }
+
+        // Apply move locally
         game.doMove(pos, currentPlayer);
         boardPanel.getButtons()[pos].setText(String.valueOf(game.getSymbolAt(pos)));
+        boardPanel.getButtons()[pos].repaint();
+
+
+        if (gameMode.isServerMode()) updateButtonStates(false);
 
         if (game.isGameOver()) {
             updateGameEndStatus();
@@ -326,6 +397,7 @@ public class TicTacToeGame extends AbstractRoundedButton {
             doAiMove();
         }
     }
+
 
     private void doAiMove() {
         SwingUtilities.invokeLater(() -> {
@@ -436,15 +508,9 @@ public class TicTacToeGame extends AbstractRoundedButton {
 
 
     private String getNameBySymbol(char symbol) {
-        if (gameMode == GameMode.PVP) {
-            return (symbol == 'X') ? player1 : player2;
-        } else if (gameMode == GameMode.PVA) {
-            if (symbol == playerRole) return (playerRole == 'X') ? player1 : player2;
-            else return "AI";
-        } else if (gameMode.isServerMode()) {
-            if (symbol == playerRole) return localPlayerName != null ? localPlayerName : "";
-            else return opponentName != null ? opponentName : "";
-        }
+        if (gameMode == GameMode.PVP) return (symbol == 'X') ? player1 : player2;
+        if (gameMode == GameMode.PVA) return (symbol == playerRole) ? ((playerRole == 'X') ? player1 : player2) : "AI";
+        if (gameMode.isServerMode()) return (symbol == playerRole) ? (localPlayerName != null ? localPlayerName : "") : (opponentName != null ? opponentName : "");
         return "";
     }
 
@@ -490,11 +556,8 @@ public class TicTacToeGame extends AbstractRoundedButton {
                 try {
                     client.quit();
                 } catch (Exception e) {
-                    System.err.println("Error while quitting the game: " + e.getMessage());
-                    try {
-                        client.shutdown();
-                    } catch (Exception ignored) {
-                    }
+                    System.err.println("Error while quitting: " + e.getMessage());
+                    try { client.shutdown(); } catch (Exception ignored) {}
                 }
             }
             menuManager.onTicTacToeGameFinished();
