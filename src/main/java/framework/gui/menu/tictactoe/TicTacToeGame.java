@@ -2,36 +2,33 @@ package framework.gui.menu.tictactoe;
 
 import java.awt.*;
 import javax.swing.*;
-import java.awt.event.*;
-import java.io.IOException;
 import java.util.List;
 
 import framework.controllers.GameMode;
 import framework.controllers.LanguageManager;
 import framework.controllers.MenuManager;
-import framework.controllers.ThemeManager;
-import framework.gui.AbstractRoundedButton;
 import tictactoe.TicTacToe;
 import tictactoe.MinimaxAI;
 import server.ClientTicTacToe;
 
-public class TicTacToeGame extends AbstractRoundedButton {
+public class TicTacToeGame extends JPanel {
     private final MenuManager menuManager;
     private final GameMode gameMode;
     private final LanguageManager lang = LanguageManager.getInstance();
-    private final ThemeManager theme = ThemeManager.getInstance();
     private boolean turnX = true;
     private final String player1;
     private final String player2;
     private volatile boolean aiTurnPending = false;
     private volatile boolean aiBusy = false;
 
-    private JLabel statusLabel;
-    private JButton menuButton;
-    private SquareBoardPanel boardPanel;
+    // UI Component
+    private TicTacToeUI ui;
+
+    // Game Logic
     private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
 
+    // Network & Roles
     private char playerRole;
     private char aiRole;
     private ClientTicTacToe client;
@@ -40,42 +37,13 @@ public class TicTacToeGame extends AbstractRoundedButton {
     private String localPlayerName = "";
     private String opponentName = "";
 
-    private String extractField(String serverMsg, String fieldName) {
-        try {
-            int idx = serverMsg.indexOf(fieldName + ":");
-            if (idx == -1 && (idx = serverMsg.indexOf(fieldName.toUpperCase() + ":")) == -1) return "";
-            String after = serverMsg.substring(idx + fieldName.length() + 1).trim();
-            int start = after.indexOf('"') + 1, end = after.indexOf('"', start);
-            return (start > 0 && end > start) ? after.substring(start, end) : "";
-        } catch (Exception e) {
-            System.err.println("Failed to parse " + fieldName + ": " + e.getMessage());
-            return "";
-        }
-    }
-
-    private int extractMovePosition(String msg) {
-        try { return Integer.parseInt(extractField(msg, "MOVE")); }
-        catch (NumberFormatException e) { return -1; }
-    }
-
-    private String extractPlayerName(String msg) { return extractField(msg, "PLAYER"); }
-
     private boolean isOurMove(String movePlayerName, String ourBaseName) {
         return movePlayerName.startsWith(ourBaseName);
     }
 
     private void updateButtonStates(boolean enable) {
-        if (boardPanel == null || boardPanel.getButtons() == null) {
-            System.err.println("[DEBUG] updateButtonStates called but boardPanel is null!");
-            return;
-        }
-
-        System.out.println("[DEBUG] updateButtonStates called with enable=" + enable);
-        for (JButton btn : boardPanel.getButtons()) {
-            int index = java.util.Arrays.asList(boardPanel.getButtons()).indexOf(btn);
-            boolean shouldEnable = enable && game.isFree(index) && !game.isGameOver();
-            btn.setEnabled(shouldEnable);
-            System.out.println("[DEBUG] Button " + index + " set to: " + shouldEnable + " (free=" + game.isFree(index) + ", gameOver=" + game.isGameOver() + ")");
+        if (ui != null) {
+            ui.updateButtonStates(enable);
         }
     }
 
@@ -87,22 +55,28 @@ public class TicTacToeGame extends AbstractRoundedButton {
 
     // Consolidated message handler
     private void handleServerMessage(String msg) {
-        String timestamp = java.time.LocalTime.now().toString();
-        System.out.println("\n[" + timestamp + "] [Server MSG] " + msg);
-
         if (msg.contains("OK")) {
             loggedIn = true;
-            System.out.println("[" + timestamp + "] [LOGIN] Successfully logged in");
+            System.out.println("[DEBUG LOGIN] ✅ Received OK - Login successful! loggedIn = " + loggedIn);
         }
-        else if (msg.contains("MATCH")) handleMatchMessage(msg);
-        else if (msg.contains("YOURTURN")) handleYourTurnMessage();
-        else if (msg.contains("MOVE") && msg.contains("PLAYER:")) handleMoveMessage(msg);
+        else if (msg.contains("MATCH")) {
+            System.out.println("[DEBUG] Received MATCH message");
+            handleMatchMessage(msg);
+        }
+        else if (msg.contains("YOURTURN")) {
+            System.out.println("[DEBUG] Received YOURTURN message");
+            handleYourTurnMessage();
+        }
+        else if (msg.contains("MOVE") && msg.contains("PLAYER:")) {
+            System.out.println("[DEBUG] Received MOVE message");
+            handleMoveMessage(msg);
+        }
     }
 
     private void handleMatchMessage(String msg) {
         inGame = true;
-        String playerToMove = extractField(msg, "PLAYERTOMOVE");
-        String opponent = extractField(msg, "OPPONENT");
+        String playerToMove = ClientTicTacToe.extractField(msg, "PLAYERTOMOVE");
+        String opponent = ClientTicTacToe.extractField(msg, "OPPONENT");
         boolean starterIsLocal = !playerToMove.isEmpty() && !localPlayerName.isEmpty() &&
                                  (playerToMove.startsWith(localPlayerName) || localPlayerName.startsWith(playerToMove));
 
@@ -139,11 +113,17 @@ public class TicTacToeGame extends AbstractRoundedButton {
     }
 
     private void handleMoveMessage(String msg) {
-        String playerName = extractPlayerName(msg);
-        int movePos = extractMovePosition(msg);
+        System.out.println("[DEBUG MOVE] ========== PROCESSING MOVE MESSAGE ==========");
+        String playerName = ClientTicTacToe.extractPlayerName(msg);
+        int movePos = ClientTicTacToe.extractMovePosition(msg);
         String ourName = gameMode.isServerMode() ? localPlayerName : (playerRole == 'X' ? player1 : player2);
 
-        System.out.println("[DEBUG MOVE] Position: " + movePos + ", Player: '" + playerName + "', Our: '" + ourName + "'");
+        System.out.println("[DEBUG MOVE] Position: " + movePos);
+        System.out.println("[DEBUG MOVE] Player: '" + playerName + "'");
+        System.out.println("[DEBUG MOVE] Our name: '" + ourName + "'");
+        System.out.println("[DEBUG MOVE] Our role: " + playerRole);
+        System.out.println("[DEBUG MOVE] UI null? " + (ui == null));
+        System.out.println("[DEBUG MOVE] Game null? " + (game == null));
 
         if (movePos == -1) {
             System.err.println("[DEBUG MOVE] Invalid position!");
@@ -151,30 +131,48 @@ public class TicTacToeGame extends AbstractRoundedButton {
         }
 
         if (isOurMove(playerName, ourName)) {
-            System.out.println("[DEBUG MOVE] Our move - ignoring");
+            System.out.println("[DEBUG MOVE] >>> Our move - ignoring (already applied locally)");
             aiBusy = false;
             aiTurnPending = false;
         } else {
-            System.out.println("[DEBUG MOVE] Opponent move - applying");
+            System.out.println("[DEBUG MOVE] >>> Opponent move - WILL APPLY TO BOARD");
             char opponentSymbol = (playerRole == 'X') ? 'O' : 'X';
+            System.out.println("[DEBUG MOVE] Opponent symbol: " + opponentSymbol);
 
             SwingUtilities.invokeLater(() -> {
+                System.out.println("[DEBUG MOVE] Inside SwingUtilities.invokeLater");
+                System.out.println("[DEBUG MOVE] Position " + movePos + " is free: " + game.isFree(movePos));
+
                 if (!game.isFree(movePos)) {
-                    System.err.println("[DEBUG MOVE] Position not free!");
+                    System.err.println("[DEBUG MOVE] ERROR: Position not free!");
+                    System.err.println("[DEBUG MOVE] Current symbol at position: " + game.getSymbolAt(movePos));
                     return;
                 }
 
+                System.out.println("[DEBUG MOVE] Applying move to game state...");
                 game.doMove(movePos, opponentSymbol);
-                JButton button = boardPanel.getButtons()[movePos];
-                button.setText(String.valueOf(opponentSymbol));
-                button.repaint();
+
+                System.out.println("[DEBUG MOVE] Updating UI button text...");
+                if (ui != null) {
+                    ui.updateButtonText(movePos, opponentSymbol);
+                    System.out.println("[DEBUG MOVE] UI updated successfully");
+                } else {
+                    System.err.println("[DEBUG MOVE] ERROR: UI is null!");
+                }
 
                 turnX = (countMoves() % 2 == 0);
-                System.out.println("[DEBUG MOVE] Applied. Moves: " + countMoves() + ", turnX: " + turnX);
+                System.out.println("[DEBUG MOVE] Move count: " + countMoves() + ", turnX: " + turnX);
                 updateStatusLabel();
 
-                if (game.isGameOver()) updateGameEndStatus();
-                else updateButtonStates(true);
+                if (game.isGameOver()) {
+                    System.out.println("[DEBUG MOVE] Game is over!");
+                    updateGameEndStatus();
+                } else {
+                    System.out.println("[DEBUG MOVE] Enabling buttons for our turn...");
+                    updateButtonStates(true);
+                }
+
+                System.out.println("[DEBUG MOVE] ========== MOVE PROCESSING COMPLETE ==========");
             });
         }
     }
@@ -191,7 +189,10 @@ public class TicTacToeGame extends AbstractRoundedButton {
             playerRole = aiIsX ? 'O' : 'X';
         }
 
-        theme.addThemeChangeListener(this::updateTheme);
+        // Create UI component
+        ui = new TicTacToeUI(game);
+        setLayout(new BorderLayout());
+        add(ui, BorderLayout.CENTER);
         setPreferredSize(new Dimension(500, 600));
 
     }
@@ -202,7 +203,18 @@ public class TicTacToeGame extends AbstractRoundedButton {
             return;
         }
 
+        System.out.println("[DEBUG START] ========== STARTING TOURNAMENT MODE ==========");
+
+        // CRITICAL: Initialize UI FIRST so it's ready when server messages arrive
+        initializeGame();
+        System.out.println("[DEBUG START] UI initialized");
+
         client = new ClientTicTacToe();
+
+        // CRITICAL: Set message handler BEFORE connecting so AbstractClient's listener can use it
+        client.setMessageHandler(this::handleServerMessage);
+        System.out.println("[DEBUG START] Message handler set");
+
         if (!client.connectToServer()) {
             JOptionPane.showMessageDialog(null,
                     "Failed to connect to server",
@@ -212,18 +224,6 @@ public class TicTacToeGame extends AbstractRoundedButton {
             return;
         }
 
-        // Start server listener thread
-        new Thread(() -> {
-            try {
-                String serverMsg;
-                while (client.isConnected() && (serverMsg = client.getReader().readLine()) != null) {
-                    handleServerMessage(serverMsg);
-                }
-            } catch (IOException e) {
-                System.err.println("Connection lost: " + e.getMessage());
-            }
-        }, "server-listener").start();
-
         try {
             Thread.sleep(100);
         } catch (InterruptedException ignored) {
@@ -231,6 +231,7 @@ public class TicTacToeGame extends AbstractRoundedButton {
 
         String playerName = determinePlayerName();
         localPlayerName = playerName;
+        System.out.println("[DEBUG START] Logging in as: " + playerName);
         client.login(playerName);
 
         if (!waitForLogin()) {
@@ -240,8 +241,9 @@ public class TicTacToeGame extends AbstractRoundedButton {
             return;
         }
 
+        System.out.println("[DEBUG START] Login successful!");
+        System.out.println("[DEBUG START] Requesting match...");
         client.requestMatch();
-        initializeGame();
     }
 
 
@@ -263,93 +265,21 @@ public class TicTacToeGame extends AbstractRoundedButton {
         gameDone = false;
         game.reset();
 
-        setLayout(new BorderLayout());
-        setBackground(ThemeManager.getInstance().getBackgroundColor());
+        // Initialize UI with button listeners
+        boolean enableButtons = gameMode != GameMode.TOURNAMENT;
+        ui.initializeUI(enableButtons);
 
-        statusLabel = new JLabel("", JLabel.CENTER);
-        statusLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
-        statusLabel.setForeground(ThemeManager.getInstance().getFontColor1());
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-        add(statusLabel, BorderLayout.NORTH);
+        // Set up button click listener
+        ui.setButtonClickListener(this::handleButtonClick);
 
-        boardPanel = new SquareBoardPanel();
-        boardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
-        add(boardPanel, BorderLayout.CENTER);
+        // Set up menu button listener
+        ui.setMenuButtonListener(this::returnToMenu);
 
-        if (gameMode == GameMode.TOURNAMENT) updateButtonStates(false);
-
-        menuButton = createRoundedButton(lang.get("tictactoe.game.menu"),
-                new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
-        menuButton.setFont(new Font("SansSerif", Font.BOLD, 18));
-        menuButton.setPreferredSize(new Dimension(320, 45));
-        menuButton.addActionListener(e -> returnToMenu());
-
-        JPanel southPanel = new JPanel();
-        southPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
-        southPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 20));
-        southPanel.add(menuButton);
-        add(southPanel, BorderLayout.SOUTH);
-
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                statusLabel.setFont(statusLabel.getFont().deriveFont((float) Math.max(18, getHeight() / 25)));
-            }
-        });
         updateStatusLabel();
 
         if (gameMode == GameMode.PVA && !isPlayersTurn()) doAiMove();
     }
 
-    private class SquareBoardPanel extends JPanel {
-        private final JButton[] buttons;
-
-        public SquareBoardPanel() {
-            buttons = new JButton[game.getBoardSize()];
-            setLayout(null);
-            setBackground(ThemeManager.getInstance().getBackgroundColor());
-            for (int i = 0; i < game.getBoardSize(); i++) {
-                JButton btn = createTicTacToeButton("", ThemeManager.getInstance().getTitleColor(), ThemeManager.getInstance().getFontColor1(), new Color(120, 60, 150), true);
-                btn.setFocusPainted(false);
-                btn.setFont(new Font("SansSerif", Font.BOLD, 40));
-                final int pos = i;
-                if (gameMode != GameMode.TOURNAMENT) {
-                    btn.addActionListener(e -> handleButtonClick(pos));
-                }
-                buttons[i] = btn;
-                add(btn);
-            }
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            layoutButtons();
-        }
-
-        private void layoutButtons() {
-            int size = Math.min(getWidth(), getHeight());
-            int marginX = (getWidth() - size) / 2;
-            int marginY = (getHeight() - size) / 2;
-            int cell = size / game.getBoardWidth();
-            int gap = Math.max(6, cell / 15);
-
-            for (int row = 0; row < game.getBoardHeight(); row++) {
-                for (int col = 0; col < game.getBoardWidth(); col++) {
-                    int idx = row * game.getBoardWidth() + col;
-                    JButton btn = buttons[idx];
-                    int x = marginX + col * cell + gap / 2;
-                    int y = marginY + row * cell + gap / 2;
-                    int w = cell - gap;
-                    int h = cell - gap;
-                    btn.setBounds(x, y, w, h);
-                }
-            }
-        }
-        public JButton[] getButtons() {
-            return buttons;
-        }
-    }
 
     private void handleButtonClick(int pos) {
         if (game.isGameOver() || !game.isFree(pos)) return;
@@ -358,7 +288,7 @@ public class TicTacToeGame extends AbstractRoundedButton {
 
         // Validate turn for server modes
         if (gameMode.isServerMode()) {
-            if (!boardPanel.getButtons()[pos].isEnabled()) {
+            if (!ui.isButtonEnabled(pos)) {
                 System.out.println("[DEBUG CLICK] Button not enabled!");
                 return;
             }
@@ -379,9 +309,7 @@ public class TicTacToeGame extends AbstractRoundedButton {
 
         // Apply move locally
         game.doMove(pos, currentPlayer);
-        boardPanel.getButtons()[pos].setText(String.valueOf(game.getSymbolAt(pos)));
-        boardPanel.getButtons()[pos].repaint();
-
+        ui.updateButtonText(pos, currentPlayer);
 
         if (gameMode.isServerMode()) updateButtonStates(false);
 
@@ -415,7 +343,7 @@ public class TicTacToeGame extends AbstractRoundedButton {
 
             if (move != -1 && game.isFree(move)) {
                 game.doMove(move, aiRole);
-                boardPanel.getButtons()[move].setText(String.valueOf(game.getSymbolAt(move)));
+                ui.updateButtonText(move, aiRole);
             }
 
             if (game.isGameOver()) {
@@ -468,7 +396,7 @@ public class TicTacToeGame extends AbstractRoundedButton {
                 }
 
                 game.doMove(move, aiRole);
-                boardPanel.getButtons()[move].setText(String.valueOf(game.getSymbolAt(move)));
+                ui.updateButtonText(move, aiRole);
 
                 if (game.isGameOver()) {
                     updateGameEndStatus();
@@ -485,21 +413,23 @@ public class TicTacToeGame extends AbstractRoundedButton {
 
     private void updateGameEndStatus() {
         gameDone = true;
+        String message = "";
         switch (game.getStatus()) {
             case X_WINS:
                 String xWinner = getNameBySymbol('X');
-                statusLabel.setText(lang.get("tictactoe.game.win", xWinner + " (X)"));
+                message = lang.get("tictactoe.game.win", xWinner + " (X)");
                 break;
             case O_WINS:
                 String oWinner = getNameBySymbol('O');
-                statusLabel.setText(lang.get("tictactoe.game.win", oWinner + " (O)"));
+                message = lang.get("tictactoe.game.win", oWinner + " (O)");
                 break;
             case DRAW:
-                statusLabel.setText(lang.get("tictactoe.game.draw"));
+                message = lang.get("tictactoe.game.draw");
                 break;
             default:
                 break;
         }
+        ui.updateGameEndStatus(message);
     }
 
     private boolean isPlayersTurn() {
@@ -518,33 +448,18 @@ public class TicTacToeGame extends AbstractRoundedButton {
         if (game.isGameOver()) return;
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
+        String message;
+
         // in gamemode Server of Tournament, laat een tijdelijk wacht bericht zien totdat we de naam van de tegenstander hebben ontvangen van de gameserver.
         if (gameMode.isServerMode() && (opponentName == null || opponentName.isEmpty())) {
-            statusLabel.setText(lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails")));
-            return;
-        }
-        statusLabel.setText(lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")"));
-    }
-
-    private void updateTheme() {
-        setBackground(theme.getBackgroundColor());
-        statusLabel.setForeground(theme.getFontColor1());
-        boardPanel.setBackground(theme.getBackgroundColor());
-
-        menuButton.putClientProperty("baseColor", theme.getMainButtonColor());
-        menuButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
-        menuButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
-        menuButton.repaint();
-
-        for (JButton btn : boardPanel.getButtons()) {
-            btn.putClientProperty("baseColor", theme.getTitleColor());
-            btn.putClientProperty("hoverColor", theme.getTitleColor());
-            btn.putClientProperty("borderColor", new Color(120, 60, 150));
-            btn.repaint();
+            message = lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails"));
+        } else {
+            message = lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")");
         }
 
-        repaint();
+        ui.updateStatusLabel(message);
     }
+
     private void returnToMenu() {
         int option = JOptionPane.showConfirmDialog(this,
                 lang.get("main.exit.confirm"),

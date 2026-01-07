@@ -2,7 +2,6 @@
 import framework.controllers.MenuManager;
 import javax.swing.UIManager;
 
-import server.ClientTicTacToe;
 
 /**
  * Hoofdklasse voor de Spelcollectie applicatie
@@ -28,9 +27,6 @@ public class Main {
             // Als Windows look & feel niet beschikbaar is, gebruik default
             System.out.println("Kon Windows look & feel niet instellen, gebruik default.");
         }
-        ClientTicTacToe client = new ClientTicTacToe();
-        Thread clientThread = new Thread(client);
-        clientThread.start();
 
         // Start de applicatie via het menu systeem
         MenuManager menuManager = new MenuManager();
