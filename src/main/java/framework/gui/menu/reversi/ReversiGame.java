@@ -6,6 +6,7 @@ import framework.controllers.LanguageManager;
 import framework.controllers.MenuManager;
 import reversi.Reversi;
 import reversi.ReversiMinimax;
+import reversi.MonteCarloTreeSearchAI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,10 +30,13 @@ public class ReversiGame {
     private boolean gameDone = false;
     private boolean turnBlack = true;
     
-    private ReversiMinimax ai;
+    private ReversiMinimax minimaxAI;
     private volatile boolean aiThinking = false;
     private char humanRole = 'B'; // Human is always black
     private char aiRole = 'W';    // AI is always white
+
+    // Flag to determine which AI to use
+    private boolean useMCTS = false;
 
     /**
      * Creates a new Reversi game instance.
@@ -49,8 +53,25 @@ public class ReversiGame {
      */
     public void start() {
         game = new Reversi();
-        ai = new ReversiMinimax();
-        System.out.println("DEBUG: Game started");
+        minimaxAI = new ReversiMinimax();
+
+        // Determine which AI to use based on gameMode
+        useMCTS = "MCTS".equalsIgnoreCase(gameMode);
+
+        // Determine roles based on player names
+        // player1 is always Black, player2 is always White
+        // If player1 contains "AI", then AI plays Black and human plays White
+        boolean aiIsPlayer1 = player1.contains("AI");
+        if (aiIsPlayer1) {
+            // AI is Black (player1), Human is White (player2)
+            aiRole = 'B';
+            humanRole = 'W';
+        } else {
+            // Human is Black (player1), AI is White (player2)
+            humanRole = 'B';
+            aiRole = 'W';
+        }
+
         initializeGame();
     }
 
@@ -59,9 +80,9 @@ public class ReversiGame {
      */
     private void initializeGame() {
         gameDone = false;
-        turnBlack = true;
+        turnBlack = true; // Black always starts in Reversi
 
-        gameFrame = new JFrame("Reversi vs Minimax AI");
+        gameFrame = new JFrame("Reversi vs " + (useMCTS ? "MCTS" : "Minimax") + " AI");
         gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         gameFrame.setSize(700, 800);
         gameFrame.setMinimumSize(new Dimension(500, 600));
@@ -101,6 +122,18 @@ public class ReversiGame {
 
         gameFrame.setVisible(true);
         updateStatusLabel();
+
+        // If AI plays Black, AI moves first
+        if (aiRole == 'B') {
+            makeAIMove();
+        }
+    }
+
+    /**
+     * Checks if it's currently the human player's turn.
+     */
+    private boolean isHumanTurn() {
+        return (turnBlack && humanRole == 'B') || (!turnBlack && humanRole == 'W');
     }
 
     /**
@@ -110,22 +143,24 @@ public class ReversiGame {
         if (gameDone || aiThinking) return;
         
         // Only allow human player to move on their turn
-        if (!turnBlack) return; // Not human's turn
-        
+        if (!isHumanTurn()) return;
+
         if (!game.isValidMove(row, col, humanRole)) return;
         
-        System.out.println("DEBUG: Human move at " + row + "," + col);
         game.doMove(row, col, humanRole);
         boardPanel.updateBoard();
 
         if (checkGameEnd()) return;
 
+        // Switch turn
+        turnBlack = !turnBlack;
+
         // Check if AI has valid moves
         if (!game.hasValidMove(aiRole)) {
-            System.out.println("DEBUG: AI has no valid moves, passing...");
+            // Switch back to human
+            turnBlack = !turnBlack;
             // Check if human can move again
             if (!game.hasValidMove(humanRole)) {
-                System.out.println("DEBUG: No one can move - game over");
                 gameDone = true;
                 updateStatusLabel();
                 boardPanel.updateBoard();
@@ -137,8 +172,6 @@ public class ReversiGame {
             return;
         }
 
-        // AI's turn
-        turnBlack = false;
         updateStatusLabel();
         boardPanel.updateBoard();
         
@@ -157,7 +190,15 @@ public class ReversiGame {
         SwingWorker<Position, Void> worker = new SwingWorker<Position, Void>() {
             @Override
             protected Position doInBackground() {
-                return ai.findBestMove(game, aiRole);
+                if (useMCTS) {
+                    // Use Monte Carlo Tree Search AI (static method returns int[])
+                    int[] move = MonteCarloTreeSearchAI.bestMove(game, aiRole);
+                    if (move == null) return null;
+                    return new Position(move[0], move[1], 8);
+                } else {
+                    // Use Minimax AI
+                    return minimaxAI.findBestMove(game, aiRole);
+                }
             }
 
             @Override
@@ -167,35 +208,36 @@ public class ReversiGame {
                     aiThinking = false;
                     
                     if (move == null) {
-                        System.out.println("DEBUG: AI has no valid moves, passing...");
+                        // Switch turn back
+                        turnBlack = !turnBlack;
                         // Check if human can move
                         if (!game.hasValidMove(humanRole)) {
-                            System.out.println("DEBUG: No one can move - game over");
                             gameDone = true;
                             updateStatusLabel();
                             boardPanel.updateBoard();
                             return;
                         }
                         // Human gets another turn
-                        turnBlack = true;
                         updateStatusLabel();
                         boardPanel.updateBoard();
                         return;
                     }
                     
                     // Make the move
-                    System.out.println("DEBUG: AI move at " + move.getRow() + "," + move.getColumn());
                     game.doMove(move.getRow(), move.getColumn(), aiRole);
                     boardPanel.updateBoard();
 
                     if (checkGameEnd()) return;
 
+                    // Switch turn
+                    turnBlack = !turnBlack;
+
                     // Check if human has valid moves
                     if (!game.hasValidMove(humanRole)) {
-                        System.out.println("DEBUG: Human has no valid moves, passing...");
+                        // Switch back to AI
+                        turnBlack = !turnBlack;
                         // Check if AI can move again
                         if (!game.hasValidMove(aiRole)) {
-                            System.out.println("DEBUG: No one can move - game over");
                             gameDone = true;
                             updateStatusLabel();
                             boardPanel.updateBoard();
@@ -209,7 +251,6 @@ public class ReversiGame {
                     }
 
                     // Human's turn
-                    turnBlack = true;
                     updateStatusLabel();
                     boardPanel.updateBoard();
                 } catch (Exception e) {
@@ -337,7 +378,7 @@ public class ReversiGame {
                         btn.setIcon(createDiscIcon(Color.BLACK));
                     } else if (val == 'W') {
                         btn.setIcon(createDiscIcon(Color.WHITE));
-                    } else if (!gameDone && !aiThinking && turnBlack && game.isValidMove(row, col, humanRole)) {
+                    } else if (!gameDone && !aiThinking && isHumanTurn() && game.isValidMove(row, col, humanRole)) {
                         btn.setBackground(new Color(184, 107, 214, 180));
                         btn.setBorder(BorderFactory.createLineBorder(new Color(120, 60, 150), 3));
                     }
