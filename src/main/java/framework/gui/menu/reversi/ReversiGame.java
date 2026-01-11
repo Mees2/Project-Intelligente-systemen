@@ -4,6 +4,7 @@ import reversi.*;
 import framework.controllers.MenuManager;
 import framework.controllers.LanguageManager;
 import framework.boardgame.Move;
+import framework.boardgame.GameResult;
 import framework.players.*;
 
 import javax.swing.*;
@@ -114,7 +115,7 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
     }
 
     @Override
-    public void onGameEnded(ReversiGameController.GameResult result) {
+    public void onGameEnded(GameResult result) {
         statusLabel.setText(result.getDescription());
         boardPanel.updateBoard();
     }

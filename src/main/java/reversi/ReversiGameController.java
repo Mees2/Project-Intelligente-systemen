@@ -2,6 +2,7 @@ package reversi;
 
 import framework.boardgame.Move;
 import framework.boardgame.Position;
+import framework.boardgame.GameResult;
 import framework.players.AbstractPlayer;
 
 /**
@@ -241,32 +242,5 @@ public class ReversiGameController {
     public int getScore(char player) { return game.count(player); }
     public boolean wasLastMovePass() { return lastMoveWasPass; }
 
-    /**
-     * GameResult inner class
-     */
-    public static class GameResult {
-        public enum ResultType { WIN, DRAW }
-        private final ResultType type;
-        private final AbstractPlayer winner;
-
-        private GameResult(ResultType type, AbstractPlayer winner) {
-            this.type = type;
-            this.winner = winner;
-        }
-
-        public static GameResult createWin(AbstractPlayer winner) {
-            return new GameResult(ResultType.WIN, winner);
-        }
-
-        public static GameResult createDraw() {
-            return new GameResult(ResultType.DRAW, null);
-        }
-
-        public String getDescription() {
-            return type == ResultType.WIN ? winner.getName() + " wins!" : "Draw!";
-        }
-
-        public ResultType getType() { return type; }
-        public AbstractPlayer getWinner() { return winner; }
-    }
+    
 }

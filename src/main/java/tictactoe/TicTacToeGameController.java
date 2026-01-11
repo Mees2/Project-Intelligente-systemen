@@ -2,12 +2,12 @@ package tictactoe;
 
 import framework.boardgame.Move;
 import framework.boardgame.Position;
+import framework.boardgame.GameResult;
 import framework.players.AbstractPlayer;
 
 /**
  * TicTacToe Game Controller - Backend game logic only
  * Handelt alle spelregels en zetten af, volledig losgekoppeld van UI
- * ~140 lijnen
  */
 public class TicTacToeGameController {
     private final TicTacToe game;
@@ -151,32 +151,5 @@ public class TicTacToeGameController {
     public char[] getBoardState() { return game.getBord(); }
     public boolean isAIThinking() { return aiThinking; }
 
-    /**
-     * GameResult inner class
-     */
-    public static class GameResult {
-        public enum ResultType { WIN, DRAW }
-        private final ResultType type;
-        private final AbstractPlayer winner;
 
-        private GameResult(ResultType type, AbstractPlayer winner) {
-            this.type = type;
-            this.winner = winner;
-        }
-
-        public static GameResult createWin(AbstractPlayer winner) {
-            return new GameResult(ResultType.WIN, winner);
-        }
-
-        public static GameResult createDraw() {
-            return new GameResult(ResultType.DRAW, null);
-        }
-
-        public String getDescription() {
-            return type == ResultType.WIN ? winner.getName() + " wins!" : "Draw!";
-        }
-
-        public ResultType getType() { return type; }
-        public AbstractPlayer getWinner() { return winner; }
-    }
 }

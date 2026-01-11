@@ -2,7 +2,7 @@ package framework.gui.menu.tictactoe;
 
 import tictactoe.*;
 import framework.controllers.MenuManager;
-import framework.boardgame.Move;
+import framework.boardgame.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -85,7 +85,7 @@ public class TicTacToeGame extends JPanel implements TicTacToeGameController.Gam
     }
 
     @Override
-    public void onGameEnded(TicTacToeGameController.GameResult result) {
+    public void onGameEnded(GameResult result) {
         statusLabel.setText(result.getDescription());
         boardPanel.updateBoard();
     }
