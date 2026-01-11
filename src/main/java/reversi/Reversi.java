@@ -1,11 +1,12 @@
 package reversi;
 
 import framework.boardgame.AbstractBoardGame;
+import framework.boardgame.Move;
+import framework.boardgame.Position;
 
 /**
  * Implements the game logic for Reversi (also known as Othello).
- * This class handles the rules, move validation, and state management for a Reversi game.
- * The game is played on an 8x8 board where players alternate placing black ('B') and white ('W') pieces.
+ * Uses Move and Position classes from the framework.
  */
 public class Reversi extends AbstractBoardGame {
     
@@ -16,7 +17,7 @@ public class Reversi extends AbstractBoardGame {
      */
     public Reversi() {
         super(8, 8, ' ');
-        // Startpositie
+        // Standard starting position
         board[27] = 'W'; // (3,3)
         board[28] = 'B'; // (3,4)
         board[35] = 'B'; // (4,3)
@@ -55,6 +56,13 @@ public class Reversi extends AbstractBoardGame {
     }
 
     /**
+     * Checks if a move is valid using Position object
+     */
+    public boolean isValidMove(Position pos, char player) {
+        return isValidMove(pos.getRow(), pos.getColumn(), player);
+    }
+
+    /**
      * Checks if a move is valid for the specified player.
      * A move is valid if:
      * - The target cell is empty
@@ -80,6 +88,15 @@ public class Reversi extends AbstractBoardGame {
             }
         }
         return false;
+    }
+
+    /**
+     * Executes a move using Move object
+     */
+    @Override
+    public void doMove(Move move) {
+        Position pos = move.getPosition();
+        doMove(pos.getRow(), pos.getColumn(), move.getPlayer());
     }
 
     /**

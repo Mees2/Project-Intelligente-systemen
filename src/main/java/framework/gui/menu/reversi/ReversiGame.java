@@ -1,88 +1,76 @@
 package framework.gui.menu.reversi;
 
-import framework.boardgame.Position;
-import framework.boardgame.AbstractBoardGame;
-import framework.controllers.LanguageManager;
+import reversi.*;
 import framework.controllers.MenuManager;
-import reversi.Reversi;
-import reversi.ReversiMinimax;
-import reversi.MonteCarloTreeSearchAI;
+import framework.controllers.LanguageManager;
+import framework.boardgame.Move;
+import framework.players.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
- * Handles the graphical user interface and game logic for a Reversi game.
+ * Reversi Game UI - Frontend only
+ * Delegate alle game logic naar ReversiGameController
  */
-public class ReversiGame {
+public class ReversiGame extends JPanel implements ReversiGameController.GameListener {
     private final MenuManager menuManager;
-    private final String gameMode;
     private final LanguageManager lang = LanguageManager.getInstance();
-    private final String player1;
-    private final String player2;
-    
+    private final String player1Name;
+    private final String player2Name;
+    private final String gameMode;
+
     private JFrame gameFrame;
     private JLabel statusLabel;
     private JLabel scoreLabel;
     private BoardPanel boardPanel;
-    private Reversi game;
-    private boolean gameDone = false;
-    private boolean turnBlack = true;
-    
-    private ReversiMinimax minimaxAI;
-    private volatile boolean aiThinking = false;
-    private char humanRole = 'B'; // Human is always black
-    private char aiRole = 'W';    // AI is always white
+    private ReversiGameController gameController;
 
-    // Flag to determine which AI to use
-    private boolean useMCTS = false;
-
-    /**
-     * Creates a new Reversi game instance.
-     */
     public ReversiGame(MenuManager menuManager, String gameMode, String player1, String player2) {
         this.menuManager = menuManager;
+        this.player1Name = player1;
+        this.player2Name = player2;
         this.gameMode = gameMode;
-        this.player1 = player1;
-        this.player2 = player2;
     }
 
-    /**
-     * Initializes and starts a new game.
-     */
     public void start() {
-        game = new Reversi();
-        minimaxAI = new ReversiMinimax();
+        Reversi game = new Reversi();
+        ReversiMinimax minimaxAI = new ReversiMinimax();
+        MonteCarloTreeSearchAI mctsAI = new MonteCarloTreeSearchAI();
 
-        // Determine which AI to use based on gameMode
-        useMCTS = "MCTS".equalsIgnoreCase(gameMode);
+        AbstractPlayer p1 = new HumanPlayer(player1Name, 'B');
+        AbstractPlayer p2;
 
-        // Determine roles based on player names
-        // player1 is always Black, player2 is always White
-        // If player1 contains "AI", then AI plays Black and human plays White
-        boolean aiIsPlayer1 = player1.contains("AI");
-        if (aiIsPlayer1) {
-            // AI is Black (player1), Human is White (player2)
-            aiRole = 'B';
-            humanRole = 'W';
+        // CHECK GAME MODE CORRECTLY
+        if ("PVA".equalsIgnoreCase(gameMode) || "MCTS".equalsIgnoreCase(gameMode)) {
+            p2 = new AIPlayer(player2Name, 'W');
         } else {
-            // Human is Black (player1), AI is White (player2)
-            humanRole = 'B';
-            aiRole = 'W';
+            // Player vs Player
+            p2 = new HumanPlayer(player2Name, 'W');
         }
 
-        initializeGame();
+        gameController = new ReversiGameController(game, p1, p2, minimaxAI, mctsAI);
+        gameController.setUseMCTS("MCTS".equalsIgnoreCase(gameMode));
+        gameController.setGameListener(this);
+
+        initializeUI();
+        gameFrame.setVisible(true);
+
+        // REFRESH BOARD DISPLAY
+        if (boardPanel != null) {
+            boardPanel.updateBoard();
+        }
+        updateScoreLabel();
+
+        // AI goes first if needed
+        if (p2.isAI()) {
+            gameController.makeAIMove();
+        }
     }
 
-    /**
-     * Initializes the game window and all UI components.
-     */
-    private void initializeGame() {
-        gameDone = false;
-        turnBlack = true; // Black always starts in Reversi
-
-        gameFrame = new JFrame("Reversi vs " + (useMCTS ? "MCTS" : "Minimax") + " AI");
+    private void initializeUI() {
+        gameFrame = new JFrame("Reversi - " + gameMode);
         gameFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         gameFrame.setSize(700, 800);
         gameFrame.setMinimumSize(new Dimension(500, 600));
@@ -98,10 +86,8 @@ public class ReversiGame {
 
         JPanel scorePanel = new JPanel();
         scorePanel.setBackground(new Color(247, 247, 255));
-        scorePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
         scoreLabel = new JLabel();
-        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        scoreLabel.setForeground(new Color(5, 5, 169));
+        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         scorePanel.add(scoreLabel);
         gameFrame.add(scorePanel, BorderLayout.EAST);
 
@@ -110,200 +96,57 @@ public class ReversiGame {
         gameFrame.add(boardPanel, BorderLayout.CENTER);
 
         JButton menuButton = new JButton("Menu");
-        menuButton.setFont(new Font("SansSerif", Font.BOLD, 18));
-        menuButton.setPreferredSize(new Dimension(220, 45));
+        menuButton.setFont(new Font("SansSerif", Font.BOLD, 16));
         menuButton.addActionListener(e -> returnToMenu());
-
         JPanel southPanel = new JPanel();
         southPanel.setBackground(new Color(247, 247, 255));
-        southPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 20));
         southPanel.add(menuButton);
         gameFrame.add(southPanel, BorderLayout.SOUTH);
 
-        gameFrame.setVisible(true);
-        updateStatusLabel();
-
-        // If AI plays Black, AI moves first
-        if (aiRole == 'B') {
-            makeAIMove();
-        }
+        updateScoreLabel();
+        statusLabel.setText(gameController.getCurrentPlayer().getName() + "'s turn");
     }
 
-    /**
-     * Checks if it's currently the human player's turn.
-     */
-    private boolean isHumanTurn() {
-        return (turnBlack && humanRole == 'B') || (!turnBlack && humanRole == 'W');
-    }
-
-    /**
-     * Handles a player's move when they click a cell on the board.
-     */
-    private void handleButtonClick(int row, int col) {
-        if (gameDone || aiThinking) return;
-        
-        // Only allow human player to move on their turn
-        if (!isHumanTurn()) return;
-
-        if (!game.isValidMove(row, col, humanRole)) return;
-        
-        game.doMove(row, col, humanRole);
+    @Override
+    public void onMoveExecuted(Move move) {
         boardPanel.updateBoard();
+        updateScoreLabel();
+    }
 
-        if (checkGameEnd()) return;
-
-        // Switch turn
-        turnBlack = !turnBlack;
-
-        // Check if AI has valid moves
-        if (!game.hasValidMove(aiRole)) {
-            // Switch back to human
-            turnBlack = !turnBlack;
-            // Check if human can move again
-            if (!game.hasValidMove(humanRole)) {
-                gameDone = true;
-                updateStatusLabel();
-                boardPanel.updateBoard();
-                return;
-            }
-            // Human gets another turn
-            updateStatusLabel();
-            boardPanel.updateBoard();
-            return;
-        }
-
-        updateStatusLabel();
+    @Override
+    public void onGameEnded(ReversiGameController.GameResult result) {
+        statusLabel.setText(result.getDescription());
         boardPanel.updateBoard();
-        
-        makeAIMove();
     }
 
-    /**
-     * Makes the AI's move.
-     */
-    private void makeAIMove() {
-        if (gameDone || aiThinking) return;
-        
-        aiThinking = true;
-        updateStatusLabel();
-
-        SwingWorker<Position, Void> worker = new SwingWorker<Position, Void>() {
-            @Override
-            protected Position doInBackground() {
-                if (useMCTS) {
-                    // Use Monte Carlo Tree Search AI (static method returns int[])
-                    int[] move = MonteCarloTreeSearchAI.bestMove(game, aiRole);
-                    if (move == null) return null;
-                    return new Position(move[0], move[1], 8);
-                } else {
-                    // Use Minimax AI
-                    return minimaxAI.findBestMove(game, aiRole);
-                }
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    Position move = get();
-                    aiThinking = false;
-                    
-                    if (move == null) {
-                        // Switch turn back
-                        turnBlack = !turnBlack;
-                        // Check if human can move
-                        if (!game.hasValidMove(humanRole)) {
-                            gameDone = true;
-                            updateStatusLabel();
-                            boardPanel.updateBoard();
-                            return;
-                        }
-                        // Human gets another turn
-                        updateStatusLabel();
-                        boardPanel.updateBoard();
-                        return;
-                    }
-                    
-                    // Make the move
-                    game.doMove(move.getRow(), move.getColumn(), aiRole);
-                    boardPanel.updateBoard();
-
-                    if (checkGameEnd()) return;
-
-                    // Switch turn
-                    turnBlack = !turnBlack;
-
-                    // Check if human has valid moves
-                    if (!game.hasValidMove(humanRole)) {
-                        // Switch back to AI
-                        turnBlack = !turnBlack;
-                        // Check if AI can move again
-                        if (!game.hasValidMove(aiRole)) {
-                            gameDone = true;
-                            updateStatusLabel();
-                            boardPanel.updateBoard();
-                            return;
-                        }
-                        // AI gets another turn
-                        updateStatusLabel();
-                        boardPanel.updateBoard();
-                        makeAIMove();
-                        return;
-                    }
-
-                    // Human's turn
-                    updateStatusLabel();
-                    boardPanel.updateBoard();
-                } catch (Exception e) {
-                    aiThinking = false;
-                    e.printStackTrace();
-                }
-            }
-        };
-        worker.execute();
+    @Override
+    public void onStatusChanged(String status) {
+        statusLabel.setText(status);
+        boardPanel.updateBoard();
     }
 
-    /**
-     * Checks if game has ended.
-     */
-    private boolean checkGameEnd() {
-        if (!game.hasValidMove('B') && !game.hasValidMove('W')) {
-            gameDone = true;
-            updateStatusLabel();
-            boardPanel.updateBoard();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Updates status and score labels.
-     */
-    private void updateStatusLabel() {
-        int black = game.count('B');
-        int white = game.count('W');
-        scoreLabel.setText(String.format("<html>%s (●): %d<br>%s (○): %d</html>", 
-            player1, black, player2, white));
-
-        if (gameDone) {
-            if (black > white) {
-                statusLabel.setText(player1 + " wins!");
-            } else if (white > black) {
-                statusLabel.setText(player2 + " wins!");
-            } else {
-                statusLabel.setText("Draw!");
-            }
-        } else if (aiThinking) {
+    @Override
+    public void onAIThinking(boolean thinking) {
+        if (thinking) {
             statusLabel.setText("AI thinking...");
         } else {
-            statusLabel.setText(turnBlack ? (player1 + "'s turn") : (player2 + "'s turn"));
+            statusLabel.setText(gameController.getCurrentPlayer().getName() + "'s turn");
+        }
+        boardPanel.updateBoard();
+    }
+
+    public void updateScoreLabel() {
+        if (gameController != null) {
+            int p1Score = gameController.getScore(gameController.getPlayer1().getSymbol());
+            int p2Score = gameController.getScore(gameController.getPlayer2().getSymbol());
+            scoreLabel.setText(String.format("<html>%s: %d<br>%s: %d</html>",
+                player1Name, p1Score, player2Name, p2Score));
         }
     }
 
-    /**
-     * Handles the return to menu action.
-     */
     private void returnToMenu() {
-        int option = JOptionPane.showConfirmDialog(gameFrame, "Return to menu?", "Confirm", JOptionPane.YES_NO_OPTION);
+        int option = JOptionPane.showConfirmDialog(gameFrame, "Return to menu?", "Confirm",
+                JOptionPane.YES_NO_OPTION);
         if (option == JOptionPane.YES_OPTION) {
             gameFrame.dispose();
             menuManager.onReversiGameFinished();
@@ -311,14 +154,7 @@ public class ReversiGame {
     }
 
     /**
-     * Closes the game window.
-     */
-    public void close() {
-        if (gameFrame != null) gameFrame.dispose();
-    }
-
-    /**
-     * Inner class representing the game board.
+     * Inner class: Game Board UI
      */
     private class BoardPanel extends JPanel {
         private final int SIZE = 8;
@@ -326,19 +162,21 @@ public class ReversiGame {
 
         public BoardPanel() {
             setLayout(null);
-            setBackground(new Color(247, 247, 255));
             for (int row = 0; row < SIZE; row++) {
                 for (int col = 0; col < SIZE; col++) {
                     JButton btn = new JButton();
                     btn.setFocusPainted(false);
                     btn.setBackground(new Color(61, 169, 166));
                     final int r = row, c = col;
-                    btn.addActionListener(e -> handleButtonClick(r, c));
+                    btn.addActionListener(e -> {
+                        if (!gameController.isGameDone() && !gameController.isAIThinking()) {
+                            gameController.makeMove(r, c);
+                        }
+                    });
                     buttons[row][col] = btn;
                     add(btn);
                 }
             }
-            updateBoard();
         }
 
         @Override
@@ -356,20 +194,26 @@ public class ReversiGame {
 
             for (int row = 0; row < SIZE; row++) {
                 for (int col = 0; col < SIZE; col++) {
-                    int x = marginX + col * cell + gap / 2;
-                    int y = marginY + row * cell + gap / 2;
-                    int w = cell - gap;
-                    int h = cell - gap;
-                    buttons[row][col].setBounds(x, y, w, h);
+                    buttons[row][col].setBounds(
+                        marginX + col * cell + gap / 2,
+                        marginY + row * cell + gap / 2,
+                        cell - gap, cell - gap
+                    );
                 }
             }
         }
 
         public void updateBoard() {
+            Reversi game = gameController.getGame();
+            char currentPlayerSymbol = gameController.getCurrentPlayer().getSymbol();
+            boolean isCurrentPlayerHuman = !gameController.getCurrentPlayer().isAI();
+            boolean isAIThinking = gameController.isAIThinking();
+
             for (int row = 0; row < SIZE; row++) {
                 for (int col = 0; col < SIZE; col++) {
                     JButton btn = buttons[row][col];
                     char val = game.getSymbolAt(row, col);
+
                     btn.setIcon(null);
                     btn.setBackground(new Color(61, 169, 166));
                     btn.setBorder(BorderFactory.createLineBorder(new Color(40, 120, 120), 2));
@@ -378,7 +222,10 @@ public class ReversiGame {
                         btn.setIcon(createDiscIcon(Color.BLACK));
                     } else if (val == 'W') {
                         btn.setIcon(createDiscIcon(Color.WHITE));
-                    } else if (!gameDone && !aiThinking && isHumanTurn() && game.isValidMove(row, col, humanRole)) {
+                    } else if (!gameController.isGameDone() && !isAIThinking 
+                            && isCurrentPlayerHuman
+                            && game.isValidMove(row, col, currentPlayerSymbol)) {
+                        // HIGHLIGHT LEGAL MOVES
                         btn.setBackground(new Color(184, 107, 214, 180));
                         btn.setBorder(BorderFactory.createLineBorder(new Color(120, 60, 150), 3));
                     }
