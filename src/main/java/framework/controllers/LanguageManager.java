@@ -103,7 +103,7 @@ public final class LanguageManager {
         addTranslation("reversi.menu.title", "Reversi - Kies Spelmode", "Reversi - Choose Game Mode", "Cờ Lật - Chọn chế độ", "黑白棋 - 选择模式");
         addTranslation("reversi.menu.header", "Kies je spelmode", "Choose your game mode", "Chọn chế độ game", "选择模式");
         addTranslation("reversi.menu.pvp", "Speler tegen Speler", "Player vs Player", "Người chơi đấu với người chơi", "玩家对战");
-        addTranslation("reversi.menu.pva", "Speler tegen AI", "Player vs AI", "Người chơi vs AI", "玩家对战 AI");
+        addTranslation("reversi.menu.minimax", "Speler tegen AI (MiniMax)", "Player vs AI (MiniMax)", "Người chơi vs AI (MiniMax)", "玩家对战 AI (MiniMax)");
         addTranslation("reversi.menu.mcts", "Speler tegen AI (MCTS)", "Player vs AI (MCTS)", "Người chơi vs AI (MCTS)", "玩家对战AI（MCTS）");
         addTranslation("reversi.menu.back", "Terug", "Back", "Quay lại", "返回");
 

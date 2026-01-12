@@ -33,7 +33,7 @@ public class ReversiUI extends AbstractGameUI {
      */
     public void initializeUI() {
         // Initialize common components
-        initializeCommonUI("reversi.game.menu", new Dimension(200, 40));
+        initializeCommonUI("reversi.name.back", new Dimension(200, 40));
 
         // Score panel (Reversi-specific)
         JPanel scorePanel = new JPanel();

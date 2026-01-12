@@ -31,6 +31,8 @@ public class GameMenu extends AbstractRoundedButton {
     private JButton serverButton;
     private JButton tournamentButton;
     private JButton backButton;
+    private JButton aiButtonMCTS;
+    private JButton aiButtonMinimax;
     private JPanel buttonPanel;
 
     /**
@@ -138,19 +140,19 @@ public class GameMenu extends AbstractRoundedButton {
                 theme.getButtonColor().darker(), true);
         pvpButton.addActionListener(e -> menuManager.openReversiNamePvp());
         buttonPanel.add(pvpButton);
-        buttonPanel.add(Box.createVerticalStrut(20));
+        buttonPanel.add(Box.createVerticalStrut(10));
 
         // Player vs AI button
         // First AI button (MCTS)
-        pvaButton = createRoundedButton(lang.get("reversi.menu.mcts"),
+        aiButtonMCTS= createRoundedButton(lang.get("reversi.menu.mcts"),
             theme.getButtonColor(), theme.getButtonColorHover(),
             theme.getButtonColor().darker(), true);
-        pvaButton.addActionListener(e -> menuManager.openReversiNameMCTS());
-        buttonPanel.add(pvaButton);
+        aiButtonMCTS.addActionListener(e -> menuManager.openReversiNameMCTS());
+        buttonPanel.add(aiButtonMCTS);
         buttonPanel.add(Box.createVerticalStrut(10));
 
         // Second AI button (Minimax) - uses same PVA label but opens MINIMAX name selection
-        JButton aiButtonMinimax = createRoundedButton(lang.get("reversi.menu.pva"),
+        aiButtonMinimax = createRoundedButton(lang.get("reversi.menu.minimax"),
             theme.getButtonColor(), theme.getButtonColorHover(),
             theme.getButtonColor().darker(), true);
         aiButtonMinimax.addActionListener(e -> menuManager.openReversiNameMINIMAX());
@@ -220,8 +222,11 @@ public class GameMenu extends AbstractRoundedButton {
             }
             case REVERSI -> {
                 pvpButton.setText(lang.get("reversi.menu.pvp"));
-                pvaButton.setText(lang.get("reversi.menu.pva"));
                 backButton.setText(lang.get("reversi.menu.back"));
+                aiButtonMCTS.setText(lang.get("reversi.menu.mcts"));
+                aiButtonMinimax.setText(lang.get("reversi.menu.minimax"));
+
+
             }
         }
     }
@@ -235,11 +240,12 @@ public class GameMenu extends AbstractRoundedButton {
         pvpButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         pvpButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
-        pvaButton.putClientProperty("baseColor", theme.getButtonColor());
-        pvaButton.putClientProperty("hoverColor", theme.getButtonColorHover());
-        pvaButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         if (gameType == GameType.TICTACTOE) {
+            pvaButton.putClientProperty("baseColor", theme.getButtonColor());
+            pvaButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+            pvaButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+
             serverButton.putClientProperty("baseColor", theme.getButtonColor());
             serverButton.putClientProperty("hoverColor", theme.getButtonColorHover());
             serverButton.putClientProperty("borderColor", theme.getButtonColor().darker());
@@ -247,6 +253,17 @@ public class GameMenu extends AbstractRoundedButton {
             tournamentButton.putClientProperty("baseColor", theme.getButtonColor());
             tournamentButton.putClientProperty("hoverColor", theme.getButtonColorHover());
             tournamentButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+        }
+
+        if (gameType == GameType.REVERSI) {
+            aiButtonMCTS.putClientProperty("baseColor", theme.getButtonColor());
+            aiButtonMCTS.putClientProperty("hoverColor", theme.getButtonColorHover());
+            aiButtonMCTS.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+
+            aiButtonMinimax.putClientProperty("baseColor", theme.getButtonColor());
+            aiButtonMinimax.putClientProperty("hoverColor", theme.getButtonColorHover());
+            aiButtonMinimax.putClientProperty("borderColor", theme.getButtonColor().darker());
         }
 
         backButton.putClientProperty("baseColor", theme.getMainButtonColor());
