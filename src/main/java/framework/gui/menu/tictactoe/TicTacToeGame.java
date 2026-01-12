@@ -22,18 +22,15 @@ public class TicTacToeGame extends JPanel {
     private volatile boolean aiBusy = false;
 
     // UI Component
-    private TicTacToeUI ui;
+    private TicTacToeUI gameUI;
 
-    // Game Logic
     private final TicTacToe game = new TicTacToe();
     private boolean gameDone = false;
 
-    // Network & Roles
     private char playerRole;
     private char aiRole;
     private ClientTicTacToe client;
     private volatile boolean loggedIn = false;
-    private volatile boolean inGame = false;
     private String localPlayerName = "";
     private String opponentName = "";
 
@@ -42,9 +39,7 @@ public class TicTacToeGame extends JPanel {
     }
 
     private void updateButtonStates(boolean enable) {
-        if (ui != null) {
-            ui.updateButtonStates(enable);
-        }
+        if (gameUI != null) gameUI.updateButtonStates(enable);
     }
 
     private int countMoves() {
@@ -53,28 +48,14 @@ public class TicTacToeGame extends JPanel {
         return count;
     }
 
-    // Consolidated message handler
     private void handleServerMessage(String msg) {
-        if (msg.contains("OK")) {
-            loggedIn = true;
-            System.out.println("[DEBUG LOGIN] ✅ Received OK - Login successful! loggedIn = " + loggedIn);
-        }
-        else if (msg.contains("MATCH")) {
-            System.out.println("[DEBUG] Received MATCH message");
-            handleMatchMessage(msg);
-        }
-        else if (msg.contains("YOURTURN")) {
-            System.out.println("[DEBUG] Received YOURTURN message");
-            handleYourTurnMessage();
-        }
-        else if (msg.contains("MOVE") && msg.contains("PLAYER:")) {
-            System.out.println("[DEBUG] Received MOVE message");
-            handleMoveMessage(msg);
-        }
+        if (msg.contains("OK")) loggedIn = true;
+        else if (msg.contains("MATCH")) handleMatchMessage(msg);
+        else if (msg.contains("YOURTURN")) handleYourTurnMessage();
+        else if (msg.contains("MOVE") && msg.contains("PLAYER:")) handleMoveMessage(msg);
     }
 
     private void handleMatchMessage(String msg) {
-        inGame = true;
         String playerToMove = ClientTicTacToe.extractField(msg, "PLAYERTOMOVE");
         String opponent = ClientTicTacToe.extractField(msg, "OPPONENT");
         boolean starterIsLocal = !playerToMove.isEmpty() && !localPlayerName.isEmpty() &&
@@ -85,8 +66,6 @@ public class TicTacToeGame extends JPanel {
             playerRole = starterIsLocal ? 'X' : 'O';
             aiRole = playerRole;
             turnX = true;
-
-            System.out.println("[DEBUG MATCH] Match started! Role: " + playerRole + ", Start: " + starterIsLocal + ", Opponent: " + opponentName);
             updateStatusLabel();
             updateButtonStates(starterIsLocal);
 
@@ -99,12 +78,9 @@ public class TicTacToeGame extends JPanel {
 
     private void handleYourTurnMessage() {
         SwingUtilities.invokeLater(() -> {
-            int moveCount = countMoves();
-            turnX = (moveCount % 2 == 0);
-            System.out.println("[DEBUG YOURTURN] Received. Moves: " + moveCount + ", turnX: " + turnX + ", role: " + playerRole);
+            turnX = (countMoves() % 2 == 0);
             updateStatusLabel();
             updateButtonStates(true);
-
             if (gameMode == GameMode.TOURNAMENT && !aiBusy) {
                 aiTurnPending = true;
                 doAiMoveServer();
@@ -113,66 +89,25 @@ public class TicTacToeGame extends JPanel {
     }
 
     private void handleMoveMessage(String msg) {
-        System.out.println("[DEBUG MOVE] ========== PROCESSING MOVE MESSAGE ==========");
         String playerName = ClientTicTacToe.extractPlayerName(msg);
         int movePos = ClientTicTacToe.extractMovePosition(msg);
         String ourName = gameMode.isServerMode() ? localPlayerName : (playerRole == 'X' ? player1 : player2);
 
-        System.out.println("[DEBUG MOVE] Position: " + movePos);
-        System.out.println("[DEBUG MOVE] Player: '" + playerName + "'");
-        System.out.println("[DEBUG MOVE] Our name: '" + ourName + "'");
-        System.out.println("[DEBUG MOVE] Our role: " + playerRole);
-        System.out.println("[DEBUG MOVE] UI null? " + (ui == null));
-        System.out.println("[DEBUG MOVE] Game null? " + (game == null));
-
-        if (movePos == -1) {
-            System.err.println("[DEBUG MOVE] Invalid position!");
-            return;
-        }
+        if (movePos == -1) return;
 
         if (isOurMove(playerName, ourName)) {
-            System.out.println("[DEBUG MOVE] >>> Our move - ignoring (already applied locally)");
             aiBusy = false;
             aiTurnPending = false;
         } else {
-            System.out.println("[DEBUG MOVE] >>> Opponent move - WILL APPLY TO BOARD");
             char opponentSymbol = (playerRole == 'X') ? 'O' : 'X';
-            System.out.println("[DEBUG MOVE] Opponent symbol: " + opponentSymbol);
-
             SwingUtilities.invokeLater(() -> {
-                System.out.println("[DEBUG MOVE] Inside SwingUtilities.invokeLater");
-                System.out.println("[DEBUG MOVE] Position " + movePos + " is free: " + game.isFree(movePos));
-
-                if (!game.isFree(movePos)) {
-                    System.err.println("[DEBUG MOVE] ERROR: Position not free!");
-                    System.err.println("[DEBUG MOVE] Current symbol at position: " + game.getSymbolAt(movePos));
-                    return;
-                }
-
-                System.out.println("[DEBUG MOVE] Applying move to game state...");
+                if (!game.isFree(movePos)) return;
                 game.doMove(movePos, opponentSymbol);
-
-                System.out.println("[DEBUG MOVE] Updating UI button text...");
-                if (ui != null) {
-                    ui.updateButtonText(movePos, opponentSymbol);
-                    System.out.println("[DEBUG MOVE] UI updated successfully");
-                } else {
-                    System.err.println("[DEBUG MOVE] ERROR: UI is null!");
-                }
-
+                gameUI.updateButtonText(movePos, opponentSymbol);
                 turnX = (countMoves() % 2 == 0);
-                System.out.println("[DEBUG MOVE] Move count: " + countMoves() + ", turnX: " + turnX);
                 updateStatusLabel();
-
-                if (game.isGameOver()) {
-                    System.out.println("[DEBUG MOVE] Game is over!");
-                    updateGameEndStatus();
-                } else {
-                    System.out.println("[DEBUG MOVE] Enabling buttons for our turn...");
-                    updateButtonStates(true);
-                }
-
-                System.out.println("[DEBUG MOVE] ========== MOVE PROCESSING COMPLETE ==========");
+                if (game.isGameOver()) updateGameEndStatus();
+                else updateButtonStates(true);
             });
         }
     }
@@ -189,12 +124,10 @@ public class TicTacToeGame extends JPanel {
             playerRole = aiIsX ? 'O' : 'X';
         }
 
-        // Create UI component
-        ui = new TicTacToeUI(game);
+        gameUI = new TicTacToeUI(game);
         setLayout(new BorderLayout());
-        add(ui, BorderLayout.CENTER);
+        add(gameUI, BorderLayout.CENTER);
         setPreferredSize(new Dimension(500, 600));
-
     }
 
     public void start() {
@@ -203,36 +136,20 @@ public class TicTacToeGame extends JPanel {
             return;
         }
 
-        System.out.println("[DEBUG START] ========== STARTING TOURNAMENT MODE ==========");
-
-        // CRITICAL: Initialize UI FIRST so it's ready when server messages arrive
         initializeGame();
-        System.out.println("[DEBUG START] UI initialized");
-
         client = new ClientTicTacToe();
-
-        // CRITICAL: Set message handler BEFORE connecting so AbstractClient's listener can use it
         client.setMessageHandler(this::handleServerMessage);
-        System.out.println("[DEBUG START] Message handler set");
 
         if (!client.connectToServer()) {
-            JOptionPane.showMessageDialog(null,
-                    "Failed to connect to server",
-                    "Connection Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Failed to connect to server", "Connection Error", JOptionPane.ERROR_MESSAGE);
             menuManager.onTicTacToeGameFinished();
             return;
         }
 
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ignored) {
-        }
+        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
 
-        String playerName = determinePlayerName();
-        localPlayerName = playerName;
-        System.out.println("[DEBUG START] Logging in as: " + playerName);
-        client.login(playerName);
+        localPlayerName = determinePlayerName();
+        client.login(localPlayerName);
 
         if (!waitForLogin()) {
             JOptionPane.showMessageDialog(null, "Login failed", "Error", JOptionPane.ERROR_MESSAGE);
@@ -241,8 +158,6 @@ public class TicTacToeGame extends JPanel {
             return;
         }
 
-        System.out.println("[DEBUG START] Login successful!");
-        System.out.println("[DEBUG START] Requesting match...");
         client.requestMatch();
     }
 
@@ -264,53 +179,28 @@ public class TicTacToeGame extends JPanel {
         turnX = true;
         gameDone = false;
         game.reset();
-
-        // Initialize UI with button listeners
-        boolean enableButtons = gameMode != GameMode.TOURNAMENT;
-        ui.initializeUI(enableButtons);
-
-        // Set up button click listener
-        ui.setButtonClickListener(this::handleButtonClick);
-
-        // Set up menu button listener
-        ui.setMenuButtonListener(this::returnToMenu);
-
+        gameUI.initializeUI(gameMode != GameMode.TOURNAMENT);
+        gameUI.setButtonClickListener(this::handleButtonClick);
+        gameUI.setMenuButtonListener(this::returnToMenu);
         updateStatusLabel();
-
         if (gameMode == GameMode.PVA && !isPlayersTurn()) doAiMove();
     }
-
 
     private void handleButtonClick(int pos) {
         if (game.isGameOver() || !game.isFree(pos)) return;
         if (gameMode == GameMode.PVA && !isPlayersTurn()) return;
         if (gameMode == GameMode.TOURNAMENT) return;
 
-        // Validate turn for server modes
         if (gameMode.isServerMode()) {
-            if (!ui.isButtonEnabled(pos)) {
-                System.out.println("[DEBUG CLICK] Button not enabled!");
-                return;
-            }
-            int moveCount = countMoves();
-            char expectedTurn = (moveCount % 2 == 0) ? 'X' : 'O';
-            if (expectedTurn != playerRole) {
-                System.out.println("[DEBUG CLICK] Not our turn! Expected: " + expectedTurn + ", Role: " + playerRole);
-                return;
-            }
+            if (!gameUI.isButtonEnabled(pos)) return;
+            if ((countMoves() % 2 == 0 ? 'X' : 'O') != playerRole) return;
         }
 
         char currentPlayer = turnX ? 'X' : 'O';
+        if (client != null && client.isConnected()) client.sendMove(pos);
 
-        if (client != null && client.isConnected()) {
-            System.out.println("[DEBUG CLICK] Sending move " + pos + " (" + currentPlayer + ")");
-            client.sendMove(pos);
-        }
-
-        // Apply move locally
         game.doMove(pos, currentPlayer);
-        ui.updateButtonText(pos, currentPlayer);
-
+        gameUI.updateButtonText(pos, currentPlayer);
         if (gameMode.isServerMode()) updateButtonStates(false);
 
         if (game.isGameOver()) {
@@ -320,10 +210,7 @@ public class TicTacToeGame extends JPanel {
 
         turnX = (currentPlayer == 'O');
         updateStatusLabel();
-
-        if (gameMode == GameMode.PVA && !isPlayersTurn() && !game.isGameOver()) {
-            doAiMove();
-        }
+        if (gameMode == GameMode.PVA && !isPlayersTurn() && !game.isGameOver()) doAiMove();
     }
 
 
@@ -343,7 +230,7 @@ public class TicTacToeGame extends JPanel {
 
             if (move != -1 && game.isFree(move)) {
                 game.doMove(move, aiRole);
-                ui.updateButtonText(move, aiRole);
+                gameUI.updateButtonText(move, aiRole);
             }
 
             if (game.isGameOver()) {
@@ -396,7 +283,7 @@ public class TicTacToeGame extends JPanel {
                 }
 
                 game.doMove(move, aiRole);
-                ui.updateButtonText(move, aiRole);
+                gameUI.updateButtonText(move, aiRole);
 
                 if (game.isGameOver()) {
                     updateGameEndStatus();
@@ -413,34 +300,27 @@ public class TicTacToeGame extends JPanel {
 
     private void updateGameEndStatus() {
         gameDone = true;
-        String message = "";
         switch (game.getStatus()) {
             case X_WINS:
-                String xWinner = getNameBySymbol('X');
-                message = lang.get("tictactoe.game.win", xWinner + " (X)");
+                gameUI.updateGameEndStatus(lang.get("tictactoe.game.win", getNameBySymbol('X') + " (X)"));
                 break;
             case O_WINS:
-                String oWinner = getNameBySymbol('O');
-                message = lang.get("tictactoe.game.win", oWinner + " (O)");
+                gameUI.updateGameEndStatus(lang.get("tictactoe.game.win", getNameBySymbol('O') + " (O)"));
                 break;
             case DRAW:
-                message = lang.get("tictactoe.game.draw");
-                break;
-            default:
+                gameUI.updateGameEndStatus(lang.get("tictactoe.game.draw"));
                 break;
         }
-        ui.updateGameEndStatus(message);
     }
 
     private boolean isPlayersTurn() {
         return (turnX ? 'X' : 'O') == playerRole;
     }
 
-
     private String getNameBySymbol(char symbol) {
-        if (gameMode == GameMode.PVP) return (symbol == 'X') ? player1 : player2;
-        if (gameMode == GameMode.PVA) return (symbol == playerRole) ? ((playerRole == 'X') ? player1 : player2) : "AI";
-        if (gameMode.isServerMode()) return (symbol == playerRole) ? (localPlayerName != null ? localPlayerName : "") : (opponentName != null ? opponentName : "");
+        if (gameMode == GameMode.PVP) return symbol == 'X' ? player1 : player2;
+        if (gameMode == GameMode.PVA) return symbol == playerRole ? (playerRole == 'X' ? player1 : player2) : "AI";
+        if (gameMode.isServerMode()) return symbol == playerRole ? localPlayerName : opponentName;
         return "";
     }
 
@@ -448,16 +328,10 @@ public class TicTacToeGame extends JPanel {
         if (game.isGameOver()) return;
         char currentSymbol = turnX ? 'X' : 'O';
         String currentName = getNameBySymbol(currentSymbol);
-        String message;
-
-        // in gamemode Server of Tournament, laat een tijdelijk wacht bericht zien totdat we de naam van de tegenstander hebben ontvangen van de gameserver.
-        if (gameMode.isServerMode() && (opponentName == null || opponentName.isEmpty())) {
-            message = lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails"));
-        } else {
-            message = lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")");
-        }
-
-        ui.updateStatusLabel(message);
+        String message = gameMode.isServerMode() && opponentName.isEmpty()
+            ? lang.get("tictactoe.game.turn", lang.get("tictactoe.game.waitingfordetails"))
+            : lang.get("tictactoe.game.turn", currentName + " (" + currentSymbol + ")");
+        gameUI.updateStatusLabel(message);
     }
 
     private void returnToMenu() {
