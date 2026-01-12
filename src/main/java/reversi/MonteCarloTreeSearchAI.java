@@ -1,5 +1,7 @@
 package reversi;
 
+import framework.ai.AbstractReversiAI;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -8,7 +10,7 @@ import java.util.Random;
  * Monte Carlo Tree Search AI implementation for Reversi.
  * Uses MCTS algorithm to find the best move by simulating random games.
  */
-public class MonteCarloTreeSearchAI {
+public class MonteCarloTreeSearchAI extends AbstractReversiAI {
     private static final int SIMULATIONS = 1000; // Number of simulations per move
     private static final double EXPLORATION_CONSTANT = Math.sqrt(2);
     private static final Random random = new Random();
@@ -49,19 +51,19 @@ public class MonteCarloTreeSearchAI {
      * @return An array [row, col] representing the best move, or null if no move available
      */
     public static int[] bestMove(Reversi game, char aiPlayer) {
+        long startTime = System.currentTimeMillis();
+
         if (!game.hasValidMove(aiPlayer)) {
+            System.out.println("[MCTS AI] No valid moves available for player " + aiPlayer);
             return null;
         }
 
         MCTSNode root = new MCTSNode(-1, -1, aiPlayer, null);
 
         // Expand root with all valid moves
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                if (game.isValidMove(row, col, aiPlayer)) {
-                    root.children.add(new MCTSNode(row, col, aiPlayer, root));
-                }
-            }
+        List<int[]> validMoves = getValidMovesAsArrays(game, aiPlayer);
+        for (int[] move : validMoves) {
+            root.children.add(new MCTSNode(move[0], move[1], aiPlayer, root));
         }
 
         // Run simulations
@@ -90,6 +92,15 @@ public class MonteCarloTreeSearchAI {
         if (bestNode == null) {
             return null;
         }
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        // Log AI move information
+        System.out.println("=== MCTS AI MOVE ===");
+        System.out.println("  Simulations: " + SIMULATIONS);
+        System.out.println("  Time taken: " + duration + " ms");
+        System.out.println("====================");
 
         return new int[]{bestNode.row, bestNode.col};
     }
@@ -123,25 +134,19 @@ public class MonteCarloTreeSearchAI {
             game.doMove(node.row, node.col, node.player);
         }
 
-        char nextPlayer = (node.player == 'B') ? 'W' : 'B';
+        char nextPlayer = getOpponent(node.player);
 
         // Add all valid moves as children
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                if (game.isValidMove(row, col, nextPlayer)) {
-                    node.children.add(new MCTSNode(row, col, nextPlayer, node));
-                }
-            }
+        List<int[]> validMoves = getValidMovesAsArrays(game, nextPlayer);
+        for (int[] move : validMoves) {
+            node.children.add(new MCTSNode(move[0], move[1], nextPlayer, node));
         }
 
         // If no valid moves for next player, check if current player can move
         if (node.children.isEmpty() && game.hasValidMove(node.player)) {
-            for (int row = 0; row < 8; row++) {
-                for (int col = 0; col < 8; col++) {
-                    if (game.isValidMove(row, col, node.player)) {
-                        node.children.add(new MCTSNode(row, col, node.player, node));
-                    }
-                }
+            List<int[]> currentPlayerMoves = getValidMovesAsArrays(game, node.player);
+            for (int[] move : currentPlayerMoves) {
+                node.children.add(new MCTSNode(move[0], move[1], node.player, node));
             }
         }
 
@@ -161,40 +166,63 @@ public class MonteCarloTreeSearchAI {
             game.doMove(node.row, node.col, node.player);
         }
 
-        char currentPlayer = (node.player == 'B') ? 'W' : 'B';
+        char currentPlayer = getOpponent(node.player);
         int passCount = 0;
 
         // Play random moves until game ends
         while (!game.isWin('B') && !game.isWin('W') && !game.isDraw() && passCount < 2) {
-            List<int[]> validMoves = new ArrayList<>();
-
-            for (int row = 0; row < 8; row++) {
-                for (int col = 0; col < 8; col++) {
-                    if (game.isValidMove(row, col, currentPlayer)) {
-                        validMoves.add(new int[]{row, col});
-                    }
-                }
-            }
+            List<int[]> validMoves = getValidMovesAsArrays(game, currentPlayer);
 
             if (validMoves.isEmpty()) {
                 passCount++;
-                currentPlayer = (currentPlayer == 'B') ? 'W' : 'B';
+                currentPlayer = getOpponent(currentPlayer);
                 continue;
             }
 
             passCount = 0;
             int[] move = validMoves.get(random.nextInt(validMoves.size()));
             game.doMove(move[0], move[1], currentPlayer);
-            currentPlayer = (currentPlayer == 'B') ? 'W' : 'B';
+            currentPlayer = getOpponent(currentPlayer);
         }
 
-        // Determine result
+        // Determine result using stability-aware evaluation
+        return evaluateSimulationResult(game, aiPlayer);
+    }
+
+    /**
+     * Evaluates the simulation result considering stability and piece count.
+     * Uses getStabilityScore from AbstractReversiAI for a more nuanced evaluation.
+     *
+     * @param game The final game state
+     * @param aiPlayer The AI player symbol
+     * @return 1 if AI wins, 0 if draw, -1 if AI loses
+     */
+    private static int evaluateSimulationResult(Reversi game, char aiPlayer) {
+        char opponent = getOpponent(aiPlayer);
+
+        // First check for clear win/loss/draw
         if (game.isWin(aiPlayer)) {
             return 1;
+        } else if (game.isWin(opponent)) {
+            return -1;
         } else if (game.isDraw()) {
             return 0;
-        } else {
+        }
+
+        // If game ended due to no valid moves, use piece count and stability
+        int aiCount = game.count(aiPlayer);
+        int opponentCount = game.count(opponent);
+        int stabilityScore = getStabilityScore(game, aiPlayer, opponent);
+
+        // Combine piece count advantage with stability advantage
+        int totalAdvantage = (aiCount - opponentCount) + (stabilityScore / 2);
+
+        if (totalAdvantage > 0) {
+            return 1;
+        } else if (totalAdvantage < 0) {
             return -1;
+        } else {
+            return 0;
         }
     }
 
@@ -222,18 +250,5 @@ public class MonteCarloTreeSearchAI {
         }
         return game.isWin('B') || game.isWin('W') || game.isDraw() ||
                (!game.hasValidMove('B') && !game.hasValidMove('W'));
-    }
-
-    /**
-     * Creates a deep copy of the game state
-     */
-    private static Reversi copyGame(Reversi original) {
-        Reversi copy = new Reversi();
-        for (int i = 0; i < 64; i++) {
-            int row = i / 8;
-            int col = i % 8;
-            copy.board[i] = original.getSymbolAt(row, col);
-        }
-        return copy;
     }
 }

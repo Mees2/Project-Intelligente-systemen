@@ -1,6 +1,8 @@
 package tictactoe;
 
 import framework.boardgame.AbstractBoardGame;
+import framework.boardgame.Move;
+import framework.boardgame.Position;
 
 /**
  * TicTacToe spellogica klasse
@@ -15,6 +17,24 @@ public class TicTacToe extends AbstractBoardGame {
      */
     public TicTacToe() {
         super(3, 3, ' '); // 3x3 bord, spatie voor leeg vakje
+    }
+
+    /**
+     * Voer een zet uit met behulp van het Move-object
+     * @param move Het Move-object dat de zet vertegenwoordigt
+     */
+    @Override
+    public void doMove(Move move) {
+        doMove(move.getIndex(), move.getPlayer());
+    }
+
+    /**
+     * Voer een zet uit met behulp van het Position-object
+     * @param pos Het Position-object dat de positie op het bord vertegenwoordigt
+     * @param player De speler die de zet doet ('X' of 'O')
+     */
+    public void doMove(Position pos, char player) {
+        doMove(pos.getIndex(), player);
     }
 
     /**

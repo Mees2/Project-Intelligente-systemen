@@ -101,6 +101,24 @@ public abstract class AbstractNameSelection extends AbstractRoundedButton {
         centerPanel.add(Box.createVerticalStrut(10));
     }
 
+    protected void createAIPlayer2Field() {
+        player2Label = new JLabel(lang.get("reversi.name.ai"));
+        player2Label.setForeground(theme.getFontColor2());
+        player2Label.setAlignmentX(CENTER_ALIGNMENT);
+
+        textField2 = new JTextField("AI");
+        textField2.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        textField2.setMaximumSize(new Dimension(500, 40));
+        textField2.setAlignmentX(CENTER_ALIGNMENT);
+        textField2.setBackground(theme.getTextFieldColor());
+        textField2.setEditable(false);
+
+        centerPanel.add(player2Label);
+        centerPanel.add(Box.createVerticalStrut(3));
+        centerPanel.add(textField2);
+        centerPanel.add(Box.createVerticalStrut(10));
+    }
+
     protected void createRoleSelection() {
         Color bodyTextColor = new Color(0x2B6F6E);
 
