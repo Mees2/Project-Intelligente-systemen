@@ -180,10 +180,22 @@ public final class MenuManager {
         mainFrame.showPanel(TICTACTOE_MENU);
     }
 
-    public void startReversiGame(String mode, String player1, String player2) {
-        framework.gui.menu.reversi.ReversiGame game =
-            new framework.gui.menu.reversi.ReversiGame(this, mode, player1, player2);
-        game.start();
+    public void startReversiGame(String mode, String player1, String player2, char playerColor) {
+        String panelKey = "REVERSI_GAME_" + mode;
+
+        framework.gui.menu.reversi.ReversiGame gamePanel =
+            new framework.gui.menu.reversi.ReversiGame(this, mode, player1, player2, playerColor);
+
+        gamePanel.start();
+
+        panels.put(panelKey, gamePanel);
+        mainFrame.addPanel(panelKey, gamePanel);
+        mainFrame.showPanel(panelKey);
+
+        gamePanel.revalidate();
+        gamePanel.repaint();
+        mainFrame.revalidate();
+        mainFrame.repaint();
     }
 
     public void returnToMainMenuFromSettings() {

@@ -134,7 +134,8 @@ public class ReversiNameSelection extends AbstractNameSelection {
                             lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                menuManager.startReversiGame("PVP", player1Name, player2Name);
+                // In PVP, player1 is always black, player2 is always white
+                menuManager.startReversiGame("PVP", player1Name, player2Name, 'B');
             }
             case AI -> {
                 if (!xButton.isSelected() && !oButton.isSelected()) {
@@ -146,13 +147,9 @@ public class ReversiNameSelection extends AbstractNameSelection {
                 String aiName = getAIName();
                 String aiModeString = aiType.name();  // "MCTS", etc.
                 
-                // If player selected Black (xButton), they are player1, AI is player2
-                // If player selected White (oButton), AI is player1, player is player2
-                if (xButton.isSelected()) {
-                    menuManager.startReversiGame(aiModeString, player1Name, aiName);
-                } else {
-                    menuManager.startReversiGame(aiModeString, aiName, player1Name);
-                }
+                // Pass the selected color to the game
+                char selectedColor = xButton.isSelected() ? 'B' : 'W';
+                menuManager.startReversiGame(aiModeString, player1Name, aiName, selectedColor);
             }
         }
     }

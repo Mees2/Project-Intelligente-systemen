@@ -2,27 +2,20 @@ package framework.gui.menu.tictactoe;
 
 import java.awt.*;
 import javax.swing.*;
-import java.awt.event.*;
 import framework.controllers.LanguageManager;
 import framework.controllers.ThemeManager;
-import framework.gui.AbstractRoundedButton;
+import framework.gui.AbstractGameUI;
 import tictactoe.TicTacToe;
 
 /**
  * UI component for TicTacToe game - handles all visual elements and rendering
  */
-public class TicTacToeUI extends AbstractRoundedButton {
-    private final LanguageManager lang = LanguageManager.getInstance();
-    private final ThemeManager theme = ThemeManager.getInstance();
-
-    private JLabel statusLabel;
-    private JButton menuButton;
-    private SquareBoardPanel boardPanel;
+public class TicTacToeUI extends AbstractGameUI {
+    private SquareBoardPanel squareBoardPanel;
     private final TicTacToe game;
 
     // Callback for button clicks
     private ButtonClickListener buttonClickListener;
-    private Runnable menuButtonListener;
 
     public interface ButtonClickListener {
         void onButtonClick(int position);
@@ -30,7 +23,6 @@ public class TicTacToeUI extends AbstractRoundedButton {
 
     public TicTacToeUI(TicTacToe game) {
         this.game = game;
-        theme.addThemeChangeListener(this::updateTheme);
         setPreferredSize(new Dimension(500, 600));
     }
 
@@ -38,75 +30,46 @@ public class TicTacToeUI extends AbstractRoundedButton {
      * Initialize all UI components
      */
     public void initializeUI(boolean enableButtons) {
-        setLayout(new BorderLayout());
-        setBackground(ThemeManager.getInstance().getBackgroundColor());
-
-        // Status label
-        statusLabel = new JLabel("", JLabel.CENTER);
-        statusLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
-        statusLabel.setForeground(ThemeManager.getInstance().getFontColor1());
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-        add(statusLabel, BorderLayout.NORTH);
+        // Initialize common components
+        initializeCommonUI("tictactoe.game.menu", new Dimension(320, 45));
 
         // Board panel
-        boardPanel = new SquareBoardPanel(enableButtons);
-        boardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
-        add(boardPanel, BorderLayout.CENTER);
+        squareBoardPanel = new SquareBoardPanel(enableButtons);
+        squareBoardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
+        boardPanel = squareBoardPanel;
+        add(squareBoardPanel, BorderLayout.CENTER);
 
-        // Menu button
-        menuButton = createRoundedButton(lang.get("tictactoe.game.menu"),
-                new Color(184, 107, 214), new Color(204, 127, 234), new Color(120, 60, 150), true);
-        menuButton.setFont(new Font("SansSerif", Font.BOLD, 18));
-        menuButton.setPreferredSize(new Dimension(320, 45));
-        menuButton.addActionListener(e -> {
-            if (menuButtonListener != null) menuButtonListener.run();
-        });
+        // Setup responsive font sizing (ratio: 25)
+        setupResponsiveFontSizing(25);
+    }
 
+    @Override
+    protected JPanel createSouthPanel() {
         JPanel southPanel = new JPanel();
         southPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         southPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 20));
-        southPanel.add(menuButton);
-        add(southPanel, BorderLayout.SOUTH);
-
-        // Responsive font sizing
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                statusLabel.setFont(statusLabel.getFont().deriveFont((float) Math.max(18, getHeight() / 25)));
-            }
-        });
-    }
-
-    /**
-     * Update status label text
-     */
-    public void updateStatusLabel(String text) {
-        if (statusLabel != null) {
-            statusLabel.setText(text);
-        }
+        return southPanel;
     }
 
     /**
      * Update game end status display
      */
     public void updateGameEndStatus(String message) {
-        if (statusLabel != null) {
-            statusLabel.setText(message);
-        }
+        updateStatusLabel(message);
     }
 
     /**
      * Enable or disable board buttons
      */
     public void updateButtonStates(boolean enable) {
-        if (boardPanel == null || boardPanel.getButtons() == null) {
+        if (squareBoardPanel == null || squareBoardPanel.getButtons() == null) {
             System.err.println("[DEBUG] updateButtonStates called but boardPanel is null!");
             return;
         }
 
         System.out.println("[DEBUG] updateButtonStates called with enable=" + enable);
-        for (JButton btn : boardPanel.getButtons()) {
-            int index = java.util.Arrays.asList(boardPanel.getButtons()).indexOf(btn);
+        for (JButton btn : squareBoardPanel.getButtons()) {
+            int index = java.util.Arrays.asList(squareBoardPanel.getButtons()).indexOf(btn);
             boolean shouldEnable = enable && game.isFree(index) && !game.isGameOver();
             btn.setEnabled(shouldEnable);
             System.out.println("[DEBUG] Button " + index + " set to: " + shouldEnable + " (free=" + game.isFree(index) + ", gameOver=" + game.isGameOver() + ")");
@@ -117,8 +80,8 @@ public class TicTacToeUI extends AbstractRoundedButton {
      * Update button text at position
      */
     public void updateButtonText(int position, char symbol) {
-        if (boardPanel != null && boardPanel.getButtons() != null) {
-            JButton button = boardPanel.getButtons()[position];
+        if (squareBoardPanel != null && squareBoardPanel.getButtons() != null) {
+            JButton button = squareBoardPanel.getButtons()[position];
             button.setText(String.valueOf(symbol));
             button.repaint();
         }
@@ -127,24 +90,12 @@ public class TicTacToeUI extends AbstractRoundedButton {
     /**
      * Update theme colors
      */
+    @Override
     public void updateTheme() {
-        setBackground(theme.getBackgroundColor());
-        if (statusLabel != null) {
-            statusLabel.setForeground(theme.getFontColor1());
-        }
-        if (boardPanel != null) {
-            boardPanel.setBackground(theme.getBackgroundColor());
-        }
+        updateCommonTheme();
 
-        if (menuButton != null) {
-            menuButton.putClientProperty("baseColor", theme.getMainButtonColor());
-            menuButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
-            menuButton.putClientProperty("borderColor", theme.getMainButtonColor().darker());
-            menuButton.repaint();
-        }
-
-        if (boardPanel != null && boardPanel.getButtons() != null) {
-            for (JButton btn : boardPanel.getButtons()) {
+        if (squareBoardPanel != null && squareBoardPanel.getButtons() != null) {
+            for (JButton btn : squareBoardPanel.getButtons()) {
                 btn.putClientProperty("baseColor", theme.getTitleColor());
                 btn.putClientProperty("hoverColor", theme.getTitleColor());
                 btn.putClientProperty("borderColor", new Color(120, 60, 150));
@@ -159,8 +110,8 @@ public class TicTacToeUI extends AbstractRoundedButton {
      * Check if a button is enabled
      */
     public boolean isButtonEnabled(int position) {
-        if (boardPanel != null && boardPanel.getButtons() != null) {
-            return boardPanel.getButtons()[position].isEnabled();
+        if (squareBoardPanel != null && squareBoardPanel.getButtons() != null) {
+            return squareBoardPanel.getButtons()[position].isEnabled();
         }
         return false;
     }
@@ -173,17 +124,10 @@ public class TicTacToeUI extends AbstractRoundedButton {
     }
 
     /**
-     * Set menu button listener
-     */
-    public void setMenuButtonListener(Runnable listener) {
-        this.menuButtonListener = listener;
-    }
-
-    /**
      * Get board buttons array
      */
     public JButton[] getButtons() {
-        return boardPanel != null ? boardPanel.getButtons() : null;
+        return squareBoardPanel != null ? squareBoardPanel.getButtons() : null;
     }
 
     /**
@@ -248,4 +192,3 @@ public class TicTacToeUI extends AbstractRoundedButton {
         }
     }
 }
-

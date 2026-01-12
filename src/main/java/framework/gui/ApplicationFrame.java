@@ -27,6 +27,21 @@ public class ApplicationFrame extends JFrame {
     }
 
     public void showPanel(String name) {
+        // Resize frame for specific game panels
+        if (name != null && name.startsWith("REVERSI_GAME_")) {
+            setSize(700, 800);
+            setLocationRelativeTo(null);
+        } else if (name != null && name.startsWith("TICTACTOE_GAME_")) {
+            setSize(500, 600);
+            setLocationRelativeTo(null);
+        } else {
+            // Default size for menus
+            setSize(700, 450);
+            setLocationRelativeTo(null);
+        }
+
         cardLayout.show(contentPanel, name);
+        revalidate();
+        repaint();
     }
 }
