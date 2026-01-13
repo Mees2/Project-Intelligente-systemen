@@ -91,8 +91,8 @@ public class ReversiNameSelection extends AbstractNameSelection {
         roleLabel.setForeground(theme.getFontColor2());
         roleLabel.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
 
-        xButton = new JRadioButton(lang.get("reversi.name.black")); // Black
-        oButton = new JRadioButton(lang.get("reversi.name.white")); // White
+        xButton = new JRadioButton(lang.get("reversi.name.black"));
+        oButton = new JRadioButton(lang.get("reversi.name.white"));
 
         ButtonGroup roleGroup = new ButtonGroup();
         roleGroup.add(xButton);
@@ -156,7 +156,6 @@ public class ReversiNameSelection extends AbstractNameSelection {
         return switch (aiType) {
             case MCTS -> "MCTS AI";
             case MINIMAX -> "Minimax AI";
-            // Add more AI types here
         };
     }
 

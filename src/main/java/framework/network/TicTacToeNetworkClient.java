@@ -96,7 +96,6 @@ public class TicTacToeNetworkClient {
         try {
             String s = extractField(msg, fieldName);
             if (s == null || s.isEmpty()) {
-                // fallback: find numbers after field
                 int idx = msg.indexOf(fieldName + ":");
                 if (idx == -1) idx = msg.indexOf(fieldName.toUpperCase() + ":");
                 if (idx == -1) return -1;
