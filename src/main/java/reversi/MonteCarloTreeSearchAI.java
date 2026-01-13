@@ -11,9 +11,25 @@ import java.util.Random;
  * Uses MCTS algorithm to find the best move by simulating random games.
  */
 public class MonteCarloTreeSearchAI extends AbstractReversiAI {
-    private static final int SIMULATIONS = 1000; // Number of simulations per move
+    private static final int DEFAULT_SIMULATIONS = 1000;
+    private int simulations = DEFAULT_SIMULATIONS; // Number of simulations per move
     private static final double EXPLORATION_CONSTANT = Math.sqrt(2);
     private static final Random random = new Random();
+
+    /**
+     * Set the number of simulations for MCTS
+     * @param sims Number of simulations (recommended: 100-100000)
+     */
+    public void setSimulations(int sims) {
+        this.simulations = Math.max(100, Math.min(sims, 100000)); // Clamp between 100-100000
+    }
+
+    /**
+     * Get current number of simulations
+     */
+    public int getSimulations() {
+        return simulations;
+    }
 
     /**
      * Represents a node in the Monte Carlo search tree
@@ -45,12 +61,20 @@ public class MonteCarloTreeSearchAI extends AbstractReversiAI {
     }
 
     /**
+     * Static wrapper for backwards compatibility - uses default simulations
+     */
+    public static int[] bestMove(Reversi game, char aiPlayer) {
+        MonteCarloTreeSearchAI ai = new MonteCarloTreeSearchAI();
+        return ai.findBestMove(game, aiPlayer);
+    }
+
+    /**
      * Finds the best move for the AI player using Monte Carlo Tree Search
      * @param game The current Reversi game
      * @param aiPlayer The AI player symbol ('B' or 'W')
      * @return An array [row, col] representing the best move, or null if no move available
      */
-    public static int[] bestMove(Reversi game, char aiPlayer) {
+    public int[] findBestMove(Reversi game, char aiPlayer) {
         long startTime = System.currentTimeMillis();
 
         if (!game.hasValidMove(aiPlayer)) {
@@ -67,7 +91,7 @@ public class MonteCarloTreeSearchAI extends AbstractReversiAI {
         }
 
         // Run simulations
-        for (int i = 0; i < SIMULATIONS; i++) {
+        for (int i = 0; i < simulations; i++) {
             Reversi gameCopy = copyGame(game);
             MCTSNode node = selectNode(root);
 
@@ -98,7 +122,7 @@ public class MonteCarloTreeSearchAI extends AbstractReversiAI {
 
         // Log AI move information
         System.out.println("=== MCTS AI MOVE ===");
-        System.out.println("  Simulations: " + SIMULATIONS);
+        System.out.println("  Simulations: " + simulations);
         System.out.println("  Time taken: " + duration + " ms");
         System.out.println("====================");
 

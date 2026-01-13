@@ -22,6 +22,10 @@ public class ReversiGameController {
     private final ReversiMinimax minimaxAI;
     private final MonteCarloTreeSearchAI mctsAI;
     private boolean useMCTS = false;
+    private String player1AIType = "Minimax"; // Default AI type for player 1
+    private String player2AIType = "Minimax"; // Default AI type for player 2
+    private int player1AIParam = 3; // Default depth/simulations for player 1
+    private int player2AIParam = 3; // Default depth/simulations for player 2
 
     /**
      * Listener interface voor UI updates
@@ -49,6 +53,38 @@ public class ReversiGameController {
 
     public void setUseMCTS(boolean use) {
         this.useMCTS = use;
+    }
+
+    /**
+     * Set AI type for player 1 (Black)
+     */
+    public void setPlayer1AI(String aiType) {
+        this.player1AIType = aiType;
+        this.player1AIParam = "MCTS".equalsIgnoreCase(aiType) ? 1000 : 3;
+    }
+
+    /**
+     * Set AI type and parameter for player 1 (Black)
+     */
+    public void setPlayer1AI(String aiType, int param) {
+        this.player1AIType = aiType;
+        this.player1AIParam = param;
+    }
+
+    /**
+     * Set AI type for player 2 (White)
+     */
+    public void setPlayer2AI(String aiType) {
+        this.player2AIType = aiType;
+        this.player2AIParam = "MCTS".equalsIgnoreCase(aiType) ? 1000 : 3;
+    }
+
+    /**
+     * Set AI type and parameter for player 2 (White)
+     */
+    public void setPlayer2AI(String aiType, int param) {
+        this.player2AIType = aiType;
+        this.player2AIParam = param;
     }
 
     /**
@@ -157,11 +193,20 @@ public class ReversiGameController {
             gameListener.onAIThinking(true);
         }
 
+        // Determine which AI to use based on current player
+        String aiType = (currentPlayer == player1) ? player1AIType : player2AIType;
+        int aiParam = (currentPlayer == player1) ? player1AIParam : player2AIParam;
+        boolean useCurrentMCTS = "MCTS".equalsIgnoreCase(aiType) || useMCTS;
+
         Position bestMove;
-        if (useMCTS) {
-            int[] moveArray = MonteCarloTreeSearchAI.bestMove(game, currentPlayer.getSymbol());
+        if (useCurrentMCTS) {
+            // Configure MCTS simulations
+            mctsAI.setSimulations(aiParam);
+            int[] moveArray = mctsAI.findBestMove(game, currentPlayer.getSymbol());
             bestMove = (moveArray == null) ? null : new Position(moveArray[0], moveArray[1], 8);
         } else {
+            // Configure Minimax depth
+            minimaxAI.setSearchDepth(aiParam);
             bestMove = minimaxAI.findBestMove(game, currentPlayer.getSymbol());
         }
 

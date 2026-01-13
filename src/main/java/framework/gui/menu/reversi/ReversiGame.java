@@ -37,7 +37,24 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
         MonteCarloTreeSearchAI mctsAI = new MonteCarloTreeSearchAI();
         AbstractPlayer p1, p2;
 
-        if ("PVA".equalsIgnoreCase(gameMode) || "MCTS".equalsIgnoreCase(gameMode) || "MINIMAX".equalsIgnoreCase(gameMode)) {
+        // Handle AI_VS_AI mode
+        if (gameMode.startsWith("AI_VS_AI:")) {
+            String[] parts = gameMode.split(":");
+            String blackAI = parts.length > 1 ? parts[1] : "Minimax";
+            String whiteAI = parts.length > 2 ? parts[2] : "Minimax";
+            int blackParam = parts.length > 3 ? Integer.parseInt(parts[3]) : 3;
+            int whiteParam = parts.length > 4 ? Integer.parseInt(parts[4]) : 3;
+
+            p1 = new AIPlayer(player1Name, 'B');
+            p2 = new AIPlayer(player2Name, 'W');
+
+            gameController = new ReversiGameController(game, p1, p2, minimaxAI, mctsAI);
+            // Set AI types and parameters for each player
+            gameController.setPlayer1AI(blackAI, blackParam);
+            gameController.setPlayer2AI(whiteAI, whiteParam);
+        }
+        // Handle Human vs AI modes
+        else if ("PVA".equalsIgnoreCase(gameMode) || "MCTS".equalsIgnoreCase(gameMode) || "MINIMAX".equalsIgnoreCase(gameMode)) {
             if (playerColor == 'B') {
                 p1 = new HumanPlayer(player1Name, 'B');
                 p2 = new AIPlayer(player2Name, 'W');
@@ -45,7 +62,11 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
                 p1 = new AIPlayer(player2Name, 'B');
                 p2 = new HumanPlayer(player1Name, 'W');
             }
-        } else {
+            gameController = new ReversiGameController(game, p1, p2, minimaxAI, mctsAI);
+            gameController.setUseMCTS("MCTS".equalsIgnoreCase(gameMode));
+        }
+        // Handle PVP mode
+        else {
             if (playerColor == 'B') {
                 p1 = new HumanPlayer(player1Name, 'B');
                 p2 = new HumanPlayer(player2Name, 'W');
@@ -53,10 +74,9 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
                 p1 = new HumanPlayer(player2Name, 'B');
                 p2 = new HumanPlayer(player1Name, 'W');
             }
+            gameController = new ReversiGameController(game, p1, p2, minimaxAI, mctsAI);
         }
 
-        gameController = new ReversiGameController(game, p1, p2, minimaxAI, mctsAI);
-        gameController.setUseMCTS("MCTS".equalsIgnoreCase(gameMode));
         gameController.setGameListener(this);
 
         ui = new ReversiUI(game);

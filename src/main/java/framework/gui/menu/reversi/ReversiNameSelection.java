@@ -13,7 +13,7 @@ import javax.swing.*;
 public class ReversiNameSelection extends AbstractNameSelection {
 
     public enum GameMode {
-        PVP, AI
+        PVP, AI, AI_VS_AI
     }
 
     public enum AIType {
@@ -80,6 +80,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
         return switch (gameMode) {
             case PVP -> "reversi.name.playername1";
             case AI -> "reversi.name.playername";
+            case AI_VS_AI -> "reversi.name.playername"; // Not used in AI_VS_AI mode
         };
     }
 
