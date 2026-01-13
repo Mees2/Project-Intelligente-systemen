@@ -16,14 +16,13 @@ public class ReversiNameSelection extends AbstractNameSelection {
         PVP, AI
     }
 
-    // AI types for different algorithms
     public enum AIType {
-        MCTS, // Monte Carlo Tree Search - add more AI types here in the future
-        MINIMAX // Example additional AI type
+        MCTS,
+        MINIMAX
     }
 
     private final GameMode gameMode;
-    private final AIType aiType;  // Only used when gameMode is AI
+    private final AIType aiType;
 
     /**
      * Creates a new ReversiNameSelection dialog for PVP mode.
@@ -134,7 +133,6 @@ public class ReversiNameSelection extends AbstractNameSelection {
                             lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                // In PVP, player1 is always black, player2 is always white
                 menuManager.startReversiGame("PVP", player1Name, player2Name, 'B');
             }
             case AI -> {
@@ -143,11 +141,8 @@ public class ReversiNameSelection extends AbstractNameSelection {
                             lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                // Get the AI name based on the AI type
                 String aiName = getAIName();
-                String aiModeString = aiType.name();  // "MCTS", etc.
-                
-                // Pass the selected color to the game
+                String aiModeString = aiType.name();
                 char selectedColor = xButton.isSelected() ? 'B' : 'W';
                 menuManager.startReversiGame(aiModeString, player1Name, aiName, selectedColor);
             }
@@ -175,7 +170,6 @@ public class ReversiNameSelection extends AbstractNameSelection {
         return switch (aiType) {
             case MCTS -> "reversi.name.title.mcts";
             case MINIMAX -> "reversi.name.title.minimax";
-            // Add more AI types here
         };
     }
 

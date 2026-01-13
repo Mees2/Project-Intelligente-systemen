@@ -20,8 +20,6 @@ public class TicTacToeGame extends JPanel {
     private final String player2;
     private volatile boolean aiTurnPending = false;
     private volatile boolean aiBusy = false;
-
-    // UI Component
     private TicTacToeUI gameUI;
 
     private final TicTacToe game = new TicTacToe();

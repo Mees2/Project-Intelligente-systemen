@@ -57,13 +57,11 @@ public class TicTacToeNetworkClient {
     private void handleLine(String line) {
         if (line == null) return;
         String upper = line.toUpperCase();
-        // Login acknowledgement (server sends OK on successful login)
         if (upper.contains("OK")) {
             if (listener != null) listener.onLogin();
             return;
         }
         if (upper.contains("MATCH")) {
-            // Extract fields PLAYERTOMOVE: and OPPONENT:
             String playerToMove = extractField(line, "PLAYERTOMOVE");
             String opponent = extractField(line, "OPPONENT");
             if (listener != null) listener.onMatch(playerToMove, opponent);

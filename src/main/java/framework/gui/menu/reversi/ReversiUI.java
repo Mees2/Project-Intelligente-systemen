@@ -15,8 +15,6 @@ public class ReversiUI extends AbstractGameUI {
     private JLabel scoreLabel;
     private ReversiBoardPanel reversiBoardPanel;
     private final Reversi game;
-
-    // Callback for button clicks
     private ButtonClickListener buttonClickListener;
 
     public interface ButtonClickListener {
@@ -32,10 +30,7 @@ public class ReversiUI extends AbstractGameUI {
      * Initialize all UI components
      */
     public void initializeUI() {
-        // Initialize common components
         initializeCommonUI("reversi.name.back", new Dimension(200, 40));
-
-        // Score panel (Reversi-specific)
         JPanel scorePanel = new JPanel();
         scorePanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         scoreLabel = new JLabel();
@@ -43,20 +38,17 @@ public class ReversiUI extends AbstractGameUI {
         scoreLabel.setForeground(ThemeManager.getInstance().getFontColor1());
         scorePanel.add(scoreLabel);
         add(scorePanel, BorderLayout.EAST);
-
-        // Board panel
         reversiBoardPanel = new ReversiBoardPanel();
         reversiBoardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         boardPanel = reversiBoardPanel;
         add(reversiBoardPanel, BorderLayout.CENTER);
 
-        // Setup responsive font sizing (ratio: 35 for status, custom for score)
+
         setupResponsiveFontSizing(35);
     }
 
     @Override
     protected void onComponentResized(int height) {
-        // Additional resize handling for score label
         if (scoreLabel != null) {
             scoreLabel.setFont(scoreLabel.getFont().deriveFont((float) Math.max(14, height / 45)));
         }
@@ -170,7 +162,6 @@ public class ReversiUI extends AbstractGameUI {
                         btn.setIcon(createDiscIcon(Color.WHITE));
                     } else if (!isAIThinking && isCurrentPlayerHuman
                             && game.isValidMove(row, col, currentPlayerSymbol)) {
-                        // HIGHLIGHT LEGAL MOVES
                         btn.setBackground(new Color(184, 107, 214, 180));
                         btn.setBorder(BorderFactory.createLineBorder(new Color(120, 60, 150), 3));
                     }

@@ -142,7 +142,7 @@ public class GameMenu extends AbstractRoundedButton {
         buttonPanel.add(pvpButton);
         buttonPanel.add(Box.createVerticalStrut(10));
 
-        // Player vs AI button
+
         // First AI button (MCTS)
         aiButtonMCTS= createRoundedButton(lang.get("reversi.menu.mcts"),
             theme.getButtonColor(), theme.getButtonColorHover(),
@@ -151,7 +151,7 @@ public class GameMenu extends AbstractRoundedButton {
         buttonPanel.add(aiButtonMCTS);
         buttonPanel.add(Box.createVerticalStrut(10));
 
-        // Second AI button (Minimax) - uses same PVA label but opens MINIMAX name selection
+        // Second AI button (Minimax)
         aiButtonMinimax = createRoundedButton(lang.get("reversi.menu.minimax"),
             theme.getButtonColor(), theme.getButtonColorHover(),
             theme.getButtonColor().darker(), true);
@@ -235,7 +235,6 @@ public class GameMenu extends AbstractRoundedButton {
         setBackground(theme.getBackgroundColor());
         titleLabel.setForeground(theme.getFontColor1());
 
-        // Update button colors
         pvpButton.putClientProperty("baseColor", theme.getButtonColor());
         pvpButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         pvpButton.putClientProperty("borderColor", theme.getButtonColor().darker());

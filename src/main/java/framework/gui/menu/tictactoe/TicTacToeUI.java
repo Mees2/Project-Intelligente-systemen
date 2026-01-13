@@ -13,8 +13,6 @@ import tictactoe.TicTacToe;
 public class TicTacToeUI extends AbstractGameUI {
     private SquareBoardPanel squareBoardPanel;
     private final TicTacToe game;
-
-    // Callback for button clicks
     private ButtonClickListener buttonClickListener;
 
     public interface ButtonClickListener {
@@ -30,16 +28,12 @@ public class TicTacToeUI extends AbstractGameUI {
      * Initialize all UI components
      */
     public void initializeUI(boolean enableButtons) {
-        // Initialize common components
         initializeCommonUI("tictactoe.game.menu", new Dimension(320, 45));
 
-        // Board panel
         squareBoardPanel = new SquareBoardPanel(enableButtons);
         squareBoardPanel.setBackground(ThemeManager.getInstance().getBackgroundColor());
         boardPanel = squareBoardPanel;
         add(squareBoardPanel, BorderLayout.CENTER);
-
-        // Setup responsive font sizing (ratio: 25)
         setupResponsiveFontSizing(25);
     }
 

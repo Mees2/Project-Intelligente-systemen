@@ -20,11 +20,7 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
     private final String player2Name;
     private final String gameMode;
     private final char playerColor;
-
-    // UI Component
     private ReversiUI ui;
-
-    // Game Controller
     private ReversiGameController gameController;
 
     public ReversiGame(MenuManager menuManager, String gameMode, String player1, String player2, char selectedColor) {
@@ -39,29 +35,21 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
         Reversi game = new Reversi();
         ReversiMinimax minimaxAI = new ReversiMinimax();
         MonteCarloTreeSearchAI mctsAI = new MonteCarloTreeSearchAI();
-
-        // Assign colors based on player selection
-        // In Reversi, Black ALWAYS moves first
         AbstractPlayer p1, p2;
 
         if ("PVA".equalsIgnoreCase(gameMode) || "MCTS".equalsIgnoreCase(gameMode) || "MINIMAX".equalsIgnoreCase(gameMode)) {
-            // Player vs AI
             if (playerColor == 'B') {
-                // Human is Black (goes first)
                 p1 = new HumanPlayer(player1Name, 'B');
                 p2 = new AIPlayer(player2Name, 'W');
             } else {
-                // AI is Black (goes first), Human is White
                 p1 = new AIPlayer(player2Name, 'B');
                 p2 = new HumanPlayer(player1Name, 'W');
             }
         } else {
-            // Player vs Player
             if (playerColor == 'B') {
                 p1 = new HumanPlayer(player1Name, 'B');
                 p2 = new HumanPlayer(player2Name, 'W');
             } else {
-                // player1 selected White, so player2 is Black and goes first
                 p1 = new HumanPlayer(player2Name, 'B');
                 p2 = new HumanPlayer(player1Name, 'W');
             }
@@ -71,7 +59,6 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
         gameController.setUseMCTS("MCTS".equalsIgnoreCase(gameMode));
         gameController.setGameListener(this);
 
-        // Create UI component
         ui = new ReversiUI(game);
         setLayout(new BorderLayout());
         add(ui, BorderLayout.CENTER);
@@ -81,21 +68,13 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
     }
 
     private void initializeGame() {
-        // Initialize UI with button listeners
         ui.initializeUI();
-
-        // Set up button click listener
         ui.setButtonClickListener(this::handleButtonClick);
-
-        // Set up menu button listener
         ui.setMenuButtonListener(this::returnToMenu);
-
-        // Initial UI update
         updateBoard();
         updateScoreLabel();
         updateStatusLabel();
 
-        // AI goes first if player1 (who has Black) is AI
         if (gameController.getPlayer1().isAI()) {
             gameController.makeAIMove();
         }
