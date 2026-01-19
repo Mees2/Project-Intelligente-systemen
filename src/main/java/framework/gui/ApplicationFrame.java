@@ -27,6 +27,7 @@ public class ApplicationFrame extends JFrame {
     }
 
     public void showPanel(String name) {
+        // Resize frame for specific game panels
         if (name != null && name.startsWith("REVERSI_GAME_")) {
             setSize(700, 800);
             setLocationRelativeTo(null);
@@ -34,6 +35,7 @@ public class ApplicationFrame extends JFrame {
             setSize(500, 600);
             setLocationRelativeTo(null);
         } else {
+            // Default size for menus
             setSize(700, 450);
             setLocationRelativeTo(null);
         }

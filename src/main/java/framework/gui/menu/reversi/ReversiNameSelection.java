@@ -8,12 +8,12 @@ import javax.swing.*;
 /**
  * A dialog window for entering player names in Reversi game modes.
  * This class creates and manages a form where players can enter their names
- * before starting a Reversi game. Supports PVP and AI modes (MCTS, and future AI types).
+ * before starting a Reversi game. Supports PVP, AI modes (MCTS, MINIMAX), SERVER, and TOURNAMENT.
  */
 public class ReversiNameSelection extends AbstractNameSelection {
 
     public enum GameMode {
-        PVP, AI
+        PVP, AI, SERVER, TOURNAMENT
     }
 
     public enum AIType {
@@ -25,10 +25,10 @@ public class ReversiNameSelection extends AbstractNameSelection {
     private final AIType aiType;
 
     /**
-     * Creates a new ReversiNameSelection dialog for PVP mode.
+     * Creates a new ReversiNameSelection dialog for PVP, SERVER, or TOURNAMENT mode.
      *
      * @param menuManager The MenuManager instance for handling navigation between menus
-     * @param gameMode The game mode (should be PVP)
+     * @param gameMode The game mode (PVP, SERVER, or TOURNAMENT)
      */
     public ReversiNameSelection(MenuManager menuManager, GameMode gameMode) {
         super(menuManager);
@@ -69,7 +69,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
         if (gameMode == GameMode.PVP) {
             createPlayer2Field();
         }
-        if (gameMode == GameMode.AI) {
+        if (gameMode == GameMode.AI || gameMode == GameMode.SERVER) {
             createReversiRoleSelection();
         }
         createButtons();
@@ -79,7 +79,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
     private String getPlayer1LabelKey() {
         return switch (gameMode) {
             case PVP -> "reversi.name.playername1";
-            case AI -> "reversi.name.playername";
+            case AI, SERVER, TOURNAMENT -> "reversi.name.playername";
         };
     }
 
@@ -146,6 +146,18 @@ public class ReversiNameSelection extends AbstractNameSelection {
                 char selectedColor = xButton.isSelected() ? 'B' : 'W';
                 menuManager.startReversiGame(aiModeString, player1Name, aiName, selectedColor);
             }
+            case SERVER -> {
+                if (!xButton.isSelected() && !oButton.isSelected()) {
+                    JOptionPane.showMessageDialog(this, lang.get("reversi.name.error.emptyrole"),
+                            lang.get("common.error"), JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                char selectedColor = xButton.isSelected() ? 'B' : 'W';
+                menuManager.startReversiGame("SERVER", player1Name, "Server Opponent", selectedColor);
+            }
+            case TOURNAMENT -> {
+                menuManager.startReversiGame("TOURNAMENT", player1Name, "AI", 'B');
+            }
         }
     }
 
@@ -166,6 +178,12 @@ public class ReversiNameSelection extends AbstractNameSelection {
         if (gameMode == GameMode.PVP) {
             return "reversi.name.title";
         }
+        if (gameMode == GameMode.SERVER) {
+            return "reversi.name.title.server";
+        }
+        if (gameMode == GameMode.TOURNAMENT) {
+            return "reversi.name.title.tournament";
+        }
         return switch (aiType) {
             case MCTS -> "reversi.name.title.mcts";
             case MINIMAX -> "reversi.name.title.minimax";
@@ -185,7 +203,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
         if (gameMode == GameMode.PVP && player2Label != null) {
             player2Label.setText(lang.get("reversi.name.playername2"));
         }
-        if (gameMode == GameMode.AI && roleLabel != null) {
+        if ((gameMode == GameMode.AI || gameMode == GameMode.SERVER) && roleLabel != null) {
             roleLabel.setText(lang.get("reversi.name.selectrole"));
             if (xButton != null) xButton.setText(lang.get("reversi.name.black"));
             if (oButton != null) oButton.setText(lang.get("reversi.name.white"));
@@ -201,7 +219,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
         centerPanel.setBackground(theme.getBackgroundColor());
         topPanel.setBackground(theme.getBackgroundColor());
 
-        if (gameMode == GameMode.AI) {
+        if (gameMode == GameMode.AI || gameMode == GameMode.SERVER) {
             if (xButton != null) {
                 xButton.setBackground(theme.getBackgroundColor());
                 xButton.setForeground(theme.getFontColor2());

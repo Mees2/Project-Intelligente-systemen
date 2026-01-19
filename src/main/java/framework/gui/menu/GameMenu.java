@@ -157,7 +157,23 @@ public class GameMenu extends AbstractRoundedButton {
             theme.getButtonColor().darker(), true);
         aiButtonMinimax.addActionListener(e -> menuManager.openReversiNameMINIMAX());
         buttonPanel.add(aiButtonMinimax);
-        buttonPanel.add(Box.createVerticalStrut(40));
+        buttonPanel.add(Box.createVerticalStrut(10));
+
+        // Server button
+        serverButton = createRoundedButton(lang.get("reversi.menu.server"),
+                theme.getButtonColor(), theme.getButtonColorHover(),
+                theme.getButtonColor().darker(), true);
+        serverButton.addActionListener(e -> menuManager.openReversiNameServer());
+        buttonPanel.add(serverButton);
+        buttonPanel.add(Box.createVerticalStrut(10));
+
+        // Tournament button
+        tournamentButton = createRoundedButton(lang.get("reversi.menu.tournament"),
+                theme.getButtonColor(), theme.getButtonColorHover(),
+                theme.getButtonColor().darker(), true);
+        tournamentButton.addActionListener(e -> menuManager.openReversiNameTournament());
+        buttonPanel.add(tournamentButton);
+        buttonPanel.add(Box.createVerticalStrut(30));
 
         // Back button
         backButton = createRoundedButton(lang.get("reversi.menu.back"),
@@ -222,11 +238,11 @@ public class GameMenu extends AbstractRoundedButton {
             }
             case REVERSI -> {
                 pvpButton.setText(lang.get("reversi.menu.pvp"));
-                backButton.setText(lang.get("reversi.menu.back"));
                 aiButtonMCTS.setText(lang.get("reversi.menu.mcts"));
                 aiButtonMinimax.setText(lang.get("reversi.menu.minimax"));
-
-
+                serverButton.setText(lang.get("reversi.menu.server"));
+                tournamentButton.setText(lang.get("reversi.menu.tournament"));
+                backButton.setText(lang.get("reversi.menu.back"));
             }
         }
     }
@@ -239,19 +255,10 @@ public class GameMenu extends AbstractRoundedButton {
         pvpButton.putClientProperty("hoverColor", theme.getButtonColorHover());
         pvpButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
-
         if (gameType == GameType.TICTACTOE) {
             pvaButton.putClientProperty("baseColor", theme.getButtonColor());
             pvaButton.putClientProperty("hoverColor", theme.getButtonColorHover());
             pvaButton.putClientProperty("borderColor", theme.getButtonColor().darker());
-
-            serverButton.putClientProperty("baseColor", theme.getButtonColor());
-            serverButton.putClientProperty("hoverColor", theme.getButtonColorHover());
-            serverButton.putClientProperty("borderColor", theme.getButtonColor().darker());
-
-            tournamentButton.putClientProperty("baseColor", theme.getButtonColor());
-            tournamentButton.putClientProperty("hoverColor", theme.getButtonColorHover());
-            tournamentButton.putClientProperty("borderColor", theme.getButtonColor().darker());
         }
 
         if (gameType == GameType.REVERSI) {
@@ -259,11 +266,19 @@ public class GameMenu extends AbstractRoundedButton {
             aiButtonMCTS.putClientProperty("hoverColor", theme.getButtonColorHover());
             aiButtonMCTS.putClientProperty("borderColor", theme.getButtonColor().darker());
 
-
             aiButtonMinimax.putClientProperty("baseColor", theme.getButtonColor());
             aiButtonMinimax.putClientProperty("hoverColor", theme.getButtonColorHover());
             aiButtonMinimax.putClientProperty("borderColor", theme.getButtonColor().darker());
         }
+
+        // Server and Tournament buttons exist for both game types
+        serverButton.putClientProperty("baseColor", theme.getButtonColor());
+        serverButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+        serverButton.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+        tournamentButton.putClientProperty("baseColor", theme.getButtonColor());
+        tournamentButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+        tournamentButton.putClientProperty("borderColor", theme.getButtonColor().darker());
 
         backButton.putClientProperty("baseColor", theme.getMainButtonColor());
         backButton.putClientProperty("hoverColor", theme.getMainButtonColorHover());
