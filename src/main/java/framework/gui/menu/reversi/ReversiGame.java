@@ -4,14 +4,17 @@ import reversi.*;
 import framework.controllers.MenuManager;
 import framework.controllers.LanguageManager;
 import framework.boardgame.Move;
+import framework.boardgame.Position;
 import framework.boardgame.GameResult;
 import framework.players.*;
+import server.ClientReversi;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * Reversi Game Controller - Manages game logic and UI coordination
+ * Supports PVP, AI, and TOURNAMENT modes
  */
 public class ReversiGame extends JPanel implements ReversiGameController.GameListener {
     private final MenuManager menuManager;
@@ -23,6 +26,19 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
     private ReversiUI ui;
     private ReversiGameController gameController;
 
+    // Tournament mode fields
+    private ClientReversi client;
+    private volatile boolean loggedIn = false;
+    private String localPlayerName = "";
+    private String opponentName = "";
+    private char aiRole = 'B';
+    private volatile boolean aiTurnPending = false;
+    private volatile boolean aiBusy = false;
+    private Reversi game;
+    private ReversiMinimax minimaxAI;
+    private MonteCarloTreeSearchAI mctsAI;
+    private boolean useMCTS = false;
+
     public ReversiGame(MenuManager menuManager, String gameMode, String player1, String player2, char selectedColor) {
         this.menuManager = menuManager;
         this.player1Name = player1;
@@ -31,10 +47,26 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
         this.playerColor = selectedColor;
     }
 
+    private boolean isTournamentMode() {
+        return gameMode != null && gameMode.startsWith("TOURNAMENT_");
+    }
+
     public void start() {
-        Reversi game = new Reversi();
-        ReversiMinimax minimaxAI = new ReversiMinimax();
-        MonteCarloTreeSearchAI mctsAI = new MonteCarloTreeSearchAI();
+        game = new Reversi();
+        minimaxAI = new ReversiMinimax();
+        mctsAI = new MonteCarloTreeSearchAI();
+
+        // Determine if using MCTS based on game mode
+        useMCTS = gameMode.contains("MCTS");
+
+        if (isTournamentMode()) {
+            startTournamentMode();
+        } else {
+            startRegularMode();
+        }
+    }
+
+    private void startRegularMode() {
         AbstractPlayer p1, p2;
 
         if ("PVA".equalsIgnoreCase(gameMode) || "MCTS".equalsIgnoreCase(gameMode) || "MINIMAX".equalsIgnoreCase(gameMode)) {
@@ -65,6 +97,236 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
         setPreferredSize(new Dimension(700, 800));
 
         initializeGame();
+    }
+
+    private void startTournamentMode() {
+        ui = new ReversiUI(game);
+        setLayout(new BorderLayout());
+        add(ui, BorderLayout.CENTER);
+        setPreferredSize(new Dimension(700, 800));
+
+        ui.initializeUI();
+        ui.setButtonClickListener((row, col) -> {}); // Disable manual clicks in tournament
+        ui.setMenuButtonListener(this::returnToMenu);
+        updateBoardTournament();
+        ui.updateStatusLabel("Connecting to server...");
+
+        // Connect to server
+        client = new ClientReversi();
+        client.setMessageHandler(this::handleServerMessage);
+
+        if (!client.connectToServer()) {
+            JOptionPane.showMessageDialog(null, "Failed to connect to server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+            menuManager.onReversiGameFinished();
+            return;
+        }
+
+        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+
+        localPlayerName = player1Name;
+        client.login(localPlayerName);
+
+        if (!waitForLogin()) {
+            JOptionPane.showMessageDialog(null, "Login failed", "Error", JOptionPane.ERROR_MESSAGE);
+            client.shutdown();
+            menuManager.onReversiGameFinished();
+            return;
+        }
+
+        ui.updateStatusLabel("Waiting for opponent...");
+        client.requestMatch();
+    }
+
+    private boolean waitForLogin() {
+        for (int attempts = 0; !loggedIn && attempts < 20; attempts++) {
+            try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+        }
+        return loggedIn;
+    }
+
+    private void handleServerMessage(String msg) {
+        if (msg.contains("OK")) {
+            loggedIn = true;
+        } else if (msg.contains("MATCH")) {
+            handleMatchMessage(msg);
+        } else if (msg.contains("YOURTURN")) {
+            handleYourTurnMessage();
+        } else if (msg.contains("MOVE") && msg.contains("PLAYER:")) {
+            handleMoveMessage(msg);
+        } else if (msg.contains("WIN") || msg.contains("LOSS") || msg.contains("DRAW")) {
+            handleGameEndMessage(msg);
+        }
+    }
+
+    private void handleMatchMessage(String msg) {
+        String playerToMove = ClientReversi.extractField(msg, "PLAYERTOMOVE");
+        String opponent = ClientReversi.extractField(msg, "OPPONENT");
+        boolean starterIsLocal = !playerToMove.isEmpty() && !localPlayerName.isEmpty() &&
+                                 (playerToMove.startsWith(localPlayerName) || localPlayerName.startsWith(playerToMove));
+
+        SwingUtilities.invokeLater(() -> {
+            opponentName = opponent;
+            // In Reversi, Black always goes first
+            aiRole = starterIsLocal ? 'B' : 'W';
+
+            ui.updateScoreLabel(starterIsLocal ? localPlayerName : opponentName, 2,
+                               starterIsLocal ? opponentName : localPlayerName, 2);
+            ui.updateStatusLabel("Game started! " + (starterIsLocal ? "Your turn" : opponentName + "'s turn"));
+            updateBoardTournament();
+
+            if (starterIsLocal && !aiBusy) {
+                aiTurnPending = true;
+                doAiMoveTournament();
+            }
+        });
+    }
+
+    private void handleYourTurnMessage() {
+        SwingUtilities.invokeLater(() -> {
+            ui.updateStatusLabel("Your turn");
+            updateBoardTournament();
+            if (!aiBusy) {
+                aiTurnPending = true;
+                doAiMoveTournament();
+            }
+        });
+    }
+
+    private void handleMoveMessage(String msg) {
+        String playerName = ClientReversi.extractPlayerName(msg);
+        int movePos = ClientReversi.extractMovePosition(msg);
+
+        if (movePos == -1) return;
+
+        boolean isOurMove = playerName.startsWith(localPlayerName) || localPlayerName.startsWith(playerName);
+
+        if (isOurMove) {
+            aiBusy = false;
+            aiTurnPending = false;
+        } else {
+            // Opponent's move - update the board
+            char opponentSymbol = (aiRole == 'B') ? 'W' : 'B';
+            int row = movePos / 8;
+            int col = movePos % 8;
+
+            SwingUtilities.invokeLater(() -> {
+                if (game.isValidMove(row, col, opponentSymbol)) {
+                    game.doMove(row, col, opponentSymbol);
+                    updateBoardTournament();
+                    updateScoreLabelTournament();
+                }
+            });
+        }
+    }
+
+    private void handleGameEndMessage(String msg) {
+        SwingUtilities.invokeLater(() -> {
+            aiBusy = false;
+            aiTurnPending = false;
+
+            String status;
+            if (msg.contains("WIN")) {
+                status = "You won!";
+            } else if (msg.contains("LOSS")) {
+                status = "You lost!";
+            } else {
+                status = "Draw!";
+            }
+            ui.updateStatusLabel(status);
+            updateBoardTournament();
+
+            // Reset for next game after a short delay
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000); // Show result for 2 seconds
+                } catch (InterruptedException ignored) {}
+                SwingUtilities.invokeLater(this::resetForNextGame);
+            }, "reversi-game-reset").start();
+        });
+    }
+
+    private void resetForNextGame() {
+        game = new Reversi();
+        ui.setGame(game);
+        aiBusy = false;
+        aiTurnPending = false;
+        opponentName = "";
+        aiRole = 'B';
+        updateBoardTournament();
+        ui.updateScoreLabel("Black", 2, "White", 2);
+        ui.updateStatusLabel("Waiting for next match...");
+    }
+
+    private void doAiMoveTournament() {
+        if (!isTournamentMode()) return;
+        if (game.isWin('B') || game.isWin('W') || game.isDraw()) return;
+        if (client == null || !client.isConnected()) return;
+        if (!aiTurnPending || aiBusy) return;
+
+        aiBusy = true;
+        aiTurnPending = false;
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000); // Wait 1 second before making move
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                aiBusy = false;
+                return;
+            }
+
+            // Check if AI has valid moves
+            if (!game.hasValidMove(aiRole)) {
+                aiBusy = false;
+                return;
+            }
+
+            // Get best move from AI
+            int[] bestMove;
+            if (useMCTS) {
+                bestMove = MonteCarloTreeSearchAI.bestMove(game, aiRole);
+            } else {
+                Position pos = minimaxAI.findBestMove(game, aiRole);
+                bestMove = (pos != null) ? new int[]{pos.getRow(), pos.getColumn()} : null;
+            }
+
+            if (bestMove == null) {
+                aiBusy = false;
+                return;
+            }
+
+            int row = bestMove[0];
+            int col = bestMove[1];
+            int position = row * 8 + col;
+
+            // Send move to server
+            client.sendMove(position);
+
+            SwingUtilities.invokeLater(() -> {
+                if (game.isValidMove(row, col, aiRole)) {
+                    game.doMove(row, col, aiRole);
+                    updateBoardTournament();
+                    updateScoreLabelTournament();
+                }
+                aiBusy = false;
+            });
+        }, "reversi-tournament-ai").start();
+    }
+
+    private void updateBoardTournament() {
+        if (ui != null && game != null) {
+            ui.updateBoard(aiRole, false, aiBusy);
+        }
+    }
+
+    private void updateScoreLabelTournament() {
+        if (ui != null && game != null) {
+            int blackScore = game.count('B');
+            int whiteScore = game.count('W');
+            String blackName = (aiRole == 'B') ? localPlayerName : opponentName;
+            String whiteName = (aiRole == 'W') ? localPlayerName : opponentName;
+            ui.updateScoreLabel(blackName, blackScore, whiteName, whiteScore);
+        }
     }
 
     private void initializeGame() {
@@ -152,6 +414,14 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
                 "Confirm",
                 JOptionPane.YES_NO_OPTION);
         if (option == JOptionPane.YES_OPTION) {
+            if (isTournamentMode() && client != null) {
+                try {
+                    client.quit();
+                } catch (Exception e) {
+                    System.err.println("Error while quitting: " + e.getMessage());
+                    try { client.shutdown(); } catch (Exception ignored) {}
+                }
+            }
             menuManager.onReversiGameFinished();
         }
     }

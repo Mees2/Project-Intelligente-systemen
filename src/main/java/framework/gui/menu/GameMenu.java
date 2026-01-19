@@ -157,7 +157,15 @@ public class GameMenu extends AbstractRoundedButton {
             theme.getButtonColor().darker(), true);
         aiButtonMinimax.addActionListener(e -> menuManager.openReversiNameMINIMAX());
         buttonPanel.add(aiButtonMinimax);
-        buttonPanel.add(Box.createVerticalStrut(40));
+        buttonPanel.add(Box.createVerticalStrut(10));
+
+        // Tournament button
+        tournamentButton = createRoundedButton(lang.get("reversi.menu.tournament"),
+                theme.getButtonColor(), theme.getButtonColorHover(),
+                theme.getButtonColor().darker(), true);
+        tournamentButton.addActionListener(e -> menuManager.openReversiNameTournament());
+        buttonPanel.add(tournamentButton);
+        buttonPanel.add(Box.createVerticalStrut(30));
 
         // Back button
         backButton = createRoundedButton(lang.get("reversi.menu.back"),
@@ -225,8 +233,7 @@ public class GameMenu extends AbstractRoundedButton {
                 backButton.setText(lang.get("reversi.menu.back"));
                 aiButtonMCTS.setText(lang.get("reversi.menu.mcts"));
                 aiButtonMinimax.setText(lang.get("reversi.menu.minimax"));
-
-
+                tournamentButton.setText(lang.get("reversi.menu.tournament"));
             }
         }
     }
@@ -259,10 +266,13 @@ public class GameMenu extends AbstractRoundedButton {
             aiButtonMCTS.putClientProperty("hoverColor", theme.getButtonColorHover());
             aiButtonMCTS.putClientProperty("borderColor", theme.getButtonColor().darker());
 
-
             aiButtonMinimax.putClientProperty("baseColor", theme.getButtonColor());
             aiButtonMinimax.putClientProperty("hoverColor", theme.getButtonColorHover());
             aiButtonMinimax.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+            tournamentButton.putClientProperty("baseColor", theme.getButtonColor());
+            tournamentButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+            tournamentButton.putClientProperty("borderColor", theme.getButtonColor().darker());
         }
 
         backButton.putClientProperty("baseColor", theme.getMainButtonColor());

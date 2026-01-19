@@ -14,7 +14,7 @@ import java.awt.image.BufferedImage;
 public class ReversiUI extends AbstractGameUI {
     private JLabel scoreLabel;
     private ReversiBoardPanel reversiBoardPanel;
-    private final Reversi game;
+    private Reversi game;  // Remove final to allow updating
     private ButtonClickListener buttonClickListener;
 
     public interface ButtonClickListener {
@@ -92,6 +92,16 @@ public class ReversiUI extends AbstractGameUI {
      */
     public void setButtonClickListener(ButtonClickListener listener) {
         this.buttonClickListener = listener;
+    }
+
+    /**
+     * Set a new game instance (used for tournament mode reset)
+     */
+    public void setGame(Reversi newGame) {
+        this.game = newGame;
+        if (reversiBoardPanel != null) {
+            reversiBoardPanel.repaint();
+        }
     }
 
     /**

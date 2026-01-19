@@ -7,13 +7,12 @@ import javax.swing.*;
 
 /**
  * A dialog window for entering player names in Reversi game modes.
- * This class creates and manages a form where players can enter their names
- * before starting a Reversi game. Supports PVP and AI modes (MCTS, and future AI types).
+ * Supports PVP, AI, and TOURNAMENT modes.
  */
 public class ReversiNameSelection extends AbstractNameSelection {
 
     public enum GameMode {
-        PVP, AI
+        PVP, AI, TOURNAMENT
     }
 
     public enum AIType {
@@ -26,9 +25,6 @@ public class ReversiNameSelection extends AbstractNameSelection {
 
     /**
      * Creates a new ReversiNameSelection dialog for PVP mode.
-     *
-     * @param menuManager The MenuManager instance for handling navigation between menus
-     * @param gameMode The game mode (should be PVP)
      */
     public ReversiNameSelection(MenuManager menuManager, GameMode gameMode) {
         super(menuManager);
@@ -39,10 +35,6 @@ public class ReversiNameSelection extends AbstractNameSelection {
 
     /**
      * Creates a new ReversiNameSelection dialog for AI mode.
-     *
-     * @param menuManager The MenuManager instance for handling navigation between menus
-     * @param gameMode The game mode (should be AI)
-     * @param aiType The type of AI to play against (MCTS, etc.)
      */
     public ReversiNameSelection(MenuManager menuManager, GameMode gameMode, AIType aiType) {
         super(menuManager);
@@ -52,14 +44,15 @@ public class ReversiNameSelection extends AbstractNameSelection {
     }
 
     /**
-     * Initializes and configures the menu interface.
-     * Creates and layouts all UI components including:
-     * - Title label
-     * - Name input fields for players
-     * - Role selection (for PVA mode)
-     * - Start and Back buttons
-     * All components are styled according to the game's visual theme.
+     * Creates a new ReversiNameSelection dialog for TOURNAMENT mode.
      */
+    public ReversiNameSelection(MenuManager menuManager, AIType aiType) {
+        super(menuManager);
+        this.gameMode = GameMode.TOURNAMENT;
+        this.aiType = aiType;
+        initializeMenu();
+    }
+
     private void initializeMenu() {
         initializeFrame();
         createTopPanel();
@@ -72,6 +65,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
         if (gameMode == GameMode.AI) {
             createReversiRoleSelection();
         }
+        // TOURNAMENT mode doesn't need role selection - server decides
         createButtons();
         theme.addThemeChangeListener(this::updateTheme);
     }
@@ -79,7 +73,7 @@ public class ReversiNameSelection extends AbstractNameSelection {
     private String getPlayer1LabelKey() {
         return switch (gameMode) {
             case PVP -> "reversi.name.playername1";
-            case AI -> "reversi.name.playername";
+            case AI, TOURNAMENT -> "reversi.name.playername";
         };
     }
 
@@ -146,12 +140,14 @@ public class ReversiNameSelection extends AbstractNameSelection {
                 char selectedColor = xButton.isSelected() ? 'B' : 'W';
                 menuManager.startReversiGame(aiModeString, player1Name, aiName, selectedColor);
             }
+            case TOURNAMENT -> {
+                String aiName = getAIName();
+                // Use TOURNAMENT_ prefix to distinguish from regular AI mode
+                menuManager.startReversiGame("TOURNAMENT_" + aiType.name(), player1Name, aiName, 'B');
+            }
         }
     }
 
-    /**
-     * Gets the display name for the current AI type.
-     */
     private String getAIName() {
         return switch (aiType) {
             case MCTS -> "MCTS AI";
@@ -159,12 +155,12 @@ public class ReversiNameSelection extends AbstractNameSelection {
         };
     }
 
-    /**
-     * Gets the title key for the current mode.
-     */
     private String getTitleKey() {
         if (gameMode == GameMode.PVP) {
             return "reversi.name.title";
+        }
+        if (gameMode == GameMode.TOURNAMENT) {
+            return "reversi.name.title.tournament";
         }
         return switch (aiType) {
             case MCTS -> "reversi.name.title.mcts";
@@ -239,3 +235,4 @@ public class ReversiNameSelection extends AbstractNameSelection {
         repaint();
     }
 }
+

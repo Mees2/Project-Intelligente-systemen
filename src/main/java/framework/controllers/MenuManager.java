@@ -21,6 +21,7 @@ public final class MenuManager {
     private static final String TICTACTOE_NAME_SERVER = "TICTACTOE_NAME_SERVER";
     private static final String TICTACTOE_NAME_TOURNAMENT = "TICTACTOE_NAME_TOURNAMENT";
     private static final String REVERSI_NAME_MONTECARLO = "REVERSI_NAME_MONTECARLO";
+    private static final String REVERSI_NAME_TOURNAMENT = "REVERSI_NAME_TOURNAMENT";
 
     public MenuManager() {
         mainFrame = new ApplicationFrame(this);
@@ -86,6 +87,17 @@ public final class MenuManager {
             mainFrame.addPanel(REVERSI_NAME_MONTECARLO, namePanel);
         }
         mainFrame.showPanel(REVERSI_NAME_MONTECARLO);
+    }
+
+    public void openReversiNameTournament() {
+        if (!panels.containsKey(REVERSI_NAME_TOURNAMENT)) {
+            framework.gui.menu.reversi.ReversiNameSelection namePanel =
+                    new framework.gui.menu.reversi.ReversiNameSelection(this,
+                        framework.gui.menu.reversi.ReversiNameSelection.AIType.MINIMAX);
+            panels.put(REVERSI_NAME_TOURNAMENT, namePanel);
+            mainFrame.addPanel(REVERSI_NAME_TOURNAMENT, namePanel);
+        }
+        mainFrame.showPanel(REVERSI_NAME_TOURNAMENT);
     }
 
     public void returnToMainMenu() {
