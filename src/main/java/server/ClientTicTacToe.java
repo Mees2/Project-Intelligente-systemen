@@ -130,6 +130,16 @@ public class ClientTicTacToe extends AbstractClient {
     }
 
     /**
+     * Request a match for a specific game type
+     */
+    public void requestMatch(String gameType) {
+        if (isConnected()) {
+            sendMessage("subscribe " + gameType);
+            System.out.println("Requested match for " + gameType);
+        }
+    }
+
+    /**
      * Geef op voor het huidige spel
      */
     public void forfeit() {

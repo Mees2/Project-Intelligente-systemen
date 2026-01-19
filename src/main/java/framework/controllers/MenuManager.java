@@ -77,6 +77,30 @@ public final class MenuManager {
         mainFrame.showPanel(key);
     }
 
+    public void openReversiNameServer() {
+        final String key = "REVERSI_NAME_SERVER";
+        if (!panels.containsKey(key)) {
+            framework.gui.menu.reversi.ReversiNameSelection namePanel =
+                new framework.gui.menu.reversi.ReversiNameSelection(this,
+                    framework.gui.menu.reversi.ReversiNameSelection.GameMode.SERVER);
+            panels.put(key, namePanel);
+            mainFrame.addPanel(key, namePanel);
+        }
+        mainFrame.showPanel(key);
+    }
+
+    public void openReversiNameTournament() {
+        final String key = "REVERSI_NAME_TOURNAMENT";
+        if (!panels.containsKey(key)) {
+            framework.gui.menu.reversi.ReversiNameSelection namePanel =
+                new framework.gui.menu.reversi.ReversiNameSelection(this,
+                    framework.gui.menu.reversi.ReversiNameSelection.GameMode.TOURNAMENT);
+            panels.put(key, namePanel);
+            mainFrame.addPanel(key, namePanel);
+        }
+        mainFrame.showPanel(key);
+    }
+
     public void openReversiNamePva() {
         if (!panels.containsKey(REVERSI_NAME_MONTECARLO)) {
             framework.gui.menu.reversi.ReversiNameSelection namePanel =
