@@ -182,13 +182,18 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
     }
 
     private void handleYourTurnMessage() {
+        System.out.println("[TIMING] YOURTURN received at: " + System.currentTimeMillis());
+
+        // Start AI calculation IMMEDIATELY on a new thread - don't wait for EDT
+        if (!aiBusy) {
+            aiTurnPending = true;
+            doAiMoveTournament();
+        }
+
+        // Update UI separately (non-blocking)
         SwingUtilities.invokeLater(() -> {
             ui.updateStatusLabel("Your turn");
             updateBoardTournament();
-            if (!aiBusy) {
-                aiTurnPending = true;
-                doAiMoveTournament();
-            }
         });
     }
 
@@ -267,14 +272,6 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
         aiTurnPending = false;
 
         new Thread(() -> {
-            try {
-                Thread.sleep(1000); // Wait 1 second before making move
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                aiBusy = false;
-                return;
-            }
-
             // Check if AI has valid moves
             if (!game.hasValidMove(aiRole)) {
                 aiBusy = false;

@@ -13,7 +13,7 @@ public class ClientReversi extends AbstractClient {
     private Consumer<String> messageHandler;
 
     public ClientReversi() {
-        super("127.0.0.1", 7789);
+        super("172.201.112.199", 7789);
     }
 
     public ClientReversi(String host, int port) {
