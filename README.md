@@ -37,6 +37,7 @@ Dit project bevat een herbruikbaar framework voor bordspellen zoals TicTacToe en
 
 ### Geïmplementeerde Spellen:
 - **TicTacToe** - Volledig werkend met PVP en PVA modes
+- **Reversi** - Volledig Werkend Met PVP en PVA modes
 
 ## Server Configuratie
 
