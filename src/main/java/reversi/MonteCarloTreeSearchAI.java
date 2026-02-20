@@ -5,249 +5,207 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Monte Carlo Tree Search AI implementation for Reversi.
- * Uses MCTS algorithm to find the best move by simulating random games.
- */
 public class MonteCarloTreeSearchAI extends AbstractReversiAI {
     private static final int SIMULATIONS = 1000; // Number of simulations per move
     private static final double EXPLORATION_CONSTANT = Math.sqrt(2);
     private static final Random random = new Random();
 
-    /**
-     * Represents a node in the Monte Carlo search tree
-     */
-    private static class MCTSNode {
-        int row;
-        int col;
-        char player;
-        int wins = 0;
-        int visits = 0;
-        MCTSNode parent;
-        List<MCTSNode> children = new ArrayList<>();
 
-        MCTSNode(int row, int col, char player, MCTSNode parent) {
+    private static class MCTSNode {
+        final MCTSNode parent;
+        final int row, col;          // move from parent -> this node
+        final char playerToMove;     // player to move at this node
+        final List<MCTSNode> children = new ArrayList<>();
+        final List<int[]> untriedMoves;  // legal moves for playerToMove in this position
+
+        int visits = 0;
+        double wins = 0.0;           // reward from ROOT player's perspective
+
+        MCTSNode(MCTSNode parent, int row, int col, char playerToMove, List<int[]> legalMoves) {
+            this.parent = parent;
             this.row = row;
             this.col = col;
-            this.player = player;
-            this.parent = parent;
+            this.playerToMove = playerToMove;
+            this.untriedMoves = new ArrayList<>(legalMoves);
         }
 
-        /**
-         * Calculates the UCB1 (Upper Confidence Bound) value for this node
-         */
-        double getUCB1() {
-            if (visits == 0) return Double.MAX_VALUE;
-            return (double) wins / visits +
-                   EXPLORATION_CONSTANT * Math.sqrt(Math.log(parent.visits) / visits);
+        boolean isRoot() {
+            return parent == null;
+        }
+
+        boolean isFullyExpanded() {
+            return untriedMoves.isEmpty();
         }
     }
 
     /**
      * Finds the best move for the AI player using Monte Carlo Tree Search
-     * @param game The current Reversi game
+     *
+     * @param game     The current Reversi game
      * @param aiPlayer The AI player symbol ('B' or 'W')
      * @return An array [row, col] representing the best move, or null if no move available
      */
     public static int[] bestMove(Reversi game, char aiPlayer) {
-        long startTime = System.currentTimeMillis();
+        if (!game.hasValidMove(aiPlayer)) return null;
 
-        if (!game.hasValidMove(aiPlayer)) {
-            System.out.println("[MCTS AI] No valid moves available for player " + aiPlayer);
-            return null;
-        }
+        // root: playerToMove = aiPlayer, legal moves van aiPlayer
+        List<int[]> rootMoves = getValidMovesAsArrays(game, aiPlayer);
+        MCTSNode root = new MCTSNode(null, -1, -1, aiPlayer, rootMoves);
 
-        MCTSNode root = new MCTSNode(-1, -1, aiPlayer, null);
-
-        // Expand root with all valid moves
-        List<int[]> validMoves = getValidMovesAsArrays(game, aiPlayer);
-        for (int[] move : validMoves) {
-            root.children.add(new MCTSNode(move[0], move[1], aiPlayer, root));
-        }
-
-        // Run simulations
         for (int i = 0; i < SIMULATIONS; i++) {
             Reversi gameCopy = copyGame(game);
-            MCTSNode node = selectNode(root);
 
-            if (node.visits > 0 && !isTerminal(gameCopy, node)) {
-                node = expandNode(gameCopy, node);
+            // 1) Selection (en moves toepassen op game)
+            MCTSNode node = selectNodeWithState(gameCopy, root);
+
+            // 2) Expansion (past ook 1 move toe op game)
+            if (!node.untriedMoves.isEmpty()) {
+                node = expand(gameCopy, node);
             }
 
-            int result = simulate(gameCopy, node, aiPlayer);
-            backpropagate(node, result);
+            // 3) Simulation (rollout vanaf huidige game)
+            double r = simulateRollout(gameCopy, node.playerToMove, aiPlayer);
+
+            // 4) Backprop
+            backpropagate(node, r, aiPlayer);
         }
 
-        // Select the move with the highest visit count
-        MCTSNode bestNode = null;
-        int maxVisits = -1;
+        // kies child met meeste visits
+        MCTSNode best = null;
+        int bestVisits = -1;
         for (MCTSNode child : root.children) {
-            if (child.visits > maxVisits) {
-                maxVisits = child.visits;
-                bestNode = child;
+            if (child.visits > bestVisits) {
+                bestVisits = child.visits;
+                best = child;
             }
         }
-
-        if (bestNode == null) {
-            return null;
-        }
-
-        long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime;
-
-        // Log AI move information
-        System.out.println("=== MCTS AI MOVE ===");
-        System.out.println("  Simulations: " + SIMULATIONS);
-        System.out.println("  Time taken: " + duration + " ms");
-        System.out.println("====================");
-
-        return new int[]{bestNode.row, bestNode.col};
+        if (best == null) return null;
+        return new int[]{best.row, best.col};
     }
 
-    /**
-     * Selects the most promising node to explore using UCB1
-     */
-    private static MCTSNode selectNode(MCTSNode node) {
-        while (!node.children.isEmpty()) {
-            MCTSNode best = null;
-            double bestValue = -1;
 
-            for (MCTSNode child : node.children) {
-                double value = child.getUCB1();
-                if (value > bestValue) {
-                    bestValue = value;
-                    best = child;
-                }
-            }
-            node = best;
+    // Selection
+    private static MCTSNode selectNodeWithState(Reversi copyGame, MCTSNode root) {
+        MCTSNode node = root;
+
+        // zolang node fully expanded is en children heeft: kies best UCT-child
+        while (node.isFullyExpanded() && !node.children.isEmpty()) {
+            MCTSNode parent = node;
+            node = bestUctChild(node);
+
+            // De move (node.row, node.col) werd gespeeld door parent.playerToMove
+            copyGame.doMove(node.row, node.col, parent.playerToMove);
         }
         return node;
     }
 
-    /**
-     * Expands a node by adding its children (valid moves)
-     */
-    private static MCTSNode expandNode(Reversi game, MCTSNode node) {
-        // Apply the move for this node
-        if (node.row != -1 && node.col != -1) {
-            game.doMove(node.row, node.col, node.player);
-        }
+    private static MCTSNode bestUctChild(MCTSNode node) {
+        MCTSNode best = null;
+        double bestValue = Double.NEGATIVE_INFINITY;
 
-        char nextPlayer = getOpponent(node.player);
-
-        // Add all valid moves as children
-        List<int[]> validMoves = getValidMovesAsArrays(game, nextPlayer);
-        for (int[] move : validMoves) {
-            node.children.add(new MCTSNode(move[0], move[1], nextPlayer, node));
-        }
-
-        // If no valid moves for next player, check if current player can move
-        if (node.children.isEmpty() && game.hasValidMove(node.player)) {
-            List<int[]> currentPlayerMoves = getValidMovesAsArrays(game, node.player);
-            for (int[] move : currentPlayerMoves) {
-                node.children.add(new MCTSNode(move[0], move[1], node.player, node));
+        for (MCTSNode child : node.children) {
+            double uct = uctValue(node, child);
+            if (uct > bestValue) {
+                bestValue = uct;
+                best = child;
             }
         }
-
-        if (!node.children.isEmpty()) {
-            return node.children.get(random.nextInt(node.children.size()));
-        }
-        return node;
+        return best;
     }
 
-    /**
-     * Simulates a random game from the current position
-     * @return 1 if AI wins, 0 if draw, -1 if AI loses
-     */
-    private static int simulate(Reversi game, MCTSNode node, char aiPlayer) {
-        // Apply the node's move
-        if (node.row != -1 && node.col != -1) {
-            game.doMove(node.row, node.col, node.player);
+    private static double uctValue(MCTSNode parent, MCTSNode child) {
+        if (child.visits == 0) return Double.POSITIVE_INFINITY;
+
+        // wins is vanuit rootPlayer perspectief
+        double winRate = child.wins / child.visits;
+
+        double lnParent = Math.log(Math.max(1, parent.visits));
+        double explore = EXPLORATION_CONSTANT * Math.sqrt(lnParent / child.visits);
+
+        return winRate + explore;
+    }
+
+
+    // expansion
+    private static MCTSNode expand(Reversi game, MCTSNode node) {
+        if (node.untriedMoves.isEmpty()) return node;
+
+        int idx = random.nextInt(node.untriedMoves.size());
+        int[] move = node.untriedMoves.remove(idx);
+
+        // move wordt gespeeld door node.playerToMove
+        game.doMove(move[0], move[1], node.playerToMove); // Klopt dit?
+
+        char nextPlayer = getOpponent(node.playerToMove);
+        List<int[]> nextMoves = getValidMovesAsArrays(game, nextPlayer);
+
+        // PASS handling: als next player geen moves heeft maar current wel, dan blijft playerToMove hetzelfde
+        if (nextMoves.isEmpty() && game.hasValidMove(node.playerToMove)) {
+            nextPlayer = node.playerToMove;
+            nextMoves = getValidMovesAsArrays(game, nextPlayer);
         }
 
-        char currentPlayer = getOpponent(node.player);
+        MCTSNode child = new MCTSNode(node, move[0], move[1], nextPlayer, nextMoves);
+        node.children.add(child);
+        return child;
+    }
+
+
+    // Simulation
+    private static double simulateRollout(Reversi game, char playerToMove, char rootPlayer) {
+        char current = playerToMove;
         int passCount = 0;
 
-        // Play random moves until game ends
-        while (!game.isWin('B') && !game.isWin('W') && !game.isDraw() && passCount < 2) {
-            List<int[]> validMoves = getValidMovesAsArrays(game, currentPlayer);
+        while (!isTerminal(game) && passCount < 2) {
+            List<int[]> moves = getValidMovesAsArrays(game, current);
 
-            if (validMoves.isEmpty()) {
+            if (moves.isEmpty()) {
                 passCount++;
-                currentPlayer = getOpponent(currentPlayer);
+                current = getOpponent(current);
                 continue;
             }
 
             passCount = 0;
-            int[] move = validMoves.get(random.nextInt(validMoves.size()));
-            game.doMove(move[0], move[1], currentPlayer);
-            currentPlayer = getOpponent(currentPlayer);
+            int[] move = moves.get(random.nextInt(moves.size()));
+            game.doMove(move[0], move[1], current);
+            current = getOpponent(current);
         }
 
-        // Determine result using stability-aware evaluation
-        return evaluateSimulationResult(game, aiPlayer);
+        // reward vanuit rootPlayer perspectief
+        return reward(game, rootPlayer);
     }
 
-    /**
-     * Evaluates the simulation result considering stability and piece count.
-     * Uses getStabilityScore from AbstractReversiAI for a more nuanced evaluation.
-     *
-     * @param game The final game state
-     * @param aiPlayer The AI player symbol
-     * @return 1 if AI wins, 0 if draw, -1 if AI loses
-     */
-    private static int evaluateSimulationResult(Reversi game, char aiPlayer) {
-        char opponent = getOpponent(aiPlayer);
-
-        // First check for clear win/loss/draw
-        if (game.isWin(aiPlayer)) {
-            return 1;
-        } else if (game.isWin(opponent)) {
-            return -1;
-        } else if (game.isDraw()) {
-            return 0;
-        }
-
-        // If game ended due to no valid moves, use piece count and stability
-        int aiCount = game.count(aiPlayer);
-        int opponentCount = game.count(opponent);
-        int stabilityScore = getStabilityScore(game, aiPlayer, opponent);
-
-        // Combine piece count advantage with stability advantage
-        int totalAdvantage = (aiCount - opponentCount) + (stabilityScore / 2);
-
-        if (totalAdvantage > 0) {
-            return 1;
-        } else if (totalAdvantage < 0) {
-            return -1;
-        } else {
-            return 0;
-        }
+    private static boolean isTerminal(Reversi game) {
+        // gebruik alleen reads
+        if (game.isWin('B') || game.isWin('W') || game.isDraw()) return true;
+        return !game.hasValidMove('B') && !game.hasValidMove('W');
     }
 
-    /**
-     * Backpropagates the simulation result up the tree
-     */
-    private static void backpropagate(MCTSNode node, int result) {
+    private static double reward(Reversi game, char rootPlayer) {
+        char opp = getOpponent(rootPlayer);
+
+        if (game.isWin(rootPlayer)) return 1.0;
+        if (game.isWin(opp)) return 0.0;
+        if (game.isDraw()) return 0.5;
+
+        // fallback (als jullie win/draw niet altijd terminal afvangen)
+        int diff = game.count(rootPlayer) - game.count(opp);
+        if (diff > 0) return 1.0;
+        if (diff < 0) return 0.0;
+        return 0.5;
+    }
+
+    //backpropagation
+    private static void backpropagate(MCTSNode node, double reward, char rootPlayer) {
         while (node != null) {
             node.visits++;
-            if (result == 1) {
-                node.wins++;
-            } else if (result == 0) {
-                node.wins += 0.5; // Half point for draw
+            // Sla wins op vanuit het perspectief van node.playerToMove
+            if (node.playerToMove == rootPlayer) {
+                node.wins += reward;        // rootPlayer wil hoge reward
+            } else {
+                node.wins += (1.0 - reward); // tegenstander wil lage reward voor root
             }
             node = node.parent;
         }
-    }
-
-    /**
-     * Checks if a game state is terminal
-     */
-    private static boolean isTerminal(Reversi game, MCTSNode node) {
-        if (node.row != -1 && node.col != -1) {
-            game.doMove(node.row, node.col, node.player);
-        }
-        return game.isWin('B') || game.isWin('W') || game.isDraw() ||
-               (!game.hasValidMove('B') && !game.hasValidMove('W'));
     }
 }
