@@ -159,7 +159,8 @@ public class ReversiGameController {
 
         Position bestMove;
         if (useMCTS) {
-            int[] moveArray = MonteCarloTreeSearchAI.bestMove(game, currentPlayer.getSymbol());
+            // Instance-based aanroep in plaats van statisch
+            int[] moveArray = mctsAI.bestMove(game, currentPlayer.getSymbol());
             bestMove = (moveArray == null) ? null : new Position(moveArray[0], moveArray[1], 8);
         } else {
             bestMove = minimaxAI.findBestMove(game, currentPlayer.getSymbol());
