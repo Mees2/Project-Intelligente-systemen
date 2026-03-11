@@ -105,7 +105,15 @@ public final class LanguageManager {
         addTranslation("reversi.menu.pvp", "Speler tegen Speler", "Player vs Player", "Người chơi đấu với người chơi", "玩家对战");
         addTranslation("reversi.menu.minimax", "Speler tegen AI (MiniMax)", "Player vs AI (MiniMax)", "Người chơi vs AI (MiniMax)", "玩家对战 AI (MiniMax)");
         addTranslation("reversi.menu.mcts", "Speler tegen AI (MCTS)", "Player vs AI (MCTS)", "Người chơi vs AI (MCTS)", "玩家对战AI（MCTS）");
+        addTranslation("reversi.menu.aivsai", "AI vs AI (MCTS vs Minimax)", "AI vs AI (MCTS vs Minimax)", "AI vs AI (MCTS vs Minimax)", "AI对战AI（MCTS vs Minimax）");
         addTranslation("reversi.menu.back", "Terug", "Back", "Quay lại", "返回");
+
+        // Reversi AI Config panel
+        addTranslation("reversi.aiconfig.title", "AI vs AI Configuratie", "AI vs AI Configuration", "Cấu hình AI vs AI", "AI对战AI配置");
+        addTranslation("reversi.aiconfig.mcts", "MCTS Simulaties:", "MCTS Simulations:", "Số lần mô phỏng MCTS:", "MCTS模拟次数:");
+        addTranslation("reversi.aiconfig.minimax", "Minimax Diepte:", "Minimax Depth:", "Độ sâu Minimax:", "Minimax深度:");
+        addTranslation("reversi.aiconfig.start", "Start Game", "Start Game", "Bắt đầu Game", "开始游戏");
+        addTranslation("reversi.aiconfig.back", "Terug", "Back", "Quay lại", "返回");
 
         // Reversi name input
         addTranslation("reversi.name.title", "Reversi - Kies Namen", "Reversi - Choose Names", "Cờ Lật - Chọn tên", "黑白棋 - 选择名称");

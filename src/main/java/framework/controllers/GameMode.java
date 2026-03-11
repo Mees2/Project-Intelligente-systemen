@@ -4,7 +4,8 @@ public enum GameMode {
     PVP("PVP"),
     PVA("PVA"),
     SERVER("SERVER"),
-    TOURNAMENT("TOURNAMENT");
+    TOURNAMENT("TOURNAMENT"),
+    AI_VS_AI("AI_VS_AI");
 
     private final String code;
     GameMode(String code) {
@@ -18,7 +19,7 @@ public enum GameMode {
         return this == SERVER || this == TOURNAMENT;
     }
     public boolean hasAI() {
-        return this == PVA || this == TOURNAMENT;
+        return this == PVA || this == TOURNAMENT || this == AI_VS_AI;
     }
 
     public static GameMode fromCode(String code) {
@@ -30,4 +31,3 @@ public enum GameMode {
         return null;
     }
 }
-

@@ -23,6 +23,10 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
     private ReversiUI ui;
     private ReversiGameController gameController;
 
+    // AI configuratie parameters
+    private int mctsSimulations = 1000;
+    private int minimaxDepth = 5;
+
     public ReversiGame(MenuManager menuManager, String gameMode, String player1, String player2, char selectedColor) {
         this.menuManager = menuManager;
         this.player1Name = player1;
@@ -31,13 +35,36 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
         this.playerColor = selectedColor;
     }
 
+    /**
+     * Constructor voor AI vs AI met configureerbare parameters
+     */
+    public ReversiGame(MenuManager menuManager, String gameMode, String player1, String player2, char selectedColor,
+                       int mctsSimulations, int minimaxDepth) {
+        this.menuManager = menuManager;
+        this.player1Name = player1;
+        this.player2Name = player2;
+        this.gameMode = gameMode;
+        this.playerColor = selectedColor;
+        this.mctsSimulations = mctsSimulations;
+        this.minimaxDepth = minimaxDepth;
+    }
+
     public void start() {
         Reversi game = new Reversi();
         ReversiMinimax minimaxAI = new ReversiMinimax();
         MonteCarloTreeSearchAI mctsAI = new MonteCarloTreeSearchAI();
+
+        // Configureer de AI parameters dynamisch
+        mctsAI.setSimulations(mctsSimulations);
+        minimaxAI.setSearchDepth(minimaxDepth);
+
         AbstractPlayer p1, p2;
 
-        if ("PVA".equalsIgnoreCase(gameMode) || "MCTS".equalsIgnoreCase(gameMode) || "MINIMAX".equalsIgnoreCase(gameMode)) {
+        if ("AI_VS_AI".equalsIgnoreCase(gameMode)) {
+            // Monte Carlo (Black) vs Minimax (White)
+            p1 = new AIPlayer("MCTS", 'B');
+            p2 = new AIPlayer("Minimax", 'W');
+        } else if ("PVA".equalsIgnoreCase(gameMode) || "MCTS".equalsIgnoreCase(gameMode) || "MINIMAX".equalsIgnoreCase(gameMode)) {
             if (playerColor == 'B') {
                 p1 = new HumanPlayer(player1Name, 'B');
                 p2 = new AIPlayer(player2Name, 'W');
@@ -56,7 +83,34 @@ public class ReversiGame extends JPanel implements ReversiGameController.GameLis
         }
 
         gameController = new ReversiGameController(game, p1, p2, minimaxAI, mctsAI);
-        gameController.setUseMCTS("MCTS".equalsIgnoreCase(gameMode));
+
+        // Configureer welke AI voor welke speler
+        if ("AI_VS_AI".equalsIgnoreCase(gameMode)) {
+            // Player 1 (Black) = MCTS, Player 2 (White) = Minimax
+            gameController.setPlayer1AI("MCTS", mctsSimulations);
+            gameController.setPlayer2AI("MINIMAX", minimaxDepth);
+        } else if ("MCTS".equalsIgnoreCase(gameMode)) {
+            // Speler vs MCTS AI: de AI-speler moet MCTS gebruiken
+            if (playerColor == 'B') {
+                // Mens = player1 (B), AI = player2 (W) → player2 = MCTS
+                gameController.setPlayer1AI("MCTS", mctsSimulations); // ongebruikt, mens is p1
+                gameController.setPlayer2AI("MCTS", mctsSimulations);
+            } else {
+                // AI = player1 (B), Mens = player2 (W) → player1 = MCTS
+                gameController.setPlayer1AI("MCTS", mctsSimulations);
+                gameController.setPlayer2AI("MCTS", mctsSimulations); // ongebruikt, mens is p2
+            }
+        } else if ("MINIMAX".equalsIgnoreCase(gameMode)) {
+            // Speler vs Minimax AI: de AI-speler moet MINIMAX gebruiken
+            if (playerColor == 'B') {
+                gameController.setPlayer1AI("MINIMAX", minimaxDepth);
+                gameController.setPlayer2AI("MINIMAX", minimaxDepth);
+            } else {
+                gameController.setPlayer1AI("MINIMAX", minimaxDepth);
+                gameController.setPlayer2AI("MINIMAX", minimaxDepth);
+            }
+        }
+
         gameController.setGameListener(this);
 
         ui = new ReversiUI(game);

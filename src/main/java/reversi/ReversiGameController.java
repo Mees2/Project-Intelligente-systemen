@@ -23,6 +23,12 @@ public class ReversiGameController {
     private final MonteCarloTreeSearchAI mctsAI;
     private boolean useMCTS = false;
 
+    // AI configuratie per speler (defaults voor AI vs AI modus)
+    private String player1AIType = "MCTS";
+    private String player2AIType = "MINIMAX";
+    private int player1AIParam = 1000;  // simulations voor MCTS
+    private int player2AIParam = 5;     // depth voor minimax
+
     /**
      * Listener interface voor UI updates
      */
@@ -49,6 +55,26 @@ public class ReversiGameController {
 
     public void setUseMCTS(boolean use) {
         this.useMCTS = use;
+    }
+
+    /**
+     * Configureer AI voor speler 1
+     * @param aiType "MCTS" of "MINIMAX"
+     * @param param depth voor minimax, simulations voor MCTS
+     */
+    public void setPlayer1AI(String aiType, int param) {
+        this.player1AIType = aiType;
+        this.player1AIParam = param;
+    }
+
+    /**
+     * Configureer AI voor speler 2
+     * @param aiType "MCTS" of "MINIMAX"
+     * @param param depth voor minimax, simulations voor MCTS
+     */
+    public void setPlayer2AI(String aiType, int param) {
+        this.player2AIType = aiType;
+        this.player2AIParam = param;
     }
 
     /**
@@ -145,7 +171,7 @@ public class ReversiGameController {
     }
 
     /**
-     * Maak een AI zet
+     * Maak een AI zet (asynchroon met vertraging voor UI updates)
      */
     public void makeAIMove() {
         if (aiThinking || !currentPlayer.isAI() || gameDone) {
@@ -157,23 +183,40 @@ public class ReversiGameController {
             gameListener.onAIThinking(true);
         }
 
-        Position bestMove;
-        if (useMCTS) {
-            // Instance-based aanroep in plaats van statisch
-            int[] moveArray = mctsAI.bestMove(game, currentPlayer.getSymbol());
-            bestMove = (moveArray == null) ? null : new Position(moveArray[0], moveArray[1], 8);
-        } else {
-            bestMove = minimaxAI.findBestMove(game, currentPlayer.getSymbol());
-        }
+        // Voer AI berekening uit op een aparte thread
+        new Thread(() -> {
+            // Bepaal welke AI en parameters te gebruiken voor de huidige speler
+            String aiType = (currentPlayer == player1) ? player1AIType : player2AIType;
+            int aiParam = (currentPlayer == player1) ? player1AIParam : player2AIParam;
+            boolean useCurrentMCTS = "MCTS".equalsIgnoreCase(aiType);
 
-        aiThinking = false;
-        if (gameListener != null) {
-            gameListener.onAIThinking(false);
-        }
+            Position bestMove;
+            if (useCurrentMCTS) {
+                int[] moveArray = mctsAI.bestMove(game, currentPlayer.getSymbol());
+                bestMove = (moveArray == null) ? null : new Position(moveArray[0], moveArray[1], 8);
+            } else {
+                bestMove = minimaxAI.findBestMove(game, currentPlayer.getSymbol());
+            }
 
-        if (bestMove != null) {
-            makeMove(bestMove.getRow(), bestMove.getColumn());
-        }
+            // Kleine vertraging zodat de gebruiker het bord kan zien
+            try {
+                Thread.sleep(500); // 500ms vertraging tussen zetten
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            // Update UI op de Event Dispatch Thread
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                aiThinking = false;
+                if (gameListener != null) {
+                    gameListener.onAIThinking(false);
+                }
+
+                if (bestMove != null) {
+                    makeMove(bestMove.getRow(), bestMove.getColumn());
+                }
+            });
+        }).start();
     }
 
     /**
