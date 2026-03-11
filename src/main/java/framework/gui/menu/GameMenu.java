@@ -33,6 +33,7 @@ public class GameMenu extends AbstractRoundedButton {
     private JButton backButton;
     private JButton aiButtonMCTS;
     private JButton aiButtonMinimax;
+    private JButton aiVsAiButton;
     private JPanel buttonPanel;
 
     /**
@@ -157,6 +158,14 @@ public class GameMenu extends AbstractRoundedButton {
             theme.getButtonColor().darker(), true);
         aiButtonMinimax.addActionListener(e -> menuManager.openReversiNameMINIMAX());
         buttonPanel.add(aiButtonMinimax);
+        buttonPanel.add(Box.createVerticalStrut(10));
+
+        // AI vs AI button (MCTS vs Minimax)
+        aiVsAiButton = createRoundedButton(lang.get("reversi.menu.aivsai"),
+            theme.getButtonColor(), theme.getButtonColorHover(),
+            theme.getButtonColor().darker(), true);
+        aiVsAiButton.addActionListener(e -> menuManager.openReversiAIvsAI());
+        buttonPanel.add(aiVsAiButton);
         buttonPanel.add(Box.createVerticalStrut(40));
 
         // Back button
@@ -225,8 +234,7 @@ public class GameMenu extends AbstractRoundedButton {
                 backButton.setText(lang.get("reversi.menu.back"));
                 aiButtonMCTS.setText(lang.get("reversi.menu.mcts"));
                 aiButtonMinimax.setText(lang.get("reversi.menu.minimax"));
-
-
+                aiVsAiButton.setText(lang.get("reversi.menu.aivsai"));
             }
         }
     }
@@ -263,6 +271,10 @@ public class GameMenu extends AbstractRoundedButton {
             aiButtonMinimax.putClientProperty("baseColor", theme.getButtonColor());
             aiButtonMinimax.putClientProperty("hoverColor", theme.getButtonColorHover());
             aiButtonMinimax.putClientProperty("borderColor", theme.getButtonColor().darker());
+
+            aiVsAiButton.putClientProperty("baseColor", theme.getButtonColor());
+            aiVsAiButton.putClientProperty("hoverColor", theme.getButtonColorHover());
+            aiVsAiButton.putClientProperty("borderColor", theme.getButtonColor().darker());
         }
 
         backButton.putClientProperty("baseColor", theme.getMainButtonColor());

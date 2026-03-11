@@ -4,6 +4,7 @@ import framework.controllers.MenuManager;
 import framework.gui.AbstractNameSelection;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * A dialog window for entering player names in Reversi game modes.
@@ -23,6 +24,10 @@ public class ReversiNameSelection extends AbstractNameSelection {
 
     private final GameMode gameMode;
     private final AIType aiType;
+
+    // Spinner voor MCTS simulaties
+    private JLabel mctsSimulationsLabel;
+    private JSpinner mctsSimulationsSpinner;
 
     /**
      * Creates a new ReversiNameSelection dialog for PVP mode.
@@ -71,6 +76,9 @@ public class ReversiNameSelection extends AbstractNameSelection {
         }
         if (gameMode == GameMode.AI) {
             createReversiRoleSelection();
+            if (aiType == AIType.MCTS) {
+                createMCTSSimulationsSpinner();
+            }
         }
         createButtons();
         theme.addThemeChangeListener(this::updateTheme);
@@ -115,6 +123,26 @@ public class ReversiNameSelection extends AbstractNameSelection {
         centerPanel.add(Box.createVerticalStrut(10));
     }
 
+    /**
+     * Creates a spinner for configuring the number of MCTS simulations.
+     */
+    private void createMCTSSimulationsSpinner() {
+        mctsSimulationsLabel = new JLabel("MCTS Simulaties:");
+        mctsSimulationsLabel.setForeground(theme.getFontColor2());
+        mctsSimulationsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        SpinnerNumberModel model = new SpinnerNumberModel(1000, 100, 100000, 500);
+        mctsSimulationsSpinner = new JSpinner(model);
+        mctsSimulationsSpinner.setPreferredSize(new Dimension(100, 30));
+        mctsSimulationsSpinner.setMaximumSize(new Dimension(150, 30));
+        mctsSimulationsSpinner.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        centerPanel.add(mctsSimulationsLabel);
+        centerPanel.add(Box.createVerticalStrut(3));
+        centerPanel.add(mctsSimulationsSpinner);
+        centerPanel.add(Box.createVerticalStrut(10));
+    }
+
     @Override
     protected void handleStartGame() {
         String player1Name = textField1.getText().trim();
@@ -144,7 +172,14 @@ public class ReversiNameSelection extends AbstractNameSelection {
                 String aiName = getAIName();
                 String aiModeString = aiType.name();
                 char selectedColor = xButton.isSelected() ? 'B' : 'W';
-                menuManager.startReversiGame(aiModeString, player1Name, aiName, selectedColor);
+
+                if (aiType == AIType.MCTS && mctsSimulationsSpinner != null) {
+                    int mctsSimulations = (Integer) mctsSimulationsSpinner.getValue();
+                    menuManager.startReversiGame(aiModeString, player1Name, aiName, selectedColor,
+                            mctsSimulations, 5);
+                } else {
+                    menuManager.startReversiGame(aiModeString, player1Name, aiName, selectedColor);
+                }
             }
         }
     }
@@ -189,6 +224,9 @@ public class ReversiNameSelection extends AbstractNameSelection {
             roleLabel.setText(lang.get("reversi.name.selectrole"));
             if (xButton != null) xButton.setText(lang.get("reversi.name.black"));
             if (oButton != null) oButton.setText(lang.get("reversi.name.white"));
+        }
+        if (mctsSimulationsLabel != null) {
+            mctsSimulationsLabel.setText("MCTS Simulaties:");
         }
 
         startButton.setText(lang.get("reversi.name.startgame"));

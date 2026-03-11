@@ -14,7 +14,23 @@ import java.util.*;
  * - Iterative deepening for flexible search depth
  */
 public class ReversiMinimax extends AbstractReversiAI {
-    private static final int SEARCH_DEPTH = 5;
+    private int searchDepth = 5; // Configureerbare zoekdiepte
+
+    /**
+     * Stel de zoekdiepte in voor Minimax
+     * @param depth De zoekdiepte
+     */
+    public void setSearchDepth(int depth) {
+        this.searchDepth = depth;
+    }
+
+    /**
+     * Krijg de huidige zoekdiepte
+     * @return De zoekdiepte
+     */
+    public int getSearchDepth() {
+        return searchDepth;
+    }
 
     /**
      * Finds the best move for the AI player using Minimax with alpha-beta pruning.
@@ -48,7 +64,7 @@ public class ReversiMinimax extends AbstractReversiAI {
             Reversi tempGame = copyGame(game);
             tempGame.doMove(move.getRow(), move.getColumn(), player);
 
-            int score = minimax(tempGame, SEARCH_DEPTH - 1, true, player, opponent,
+            int score = minimax(tempGame, searchDepth - 1, true, player, opponent,
                     Integer.MIN_VALUE, Integer.MAX_VALUE);
             
             if (score > bestScore) {
@@ -62,7 +78,7 @@ public class ReversiMinimax extends AbstractReversiAI {
 
         // Log AI move information
         System.out.println("=== MINIMAX AI MOVE ===");
-        System.out.println("  Search Depth: " + SEARCH_DEPTH);
+        System.out.println("  Search Depth: " + searchDepth);
         System.out.println("  Time taken: " + duration + " ms");
         System.out.println("=======================");
 

@@ -21,6 +21,7 @@ public final class MenuManager {
     private static final String TICTACTOE_NAME_SERVER = "TICTACTOE_NAME_SERVER";
     private static final String TICTACTOE_NAME_TOURNAMENT = "TICTACTOE_NAME_TOURNAMENT";
     private static final String REVERSI_NAME_MONTECARLO = "REVERSI_NAME_MONTECARLO";
+    private static final String REVERSI_AI_VS_AI = "REVERSI_AI_VS_AI";
 
     public MenuManager() {
         mainFrame = new ApplicationFrame(this);
@@ -181,10 +182,16 @@ public final class MenuManager {
     }
 
     public void startReversiGame(String mode, String player1, String player2, char playerColor) {
-        String panelKey = "REVERSI_GAME_" + mode;
+        startReversiGame(mode, player1, player2, playerColor, 1000, 5);
+    }
+
+    public void startReversiGame(String mode, String player1, String player2, char playerColor,
+                                  int mctsSimulations, int minimaxDepth) {
+        String panelKey = "REVERSI_GAME_" + mode + "_" + System.currentTimeMillis();
 
         framework.gui.menu.reversi.ReversiGame gamePanel =
-            new framework.gui.menu.reversi.ReversiGame(this, mode, player1, player2, playerColor);
+            new framework.gui.menu.reversi.ReversiGame(this, mode, player1, player2, playerColor,
+                mctsSimulations, minimaxDepth);
 
         gamePanel.start();
 
@@ -215,6 +222,37 @@ public final class MenuManager {
 
     public void closeNameSelection() {
         mainFrame.showPanel(TICTACTOE_MENU);
+    }
+
+    public void openReversiAIvsAI() {
+        // Open het configuratie panel voor AI vs AI
+        final String key = "REVERSI_AI_CONFIG";
+        if (!panels.containsKey(key)) {
+            framework.gui.menu.reversi.ReversiAIConfigPanel configPanel =
+                new framework.gui.menu.reversi.ReversiAIConfigPanel(this);
+            panels.put(key, configPanel);
+            mainFrame.addPanel(key, configPanel);
+        }
+        mainFrame.showPanel(key);
+    }
+
+    public void startReversiAIvsAI(int mctsSimulations, int minimaxDepth) {
+        String panelKey = "REVERSI_GAME_AI_VS_AI";
+
+        framework.gui.menu.reversi.ReversiGame gamePanel =
+            new framework.gui.menu.reversi.ReversiGame(this, "AI_VS_AI", "MCTS", "Minimax", 'B',
+                mctsSimulations, minimaxDepth);
+
+        gamePanel.start();
+
+        panels.put(panelKey, gamePanel);
+        mainFrame.addPanel(panelKey, gamePanel);
+        mainFrame.showPanel(panelKey);
+
+        gamePanel.revalidate();
+        gamePanel.repaint();
+        mainFrame.revalidate();
+        mainFrame.repaint();
     }
 
 }
